@@ -1,8 +1,13 @@
+// ==============================================================================
+// 캐릭터 클래스 정의
+//    01. 인터페이스 ... Line 00
+//    02. 클래스 ....... Line 00
+// ==============================================================================
 using System;
 using System.Collections;
 using UnityEngine;
 
-using Game;
+using Game;    // GameDirector namespace
 
 using Resources        = CharacterBase.Resources;
 using GroundState      = CharacterBase.GroundState;
@@ -14,15 +19,13 @@ using MoveSetting      = CharacterBase.CharacterSetting.Move;
 using DamageSetting    = CharacterBase.CharacterSetting.Damage;
 using DamageType       = IDamageable.Type;
 
-
 // ==============================================================================
-// 인터페이스
-// 01. 프로퍼티 ... Line 24
-// 02. 메서드 ..... Line 46
+// 인터페이스 정의
+//    01. 프로퍼티 ... Line 00
+//    02. 메서드 ..... Line 00
 // ==============================================================================
 public interface ICharacterBase
 {
-    // Property
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -43,7 +46,6 @@ public interface ICharacterBase
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
 
-    // Method
     // Set
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
@@ -59,22 +61,31 @@ public interface ICharacterBase
 
 // ==============================================================================
 // 클래스
+//    01. 사전 정의
+//        - 리소스 .............. Line 00
+//        - 지면(Ground) 상태 ... Line 00
+//        - 상태 ................ Line 00
+//        - 설정 ................ Line 00
+//    02. 필드 ........ Line 00
+//    03. 메서드 ...... Line 00
 // ==============================================================================
 [RequireComponent(typeof(Rigidbody))]
 public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamageable
 {
-    // ==============================================================================
+    // ------------------------------------------------------------------------------
     // 사전 정의
-    // ==============================================================================
+    //    01. 리소스 .............. Line 00
+    //    02. 지면(Ground) 상태 ... Line 00
+    //    03. 상태 ................ Line 00
+    //    04. 설정 ................ Line 00
+    // ------------------------------------------------------------------------------
     public class Resources
     {
-        // Field
         public Transform                   transform { get; }
         public ICharacterModelBase         model     { get; }
         public ICharacterVoiceBase         voice     { get; }
         public CharacterEffects<MainState> effects   { get; }
 
-        // Constructor
         public Resources(Transform transform)
         {
             this.transform = transform;
@@ -83,7 +94,6 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             effects        = new CharacterEffects<MainState>(transform.Find("Effects"));
         }
 
-        // Method
         public void Follow(ICharacterDirectionBase direction, float speed)
         {
             Quaternion rotation = direction.transform.localRotation;
@@ -113,15 +123,13 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             return Mathf.Max(voice.Play(type), (effects != null) ? effects.Play(type) : default);
         }
     }
-
+    
     public class GroundState
     {
-        // Field
         public RaycastHit groundHit;
         public bool       isGrounded;
         public float      slopeAngle;
 
-        // Constructor
         public GroundState()
         {
             groundHit  = new RaycastHit();
@@ -129,7 +137,6 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             slopeAngle = 0f;
         }
 
-        // Method
         public void Update(ICharacterBase character)
         {
             Transform       transform = character.transform;
@@ -159,25 +166,21 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             }
         }
     }
-
+    
     public class State
     {
-        // Definition
         public enum Main { None = 0, Idle = 1, Damage = 2 }
         public enum Sub  { None = 0, Start = 1, Loop = 2, End = 4 }
 
-        // Field
         public Main       main;
         public Sub        sub;
         public DamageType damage;
     }
-
+    
     [Serializable] public class CharacterSetting
     {
-        // Definition
         [Serializable] public struct Move
         {
-            // Field
             [SerializeField] private float _speed;
             [SerializeField] private float _acceleration;
 
@@ -186,14 +189,12 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
             private static readonly Move _one = new Move(1f, 1f);
 
-            // Constructor
             public Move(float speed, float acceleration)
             {
                 _speed        = speed;
                 _acceleration = acceleration;
             }
-
-            // Method
+            
             public static Move one { get { return _one; } }
 
             public static Move MultiplySpeed(Move origin, float multiplier) 
@@ -202,7 +203,6 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
         [Serializable] public class Damage
         {
-            // Field
             [SerializeField]                 protected float _duration;
             [SerializeField]                 protected float _force;
             [SerializeField, Range(0f, 90f)] protected float _angle;
@@ -211,7 +211,6 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             public float force    { get { return _force; } }
             public float angle    { get { return _angle; } }
 
-            // Constructor
             public Damage(float duration, float force, float angle)
             {
                 _duration = duration;
@@ -219,7 +218,6 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
                 _angle    = angle;
             }
 
-            // Method
             public Vector3 GetForce(Transform transform)
             {
                 float   angle     = this.angle * Mathf.Deg2Rad;
@@ -230,26 +228,29 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             }
         }
 
-        // Field
         [SerializeField] protected Damage _damage;
 
         public Damage damage { get { return _damage; } }
 
-        // Constructor
         public CharacterSetting(Damage damage) { _damage = damage; }
     }
 
-    // Field
+    // ------------------------------------------------------------------------------
+    // 필드
+    // ------------------------------------------------------------------------------
+    // Component & Reference
     public new Rigidbody           rigidbody { get; protected set; }
     public new CapsuleCollider     collider  { get; protected set; }
     public ICharacterDirectionBase direction { get; protected set; }
     public Resources               resources { get; protected set; }
     public IPlanetController       planet    { get; set; }
 
+    // State
     public Vector3     gravity     { get; set; }           = Vector3.zero;
     public GroundState groundState { get; protected set; } = new GroundState();
     public State       state       { get; protected set; } = new State();
 
+    // Property
     [Header("Gravity Setting")]
     [SerializeField] protected bool  _useGravity;
     [SerializeField] protected float _radius;
@@ -269,6 +270,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     public float            maxSlopeAngle    { get { return _maxSlopeAngle; } }
     public CharacterSetting characterSetting { get { return _characterSetting; } }
 
+    // Action
     protected Coroutine setAction;
     protected Coroutine lookAtAction;
     protected Coroutine action;
@@ -277,13 +279,10 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     protected Vector3 defaultColliderCenter;
     protected float   moveSpeed;
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ------------------------------------------------------------------------------
+    // 메서드
+    // ------------------------------------------------------------------------------
+    // Event
     protected virtual void Awake() { SetField(); }
 
     protected virtual void Reset()
@@ -317,11 +316,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         planet.characters.Remove(this);
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // Initialization
     protected virtual void SetField()
     {
         rigidbody = GetComponent<Rigidbody>();
@@ -338,7 +333,6 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         material.dynamicFriction = material.staticFriction = material.bounciness = 0f;
         material.frictionCombine = material.bounceCombine  = PhysicMaterialCombine.Minimum;
     }
-
 
     protected virtual void ResetField(Rigidbody rigidbody)
     {
@@ -358,11 +352,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         collider.enabled      = true;
     }
 
-    #endregion
-
-
-    #region Set
-
+    // Set
     public virtual Coroutine Set(ICharacterTargetController target, bool resetDirection = false, 
         bool setIdle = false, float duration = 0f)
     {
@@ -467,11 +457,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         lookAtAction            = null;
     }
 
-    #endregion
-
-
-    #region Action
-
+    // Action
     public virtual void StopAction()
     {
         if (action != null) StopCoroutine(action);
@@ -531,9 +517,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         while (!groundState.isGrounded) yield return new WaitForFixedUpdate();
     }
 
-
-    #region Idle
-
+    // Action 01 - Idle
     public virtual Coroutine Idle(bool playAnimation = false) 
     {
         StopMove();
@@ -556,11 +540,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         SetFriction(false);
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // Action 02 - Damage
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
         if ((type == DamageType.None) || !mask.HasFlag(type)) return false;
@@ -624,10 +604,4 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
         SetHeight();
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
