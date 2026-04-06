@@ -17,12 +17,12 @@ using DamageType       = IDamageable.Type;
 
 // ==============================================================================
 // 인터페이스
+// 01. 프로퍼티 ... Line 24
+// 02. 메서드 ..... Line 46
 // ==============================================================================
 public interface ICharacterBase
 {
-    // ------------------------------------------------------------------------------
-    // 프로퍼티
-    // ------------------------------------------------------------------------------
+    // Property
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -42,10 +42,8 @@ public interface ICharacterBase
     float            maxSlopeAngle    { get; }
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
-       
-    // ------------------------------------------------------------------------------
-    // 메소드
-    // ------------------------------------------------------------------------------
+
+    // Method
     // Set
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
@@ -59,26 +57,24 @@ public interface ICharacterBase
     Coroutine Damage(Transform attacker, DamageType type);
 }
 
-
+// ==============================================================================
+// 클래스
+// ==============================================================================
 [RequireComponent(typeof(Rigidbody))]
 public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamageable
 {
-    #region Definition
-
+    // ==============================================================================
+    // 사전 정의
+    // ==============================================================================
     public class Resources
     {
-        #region Field
-
+        // Field
         public Transform                   transform { get; }
         public ICharacterModelBase         model     { get; }
         public ICharacterVoiceBase         voice     { get; }
         public CharacterEffects<MainState> effects   { get; }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Constructor
         public Resources(Transform transform)
         {
             this.transform = transform;
@@ -87,11 +83,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             effects        = new CharacterEffects<MainState>(transform.Find("Effects"));
         }
 
-        #endregion
-
-
-        #region Method
-
+        // Method
         public void Follow(ICharacterDirectionBase direction, float speed)
         {
             Quaternion rotation = direction.transform.localRotation;
@@ -120,24 +112,16 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
             return Mathf.Max(voice.Play(type), (effects != null) ? effects.Play(type) : default);
         }
-
-        #endregion
     }
-
 
     public class GroundState
     {
-        #region Field
-
+        // Field
         public RaycastHit groundHit;
         public bool       isGrounded;
         public float      slopeAngle;
 
-        #endregion
-
-
-        #region Constructor
-
+        // Constructor
         public GroundState()
         {
             groundHit  = new RaycastHit();
@@ -145,11 +129,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             slopeAngle = 0f;
         }
 
-        #endregion
-
-
-        #region Method
-
+        // Method
         public void Update(ICharacterBase character)
         {
             Transform       transform = character.transform;
@@ -178,39 +158,26 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
                 if (slopeAngle > character.maxSlopeAngle) isGrounded = false;
             }
         }
-
-        #endregion
     }
-
 
     public class State
     {
-        #region Definition
-
+        // Definition
         public enum Main { None = 0, Idle = 1, Damage = 2 }
         public enum Sub  { None = 0, Start = 1, Loop = 2, End = 4 }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         public Main       main;
         public Sub        sub;
         public DamageType damage;
-
-        #endregion
     }
-
 
     [Serializable] public class CharacterSetting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public struct Move
         {
-            #region Field
-
+            // Field
             [SerializeField] private float _speed;
             [SerializeField] private float _acceleration;
 
@@ -219,35 +186,23 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
             private static readonly Move _one = new Move(1f, 1f);
 
-            #endregion
-
-
-            #region Constructor
-
+            // Constructor
             public Move(float speed, float acceleration)
             {
                 _speed        = speed;
                 _acceleration = acceleration;
             }
 
-            #endregion
-
-
-            #region Method
-
+            // Method
             public static Move one { get { return _one; } }
 
             public static Move MultiplySpeed(Move origin, float multiplier) 
                 => new Move(origin.speed * multiplier, origin.acceleration);
-
-            #endregion
         }
-
 
         [Serializable] public class Damage
         {
-            #region Field
-
+            // Field
             [SerializeField]                 protected float _duration;
             [SerializeField]                 protected float _force;
             [SerializeField, Range(0f, 90f)] protected float _angle;
@@ -256,11 +211,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             public float force    { get { return _force; } }
             public float angle    { get { return _angle; } }
 
-            #endregion
-
-
-            #region Constructor
-
+            // Constructor
             public Damage(float duration, float force, float angle)
             {
                 _duration = duration;
@@ -268,11 +219,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
                 _angle    = angle;
             }
 
-            #endregion
-
-
-            #region Method
-
+            // Method
             public Vector3 GetForce(Transform transform)
             {
                 float   angle     = this.angle * Mathf.Deg2Rad;
@@ -281,34 +228,18 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
                 return transform.TransformDirection(force);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Damage _damage;
 
         public Damage damage { get { return _damage; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Constructor
         public CharacterSetting(Damage damage) { _damage = damage; }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // Field
     public new Rigidbody           rigidbody { get; protected set; }
     public new CapsuleCollider     collider  { get; protected set; }
     public ICharacterDirectionBase direction { get; protected set; }
