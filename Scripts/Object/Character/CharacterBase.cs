@@ -18,13 +18,11 @@ using DamageType       = IDamageable.Type;
 // ==============================================================================
 // 인터페이스
 // ==============================================================================
-
 public interface ICharacterBase
 {
     // ------------------------------------------------------------------------------
     // 프로퍼티
     // ------------------------------------------------------------------------------
-    
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -44,12 +42,10 @@ public interface ICharacterBase
     float            maxSlopeAngle    { get; }
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
-    
-    
+       
     // ------------------------------------------------------------------------------
     // 메소드
-    // ==============================================================================
-    
+    // ------------------------------------------------------------------------------
     // Set
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
