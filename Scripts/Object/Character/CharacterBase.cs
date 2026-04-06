@@ -15,10 +15,14 @@ using DamageSetting    = CharacterBase.CharacterSetting.Damage;
 using DamageType       = IDamageable.Type;
 
 
+// ==========================================================================================================================
+// 인터페이스
+// ==========================================================================================================================
 public interface ICharacterBase
 {
-    #region Property
-
+    // ----------------------------------------------------------------------------------------------------------------------
+    // 프로퍼티
+    // ----------------------------------------------------------------------------------------------------------------------
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -39,11 +43,9 @@ public interface ICharacterBase
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
 
-    #endregion
-
-
-    #region Function
-
+    // ----------------------------------------------------------------------------------------------------------------------
+    // 메소드
+    // ----------------------------------------------------------------------------------------------------------------------
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
     void      SetHeight(float rate = -1f);
@@ -54,8 +56,6 @@ public interface ICharacterBase
     void      StopAction();
     Coroutine Idle(bool playAnimation = false);
     Coroutine Damage(Transform attacker, DamageType type);
-
-    #endregion
 }
 
 
