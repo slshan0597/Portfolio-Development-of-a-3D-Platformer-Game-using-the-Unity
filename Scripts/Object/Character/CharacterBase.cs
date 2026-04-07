@@ -1,25 +1,25 @@
-// ==============================================================================
-// 목차
-//    1. 인터페이스
-//    2. 클래스
+/////////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 정의
+//    2. 클래스 정의
 //        1) 사전 정의
-//            - 리소스
-//            - 지면(Ground) 상태
-//            - 캐릭터 상태
-//            - 캐릭터 설정
+//            1_ 리소스 참조
+//            2_ 지면(Ground) 상태
+//            3_ 캐릭터 상태
+//            4_ 캐릭터 설정
 //        2) 필드
 //        3) 메서드
-//            - Event
-//            - Initialization
-//            - Set
-//            - Action
-//                * Idle
-// ==============================================================================
+//            1_ 이벤트(Unity 호출 함수)
+//            2_ 초기화 / 셋
+//            3_ 액션
+//                - 대기(Idle)
+//                - 데미지(Damage)
+/////////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using UnityEngine;
 
-using Game;    // GameDirector namespace
+using Game;    // Game Director
 
 using Resources        = CharacterBase.Resources;
 using GroundState      = CharacterBase.GroundState;
@@ -32,10 +32,11 @@ using DamageSetting    = CharacterBase.CharacterSetting.Damage;
 using DamageType       = IDamageable.Type;
 
 // ==============================================================================
-// 인터페이스 정의
+// 1. 인터페이스 정의
 // ==============================================================================
 public interface ICharacterBase
 {
+    // 프로퍼티
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -56,6 +57,7 @@ public interface ICharacterBase
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
 
+    // 메서드
     // Set
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
