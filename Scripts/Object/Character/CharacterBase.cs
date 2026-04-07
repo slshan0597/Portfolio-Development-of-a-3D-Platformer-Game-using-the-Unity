@@ -273,7 +273,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     public GroundState groundState { get; protected set; } = new GroundState();
     public State       state       { get; protected set; } = new State();
 
-    // Property
+    // Setting
     [Header("Gravity Setting")]
     [SerializeField] protected bool  _useGravity;
     [SerializeField] protected float _radius;
