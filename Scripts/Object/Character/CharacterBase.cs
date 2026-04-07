@@ -381,8 +381,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 3_ 셋(Set)
-    //    - 캐릭터의 배치(Transform) 설정
-    //    - 캐릭터의 형태(Collider) 설정
+    //    - 캐릭터의 배치(Transform) 및 형태(Collider) 설정
     // ------------------------------------------------------------------------------
     public virtual Coroutine Set(ICharacterTargetController target, bool resetDirection = false, 
         bool setIdle = false, float duration = 0f)
