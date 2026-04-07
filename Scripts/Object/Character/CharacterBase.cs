@@ -82,11 +82,9 @@ public interface ICharacterBase
 public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamageable
 {
     // ------------------------------------------------------------------------------
-    // 사전 정의
-    //    01. 리소스 .............. Line 00
-    //    02. 지면(Ground) 상태 ... Line 00
-    //    03. 상태 ................ Line 00
-    //    04. 설정 ................ Line 00
+    // 1_1) 사전 정의 - 리소스 참조
+    //    - 캐릭터 모델링의 회전
+    //    - 캐릭터의 보이스, 이펙트 호출
     // ------------------------------------------------------------------------------
     public class Resources
     {
@@ -132,7 +130,11 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             return Mathf.Max(voice.Play(type), (effects != null) ? effects.Play(type) : default);
         }
     }
-    
+
+    // ------------------------------------------------------------------------------
+    // 1_2) 사전 정의 - 지면(Ground) 상태
+    //    - 지면에 대한 충돌 또는 접지, 경사각 정보 갱신
+    // ------------------------------------------------------------------------------
     public class GroundState
     {
         public RaycastHit groundHit;
@@ -157,7 +159,6 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             Vector3 origin      = transform.TransformPoint(Vector3.up * (height - radius));
             Vector3 upDirection = transform.up;
             Ray     ray         = new Ray(origin, -upDirection);
-            //int     layerMask   = (-1) - (1 << LayerMask.NameToLayer("Character"));
             int     layerMask   = (1 << LayerMask.NameToLayer("Character")) | (1 << LayerMask.NameToLayer("Coin"));
                     layerMask   = ~layerMask;
             var     qtr         = QueryTriggerInteraction.Ignore;
@@ -175,7 +176,12 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
             }
         }
     }
-    
+
+    // ------------------------------------------------------------------------------
+    // 1_3) 사전 정의 - 캐릭터 상태
+    //    - 캐릭터의 메인 상태
+    //    - 메인 상태의 진행도
+    // ------------------------------------------------------------------------------
     public class State
     {
         public enum Main { None = 0, Idle = 1, Damage = 2 }
@@ -185,7 +191,11 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         public Sub        sub;
         public DamageType damage;
     }
-    
+
+    // ------------------------------------------------------------------------------
+    // 1_4) 사전 정의 - 캐릭터 설정
+    //    - 각 상태에 대한 설정 프로퍼티
+    // ------------------------------------------------------------------------------
     [Serializable] public class CharacterSetting
     {
         [Serializable] public struct Move
@@ -245,7 +255,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 필드
+    // 2) 필드
     // ------------------------------------------------------------------------------
     // Component & Reference
     public new Rigidbody           rigidbody { get; protected set; }
