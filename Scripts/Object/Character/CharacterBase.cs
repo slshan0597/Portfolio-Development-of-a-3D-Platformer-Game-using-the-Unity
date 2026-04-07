@@ -10,8 +10,10 @@
 //        2) 필드
 //        3) 메서드
 //            1_ 이벤트(Unity 호출 함수)
-//            2_ 초기화 / 셋
-//            3_ 액션
+//            2_ 초기화
+//            3_ 셋(Set)
+//            4_ 액션
+//                - 공통(정지, 이동 등)
 //                - 대기(Idle)
 //                - 데미지(Damage)
 /////////////////////////////////////////////////////////////////////////////////
@@ -31,14 +33,14 @@ using MoveSetting      = CharacterBase.CharacterSetting.Move;
 using DamageSetting    = CharacterBase.CharacterSetting.Damage;
 using DamageType       = IDamageable.Type;
 
-// ==============================================================================
+/////////////////////////////////////////////////////////////////////////////////
 // 1. 인터페이스 정의
-// ==============================================================================
+/////////////////////////////////////////////////////////////////////////////////
 public interface ICharacterBase
 {
-    // ------------------------------------------------------------------------------
+    // ==============================================================================
     // 1) 프로퍼티
-    // ------------------------------------------------------------------------------
+    // ==============================================================================
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -59,9 +61,9 @@ public interface ICharacterBase
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
 
-    // ------------------------------------------------------------------------------
+    // ==============================================================================
     // 2) 메서드
-    // ------------------------------------------------------------------------------
+    // ==============================================================================
     // Set
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
@@ -75,14 +77,17 @@ public interface ICharacterBase
     Coroutine Damage(Transform attacker, DamageType type);
 }
 
-// ==============================================================================
+/////////////////////////////////////////////////////////////////////////////////
 // 2. 클래스 정의
-// ==============================================================================
+/////////////////////////////////////////////////////////////////////////////////
 [RequireComponent(typeof(Rigidbody))]
 public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamageable
 {
+    // ==============================================================================
+    // 1) 사전 정의
+    // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1_1) 사전 정의 - 리소스 참조
+    // 1_ 리소스 참조
     //    - 캐릭터 모델링의 회전
     //    - 캐릭터의 보이스, 이펙트 호출
     // ------------------------------------------------------------------------------
@@ -132,7 +137,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 1_2) 사전 정의 - 지면(Ground) 상태
+    // 2_ 지면(Ground) 상태
     //    - 지면에 대한 충돌 또는 접지, 경사각 정보 갱신
     // ------------------------------------------------------------------------------
     public class GroundState
@@ -178,7 +183,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 1_3) 사전 정의 - 캐릭터 상태
+    // 3_ 캐릭터 상태
     //    - 캐릭터의 메인 상태
     //    - 메인 상태의 진행도
     // ------------------------------------------------------------------------------
@@ -193,7 +198,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 1_4) 사전 정의 - 캐릭터 설정
+    // 4_ 캐릭터 설정
     //    - 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
     [Serializable] public class CharacterSetting
@@ -254,9 +259,9 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         public CharacterSetting(Damage damage) { _damage = damage; }
     }
 
-    // ------------------------------------------------------------------------------
+    // ==============================================================================
     // 2) 필드
-    // ------------------------------------------------------------------------------
+    // ==============================================================================
     // Component & Reference
     public new Rigidbody           rigidbody { get; protected set; }
     public new CapsuleCollider     collider  { get; protected set; }
@@ -298,10 +303,12 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     protected Vector3 defaultColliderCenter;
     protected float   moveSpeed;
 
+    // ==============================================================================
+    // 3) 메서드
+    // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 메서드
+    // 1_ 이벤트 (Unity 호출 함수)
     // ------------------------------------------------------------------------------
-    // Event
     protected virtual void Awake() { SetField(); }
 
     protected virtual void Reset()
@@ -335,7 +342,9 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         planet.characters.Remove(this);
     }
 
-    // Initialization
+    // ------------------------------------------------------------------------------
+    // 2_ 초기화
+    // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
         rigidbody = GetComponent<Rigidbody>();
@@ -371,7 +380,11 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         collider.enabled      = true;
     }
 
-    // Set
+    // ------------------------------------------------------------------------------
+    // 3_ 셋(Set)
+    //    - 캐릭터의 배치(Transform) 설정
+    //    - 캐릭터의 형태(Collider) 설정
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Set(ICharacterTargetController target, bool resetDirection = false, 
         bool setIdle = false, float duration = 0f)
     {
@@ -476,7 +489,11 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         lookAtAction            = null;
     }
 
-    // Action
+    // ------------------------------------------------------------------------------
+    // 4_ 액션 1. 공통
+    //    - 이동 및 모든 행동에 대한 정지 기능
+    //    - 지면(Ground)과의 충돌에 대한 지연 처리
+    // ------------------------------------------------------------------------------
     public virtual void StopAction()
     {
         if (action != null) StopCoroutine(action);
@@ -536,7 +553,9 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         while (!groundState.isGrounded) yield return new WaitForFixedUpdate();
     }
 
-    // Action 01 - Idle
+    // ------------------------------------------------------------------------------
+    // 4_ 액션 2. 대기(Idle)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Idle(bool playAnimation = false) 
     {
         StopMove();
@@ -559,7 +578,12 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
         SetFriction(false);
     }
 
-    // Action 02 - Damage
+    // ------------------------------------------------------------------------------
+    // 4_ 액션 3. 대미지(Damage)
+    //    - 시작 -> TryDamage(), Damage()
+    //    - 반복 -> _Damage()
+    //    - 종료 -> StopDamage()
+    // ------------------------------------------------------------------------------
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
         if ((type == DamageType.None) || !mask.HasFlag(type)) return false;
