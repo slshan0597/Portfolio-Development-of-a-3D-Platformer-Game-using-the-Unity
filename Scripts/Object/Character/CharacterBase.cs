@@ -36,7 +36,9 @@ using DamageType       = IDamageable.Type;
 // ==============================================================================
 public interface ICharacterBase
 {
-    // 프로퍼티
+    // ------------------------------------------------------------------------------
+    // 1) 프로퍼티
+    // ------------------------------------------------------------------------------
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -57,7 +59,9 @@ public interface ICharacterBase
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
 
-    // 메서드
+    // ------------------------------------------------------------------------------
+    // 2) 메서드
+    // ------------------------------------------------------------------------------
     // Set
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
@@ -72,14 +76,7 @@ public interface ICharacterBase
 }
 
 // ==============================================================================
-// 클래스 정의
-//    1. 사전 정의
-//        1) 리소스 .............. Line 00
-//        2) 지면(Ground) 상태 ... Line 00
-//        3) 상태 ................ Line 00
-//        4) 설정 ................ Line 00
-//    2. 필드 ........ Line 00
-//    3. 메서드 ...... Line 00
+// 2. 클래스 정의
 // ==============================================================================
 [RequireComponent(typeof(Rigidbody))]
 public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamageable
