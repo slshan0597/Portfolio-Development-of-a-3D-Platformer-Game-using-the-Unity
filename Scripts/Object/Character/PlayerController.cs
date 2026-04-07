@@ -131,6 +131,8 @@ public class PlayerController : CharacterBase, IPlayerController
     // ------------------------------------------------------------------------------
     // 2_ 리소스 참조
     //    - CharacterBase.Resources 클래스를 상속하여 새로 정의하고, 부모 클래스를 대체
+    //    - 캐릭터 모델링의 회전
+    //    - 캐릭터의 보이스, 이펙트 호출
     // ------------------------------------------------------------------------------
     public new class Resources : CharacterBase.Resources
     {
@@ -327,6 +329,8 @@ public class PlayerController : CharacterBase, IPlayerController
     // ------------------------------------------------------------------------------
     // 3_ 캐릭터 상태
     //    - CharacterBase.State 클래스를 상속하여 새로 정의하고, 부모 클래스를 대체
+    //    - 캐릭터의 메인 상태
+    //    - 메인 상태의 진행도
     // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
@@ -389,8 +393,8 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ------------------------------------------------------------------------------
     // 4_ 캐릭터 설정
-    //    - 부모(CharacterBase.Setting) 클래스는 그대로 사용
-    //    - 별도의 추가 클래스 정의
+    //    - 부모(CharacterBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
+    //    - 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
@@ -672,7 +676,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ==============================================================================
     // 3) 메서드
-    //    - 
+    //    - 부모 클래스의 함수들을 재정의하여 확장
     // ==============================================================================
     // ------------------------------------------------------------------------------
     // 1_ 이벤트 (Unity 호출 함수)
@@ -849,11 +853,11 @@ public class PlayerController : CharacterBase, IPlayerController
         foreach (var trigger in triggers.Values) trigger.gameObject.SetActive(false);
     }
 
-    #endregion
-
-
-    #region Set
-
+    // ------------------------------------------------------------------------------
+    // 3_ 셋(Set)
+    //    - 캐릭터의 배치(Transform) 및 형태(Collider) 설정
+    //    - 플레이어의 체력 설정
+    // ------------------------------------------------------------------------------
     public override Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0)
     {
         if (resetDirection) cameraTarget.Initialize();
@@ -866,11 +870,11 @@ public class PlayerController : CharacterBase, IPlayerController
         state.hitPoint = Mathf.Clamp(state.hitPoint + amount, 0, setting.maxHitPoint);
     }
 
-    #endregion
-
-
-    #region Action
-
+    // ------------------------------------------------------------------------------
+    // 4_ 액션 1. 공통
+    //    - 이동 및 모든 행동에 대한 정지 기능
+    //    - 지면(Ground)과의 충돌에 대한 지연 처리
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
