@@ -95,9 +95,9 @@ public class PlayerController : CharacterBase, IPlayerController
     // 1) 사전 정의
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 사전 정의 -> UI 참조
-    //    - 상호작용 / 타이머 / 대사창 출력
-    //    - Mobile(Android) 플랫폼 빌드 시 가상패드 출력
+    // 1-1) 사전 정의 - UI 참조
+    //    -> 상호작용 / 타이머 / 대사창 출력
+    //    -> Mobile(Android) 플랫폼 빌드 시 가상패드 출력
     // ------------------------------------------------------------------------------
     public class UI : List<IUIBase>
     {
@@ -127,10 +127,10 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 사전 정의 -> 리소스 참조(CharacterBase.Resources 클래스 상속)
-    //    - 부모 클래스를 대체하여 새로 정의
-    //    - 캐릭터 모델링의 회전
-    //    - 캐릭터의 보이스, 이펙트 호출
+    // 1-2) 사전 정의 - 리소스 참조(CharacterBase.Resources 클래스 상속)
+    //    -> 부모 클래스를 대체하여 새로 정의
+    //    -> 캐릭터 모델링의 회전
+    //    -> 캐릭터의 보이스, 이펙트 호출
     // ------------------------------------------------------------------------------
     public new class Resources : CharacterBase.Resources
     {
@@ -325,10 +325,10 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-3) 사전 정의 -> 캐릭터 상태(CharacterBase.State 클래스 상속)
-    //    - 부모 클래스를 대체하여 새로 정의
-    //    - 캐릭터의 메인 상태
-    //    - 메인 상태의 진행도
+    // 1-3) 사전 정의 - 캐릭터 상태(CharacterBase.State 클래스 상속)
+    //    -> 부모 클래스를 대체하여 새로 정의
+    //    -> 캐릭터의 메인 상태
+    //    -> 메인 상태의 진행도
     // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
@@ -390,9 +390,9 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-4) 사전 정의 -> 캐릭터 설정
-    //    - 부모(CharacterBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
-    //    - 각 상태에 대한 설정 프로퍼티
+    // 1-4) 사전 정의 - 캐릭터 설정
+    //    -> 부모(CharacterBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
+    //    -> 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
@@ -677,7 +677,7 @@ public class PlayerController : CharacterBase, IPlayerController
     //    - 부모 클래스의 함수들을 재정의하여 확장
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 3-1) 메서드 -> 이벤트(Unity 호출 함수)
+    // 3-1) 메서드 -> 이벤트 함수(Unity 호출)
     // ------------------------------------------------------------------------------
     protected override void FixedUpdate()
     {
@@ -735,7 +735,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3-2) 메서드 -> 초기화
+    // 3-2) 메서드 - 초기화
     // ------------------------------------------------------------------------------
     protected override void SetField()
     {
@@ -852,9 +852,9 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3-3) 메서드 -> 셋(Set)
-    //    - 캐릭터의 배치(Transform) 및 형태(Collider) 설정
-    //    - 플레이어의 체력 설정
+    // 3-3) 메서드 - 셋(Set)
+    //    -> 캐릭터의 배치(Transform) 및 형태(Collider) 설정
+    //    -> 플레이어의 체력 설정
     // ------------------------------------------------------------------------------
     public override Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0)
     {
@@ -869,9 +869,9 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3-4) 메서드 -> 액션 1. 공통(Common)
-    //    - 이동 및 모든 행동에 대한 정지 기능
-    //    - 지면(Ground)과의 충돌에 대한 지연 처리
+    // 3-4) 메서드 - 액션(Common)
+    //    -> 이동 및 모든 행동에 대한 정지 기능
+    //    -> 지면(Ground)과의 충돌에 대한 지연 처리
     // ------------------------------------------------------------------------------
     public override void StopAction()
     {
@@ -931,7 +931,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3-4) 메서드 -> 액션 2. 대기(Idle)
+    // 3-4-1) 메서드 - 액션 - 대기(Idle)
     // ------------------------------------------------------------------------------
     public override Coroutine Idle(bool playAnimation = false)
     {
@@ -961,7 +961,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3-4) 메서드 -> 액션 3. 대미지(Damage)
+    // 3-4-2) 메서드 - 액션 - 피격(Damage)
     // ------------------------------------------------------------------------------
     public override bool TryDamage(Transform attacker, DamageType type)
     {
@@ -1060,7 +1060,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3-4) 메서드 -> 액션 4. 낙하(Fall)
+    // 3-4-3) 메서드 - 액션 - 낙하(Fall)
     // ------------------------------------------------------------------------------
     protected virtual void TryFall()
     {
@@ -1098,11 +1098,9 @@ public class PlayerController : CharacterBase, IPlayerController
         triggers[DamageType.Foot].gameObject.SetActive(false);
     }
 
-    #endregion
-
-
-    #region Land
-
+    // ------------------------------------------------------------------------------
+    // 3-4-4) 메서드 - 액션 - 착지(Land)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Land(LandState type)
     {
         StopAction();
@@ -1159,11 +1157,9 @@ public class PlayerController : CharacterBase, IPlayerController
         resources.model.SetHand();
     }
 
-    #endregion
-
-
-    #region Run
-
+    // ------------------------------------------------------------------------------
+    // 3-4-5) 메서드 - 액션 - 달리기(Run)
+    // ------------------------------------------------------------------------------
     protected virtual void TryRun()
     {
         MainState validType     = MainState.Idle  | MainState.Land;
@@ -1222,11 +1218,9 @@ public class PlayerController : CharacterBase, IPlayerController
 
     protected virtual void StopRun() { state.main = MainState.None; }
 
-    #endregion
-
-
-    #region Brake
-
+    // ------------------------------------------------------------------------------
+    // 3-4-6) 메서드 - 액션 - 멈추기(Brake)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Brake()
     {
         StopAction();
@@ -1258,11 +1252,9 @@ public class PlayerController : CharacterBase, IPlayerController
         resources.effects[MainState.Brake].Stop(0.75f);
     }
 
-    #endregion
-
-
-    #region Crouch
-
+    // ------------------------------------------------------------------------------
+    // 3-4-7) 메서드 - 액션 - 웅크리기(Crouch)
+    // ------------------------------------------------------------------------------
     protected virtual void TryCrouch()
     {
         MainState validType     = MainState.Idle  | MainState.Land | MainState.Run;
@@ -1347,11 +1339,9 @@ public class PlayerController : CharacterBase, IPlayerController
         resources.effects[MainState.Brake].Stop(0.75f);
     }
 
-    #endregion
-
-
-    #region Jump
-
+    // ------------------------------------------------------------------------------
+    // 3-4-8) 메서드 - 액션 - 뛰기(Jump)
+    // ------------------------------------------------------------------------------
     protected virtual void TryJump()
     {
         MainState validType = MainState.Idle | MainState.Land | MainState.Run | MainState.Brake | MainState.Crouch 
@@ -1491,11 +1481,9 @@ public class PlayerController : CharacterBase, IPlayerController
         state.jump     = JumpState.None;
     }
 
-    #endregion
-
-
-    #region Hip Drop
-
+    // ------------------------------------------------------------------------------
+    // 3-4-9) 메서드 - 액션 - 엉덩이 찍기(Hip Drop)
+    // ------------------------------------------------------------------------------
     protected virtual void TryHipDrop()
     {
         MainState   validType       = MainState.Fall | MainState.Jump | MainState.Attack;
@@ -1573,11 +1561,9 @@ public class PlayerController : CharacterBase, IPlayerController
         resources.effects.hipDrop[SubState.Loop].Stop();
     }
 
-    #endregion
-
-
-    #region Attack
-
+    // ------------------------------------------------------------------------------
+    // 3-4-10) 메서드 - 액션 - 공격(Attack)
+    // ------------------------------------------------------------------------------
     protected virtual void TryAttack()
     {
         MainState validType = MainState.Idle | MainState.Fall | MainState.Land | MainState.Run | MainState.Brake 
@@ -1770,11 +1756,9 @@ public class PlayerController : CharacterBase, IPlayerController
         foreach (var hand in resources.model.bones.hands) hand.localScale = Vector3.one;
     }
 
-    #endregion
-
-
-    #region Interact
-
+    // ------------------------------------------------------------------------------
+    // 3-4-11) 메서드 - 액션 - 상호작용(Interact)
+    // ------------------------------------------------------------------------------
     protected virtual void TrySetTempInteractable(IInteractable interactable)
     {
         MainState validType     = MainState.Idle  | MainState.Land | MainState.Run | MainState.Brake;
@@ -1858,11 +1842,9 @@ public class PlayerController : CharacterBase, IPlayerController
         SetFriction(false);
     }
 
-    #endregion
-
-
-    #region Bump
-
+    // ------------------------------------------------------------------------------
+    // 3-4-12) 메서드 - 액션 - 부딪치기(Bump)
+    // ------------------------------------------------------------------------------
     protected virtual void TryBump(Collision collision)
     {
         MainState   validType       = MainState.Jump | MainState.HipDrop | MainState.Attack;
@@ -1952,11 +1934,9 @@ public class PlayerController : CharacterBase, IPlayerController
         resources.model.SetFace();
     }
 
-    #endregion
-
-
-    #region Die
-
+    // ------------------------------------------------------------------------------
+    // 3-4-12) 메서드 - 액션 - 죽기(Die)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Die(DieState type)
     {
         StopAction();
@@ -2006,11 +1986,9 @@ public class PlayerController : CharacterBase, IPlayerController
         rigidbody.isKinematic = false;
     }
 
-    #endregion
-
-
-    #region Goal
-
+    // ------------------------------------------------------------------------------
+    // 3-4-12) 메서드 - 액션 - 도착하기(Goal)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Goal(GoalType type)
     {
         ICameraController camera = scene.camera;
@@ -2062,15 +2040,12 @@ public class PlayerController : CharacterBase, IPlayerController
         resources.model.SetFace();
     }
 
-    #endregion
-
-    #endregion
-
-
-    #region Overlap
-
-    #region Immunize
-
+    // ------------------------------------------------------------------------------
+    // 3-5) 메서드 - 오버랩(Overlap)
+    // ------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------
+    // 3-5-1) 메서드 - 오버랩 - 면역(Immunize)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Immunize()
     {
         OverlapState state = OverlapState.Immunize;
@@ -2102,11 +2077,9 @@ public class PlayerController : CharacterBase, IPlayerController
         this.state.overlap[state] = false;
     }
 
-    #endregion
-
-
-    #region Power Up
-
+    // ------------------------------------------------------------------------------
+    // 3-5-2) 메서드 - 오버랩 - 파워 업(Power Up)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine PowerUp(PowerUpType state)
     {
         IBackGroundMusicController sceneBGM = scene.bgm;
@@ -2165,11 +2138,9 @@ public class PlayerController : CharacterBase, IPlayerController
         if (playEffect) resources.effects.powerUp.Play(PowerUpEffectState.Off);
     }
 
-    #endregion
-
-
-    #region Cool Down
-
+    // ------------------------------------------------------------------------------
+    // 3-5-3) 메서드 - 오버랩 - 쿨타임(Cool Down)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine CoolDown()
     {
         OverlapState state = OverlapState.CoolDown;
@@ -2201,11 +2172,9 @@ public class PlayerController : CharacterBase, IPlayerController
         this.state.overlap[state] = false;
     }
 
-    #endregion
-
-
-    #region Carry
-
+    // ------------------------------------------------------------------------------
+    // 3-5-4) 메서드 - 오버랩 - 물건 나르기(Carry)
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Carry(IThrowableBase throwable)
     {
         OverlapState state = OverlapState.Carry;
@@ -2254,137 +2223,4 @@ public class PlayerController : CharacterBase, IPlayerController
 
         resources.model.SetCarryLayer(false);
     }
-
-    #endregion
-
-    #endregion
-
-
-    //#region Climb Down Function
-
-    //private void ClimbDown(Collision collision)
-    //{
-    //    var hitNormal = collision.contacts[0].normal;
-    //    var angle = Vector3.Angle(transform.up, hitNormal);
-
-    //    if ((angle >= 35f) && (angle <= 90f) && (!isGrounded || (isGrounded && !subIsGrounded)))
-    //    {
-    //        if (!isClimbingDown)
-    //        {
-    //            if (isFalling) StopFall();
-    //            if (isMoving) StopMove();
-    //            if (isJumping) StopJump();
-    //            if (isDiving) StopDive();
-    //            if (isSpinning) StopSpin();
-
-    //            isClimbingDown = true;
-
-    //            _rigidbody.velocity = Vector3.zero;
-
-    //            mesh.SetAnimation("Climb Down");
-
-    //            Quaternion lookRotation = Quaternion.LookRotation(hitNormal, transform.up);
-
-    //            mesh.transform.rotation = lookRotation;
-    //        }
-    //        else
-    //        {
-    //            float forceRate = (angle >= 75f) ? 0.9f : 0f;
-
-    //            _rigidbody.AddForce(-transform.up * forceRate, ForceMode.Acceleration);
-
-    //            Quaternion lookRotation = Quaternion.LookRotation(hitNormal, transform.up);
-
-    //            mesh.transform.rotation = lookRotation;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (isClimbingDown)
-    //        {
-    //            isClimbingDown = false;
-
-    //            Vector3 _direction = Vector3.ProjectOnPlane(mesh.transform.forward, transform.up);
-
-    //            Quaternion lookRotation = Quaternion.LookRotation(_direction, transform.up);
-
-    //            mesh.transform.rotation = lookRotation;
-
-    //            if (!isJumping) StartLand(LandType.Light);
-    //        }
-    //    }
-    //}
-
-    //private void StopClimbDown()
-    //{
-    //    if (isClimbingDown)
-    //    {
-    //        isClimbingDown = false;
-
-    //        Vector3 _direction = Vector3.ProjectOnPlane(mesh.transform.forward, transform.up);
-    //        Quaternion lookRotation = Quaternion.LookRotation(_direction, transform.up);
-
-    //        mesh.transform.rotation = lookRotation;
-
-    //        if (!isJumping) StartLand(LandType.Light);
-    //    }
-    //}
-
-    //#endregion
-
-
-    //#region Debug Function
-
-    //private void OnGUI()
-    //{
-    //    PrintVelocity();
-    //    //PrintState();
-    //}
-
-    //private void PrintVelocity()
-    //{
-    //    GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
-    //    GUIStyle contentStyle = new GUIStyle(GUI.skin.label);
-
-    //    boxStyle.fontSize = 50;
-    //    contentStyle.fontSize = 50;
-
-    //    GUI.Box(new Rect(10, 10, 950, 420), "Velocity", boxStyle);
-    //    GUI.Label(new Rect(10, 70, 950, 70), " World Velocity\t: " + worldVelocity, contentStyle);
-    //    GUI.Label(new Rect(10, 140, 950, 70), " Local Velocity\t: " + localVelocity, contentStyle);
-    //    GUI.Label(new Rect(10, 210, 950, 70), " Move Direction\t: " + localMoveDirection, contentStyle);
-    //    GUI.Label(new Rect(10, 280, 950, 70), " Move Speed\t: " + localMoveSpeed, contentStyle);
-    //    GUI.Label(new Rect(10, 350, 950, 70), " Fall Velocity\t: " + localFallVelocity, contentStyle);
-    //    GUI.Label(new Rect(10f, 420, 950, 70), localMoveVelocity.ToString(), contentStyle);
-    //}
-
-    //private void PrintState()
-    //{
-    //    GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
-    //    GUIStyle contentStyle = new GUIStyle(GUI.skin.label);
-
-    //    boxStyle.fontSize = 50;
-    //    contentStyle.fontSize = 50;
-
-    //    GUI.Box(new Rect(10, 0, 500, 960), "State", boxStyle);
-    //    GUI.Label(new Rect(10, 60, 500, 50), "Move\t: " + isMoving, contentStyle);
-    //    GUI.Label(new Rect(10, 120, 500, 50), "Carry\t: " + isCarring, contentStyle);
-    //    GUI.Label(new Rect(10, 180, 500, 50), "PowerUp\t: " + isPowerUpping, contentStyle);
-    //    //GUI.Label(new Rect(10, 240, 500, 50), "Change\t: " + isChangingTargetSpeed, contentStyle);
-    //    GUI.Label(new Rect(10, 300, 500, 50), "Run\t: " + isRunning, contentStyle);
-    //    GUI.Label(new Rect(10, 360, 500, 50), "Fall\t: " + isFalling, contentStyle);
-    //    GUI.Label(new Rect(10, 420, 500, 50), "Land\t: " + isLanding, contentStyle);
-    //    GUI.Label(new Rect(10, 480, 500, 50), "Brake\t: " + isBraking, contentStyle);
-    //    GUI.Label(new Rect(10, 540, 500, 50), "Jump\t: " + isJumping, contentStyle);
-    //    GUI.Label(new Rect(10, 600, 500, 50), "Crouch\t: " + isCrouching, contentStyle);
-    //    GUI.Label(new Rect(10, 660, 500, 50), "HipDrop\t: " + isHipDropping, contentStyle);
-    //    GUI.Label(new Rect(10, 720, 500, 50), "Attack\t: " + isAttacking, contentStyle);
-    //    GUI.Label(new Rect(10, 780, 500, 50), "Interact\t: " + isInteracting, contentStyle);
-    //    GUI.Label(new Rect(10, 840, 500, 50), "Damage\t: " + isGettingDamage, contentStyle);
-    //    GUI.Label(new Rect(10, 900, 500, 50), "Die\t: " + isDying, contentStyle);
-    //}
-
-    //#endregion
-
-    #endregion
 }
