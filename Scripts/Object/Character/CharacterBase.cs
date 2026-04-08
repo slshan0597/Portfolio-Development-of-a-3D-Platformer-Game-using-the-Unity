@@ -13,8 +13,8 @@
 //            2- 초기화 ................... Line 341
 //            3- 셋(Set) .................. Line 379
 //            4- 액션 ..................... Line 487
-//                - Idle ..... Line 551
-//                - Damage ... Line 576
+//                - 대기(Idle) ....... Line 551
+//                - 데미지(Damage) ... Line 576
 /////////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
@@ -573,7 +573,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 3-4-2) 메서드 - 액션 - 대미지(Damage)
+    // 3-4-2) 메서드 - 액션 - 데미지(Damage)
     //    -> 시작 : TryDamage(), Damage()
     //    -> 반복 : _Damage()
     //    -> 종료 : StopDamage()
