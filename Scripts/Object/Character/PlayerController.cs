@@ -35,8 +35,7 @@ using PowerUpType        = PowerUpItemController.Type;
 using CameraShakeType    = CameraController.ShakeSetting.Type;
 
 /////////////////////////////////////////////////////////////////////////////////
-// 1. 인터페이스 정의
-//  - ICharacterBase 인터페이스 상속
+// 1. 인터페이스(ICharacterBase 인터페이스 상속)
 /////////////////////////////////////////////////////////////////////////////////
 public interface IPlayerController : ICharacterBase
 {
@@ -88,8 +87,7 @@ public interface IPlayerController : ICharacterBase
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// 2. 클래스 정의
-//  - CharacterBase 클래스 상속
+// 2. 클래스(CharacterBase 클래스 상속)
 /////////////////////////////////////////////////////////////////////////////////
 public class PlayerController : CharacterBase, IPlayerController
 {
@@ -97,7 +95,7 @@ public class PlayerController : CharacterBase, IPlayerController
     // 1) 사전 정의
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1_ UI 참조
+    // 1-1) 사전 정의 -> UI 참조
     //    - 상호작용 / 타이머 / 대사창 출력
     //    - Mobile(Android) 플랫폼 빌드 시 가상패드 출력
     // ------------------------------------------------------------------------------
@@ -129,8 +127,8 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 2_ 리소스 참조
-    //    - CharacterBase.Resources 클래스를 상속하여 새로 정의하고, 부모 클래스를 대체
+    // 1-2) 사전 정의 -> 리소스 참조(CharacterBase.Resources 클래스 상속)
+    //    - 부모 클래스를 대체하여 새로 정의
     //    - 캐릭터 모델링의 회전
     //    - 캐릭터의 보이스, 이펙트 호출
     // ------------------------------------------------------------------------------
@@ -327,8 +325,8 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3_ 캐릭터 상태
-    //    - CharacterBase.State 클래스를 상속하여 새로 정의하고, 부모 클래스를 대체
+    // 1-3) 사전 정의 -> 캐릭터 상태(CharacterBase.State 클래스 상속)
+    //    - 부모 클래스를 대체하여 새로 정의
     //    - 캐릭터의 메인 상태
     //    - 메인 상태의 진행도
     // ------------------------------------------------------------------------------
@@ -392,7 +390,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 4_ 캐릭터 설정
+    // 1-4) 사전 정의 -> 캐릭터 설정
     //    - 부모(CharacterBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
     //    - 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
@@ -679,7 +677,7 @@ public class PlayerController : CharacterBase, IPlayerController
     //    - 부모 클래스의 함수들을 재정의하여 확장
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1_ 이벤트 (Unity 호출 함수)
+    // 3-1) 메서드 -> 이벤트(Unity 호출 함수)
     // ------------------------------------------------------------------------------
     protected override void FixedUpdate()
     {
@@ -737,7 +735,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 2_ 초기화
+    // 3-2) 메서드 -> 초기화
     // ------------------------------------------------------------------------------
     protected override void SetField()
     {
@@ -854,7 +852,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 3_ 셋(Set)
+    // 3-3) 메서드 -> 셋(Set)
     //    - 캐릭터의 배치(Transform) 및 형태(Collider) 설정
     //    - 플레이어의 체력 설정
     // ------------------------------------------------------------------------------
@@ -871,7 +869,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 4_ 액션 1. 공통
+    // 3-4) 메서드 -> 액션 1. 공통(Common)
     //    - 이동 및 모든 행동에 대한 정지 기능
     //    - 지면(Ground)과의 충돌에 대한 지연 처리
     // ------------------------------------------------------------------------------
@@ -932,9 +930,9 @@ public class PlayerController : CharacterBase, IPlayerController
         }
     }
 
-
-    #region Idle
-
+    // ------------------------------------------------------------------------------
+    // 3-4) 메서드 -> 액션 2. 대기(Idle)
+    // ------------------------------------------------------------------------------
     public override Coroutine Idle(bool playAnimation = false)
     {
         StopAction();
@@ -962,11 +960,9 @@ public class PlayerController : CharacterBase, IPlayerController
         resources.model.Play(EmoteType.None);
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ------------------------------------------------------------------------------
+    // 3-4) 메서드 -> 액션 3. 대미지(Damage)
+    // ------------------------------------------------------------------------------
     public override bool TryDamage(Transform attacker, DamageType type)
     {
         MainState     invalidType       = MainState.Damage | MainState.Die | MainState.Goal;
@@ -1063,11 +1059,9 @@ public class PlayerController : CharacterBase, IPlayerController
         Physics.IgnoreLayerCollision(layer1, layer2, !enabled);
     }
 
-    #endregion
-
-
-    #region Fall
-
+    // ------------------------------------------------------------------------------
+    // 3-4) 메서드 -> 액션 4. 낙하(Fall)
+    // ------------------------------------------------------------------------------
     protected virtual void TryFall()
     {
         MainState validType = MainState.Idle | MainState.Land | MainState.Run | MainState.Brake | MainState.Crouch;
