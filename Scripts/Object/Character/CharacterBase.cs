@@ -13,8 +13,8 @@
 //            2- 초기화 ................... Line 345
 //            3- 셋(Set) .................. Line 383
 //            4- 액션 ..................... Line 491
-//                - 대기(Idle) ....... Line 555
-//                - 데미지(Damage) ... Line 580
+//                - Idle ..... Line 555
+//                - Damage ... Line 580
 /////////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
@@ -37,9 +37,7 @@ using DamageType       = IDamageable.Type;
 /////////////////////////////////////////////////////////////////////////////////
 public interface ICharacterBase
 {
-    // ==============================================================================
-    // 1) 프로퍼티
-    // ==============================================================================
+    // 프로퍼티
     // Component
     GameObject              gameObject { get; }
     Transform               transform  { get; }
@@ -60,9 +58,7 @@ public interface ICharacterBase
     float            rotationSpeed    { get; }
     CharacterSetting characterSetting { get; }
 
-    // ==============================================================================
-    // 2) 메서드
-    // ==============================================================================
+    // 메서드
     // Set
     void      Initialize();
     Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0f);
