@@ -1,7 +1,19 @@
 // //////////////////////////////////////////////////////////////////////////////
 // * 목차
-//    1. 인터페이스 정의 ... Line 36
-//    2. 클래스 정의 ....... Line 80
+//    1. 인터페이스 ... Line 35
+//    2. 클래스 ....... Line 75
+//        1) 정의 ... Line 81
+//            1- 지면(Ground) 상태 ... Line 84
+//            2- 캐릭터 상태 ......... Line 130
+//            3- 캐릭터 설정 ......... Line 145
+//        2) 필드 ..... Line 207
+//        3) 메서드 ... Line 251
+//            1- 이벤트 함수(Unity 호출) ... Line 254
+//            2- 초기화 ................... Line 290
+//            3- 셋(Set) .................. Line 328
+//            4- 액션 ..................... Line 436
+//                1_ 대기(Idle) ..... Line 500
+//                2_ 피격(Damage) ... Line 525
 // //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
@@ -88,240 +100,10 @@ public interface IPlayerController : ICharacterBase
 public class PlayerController : CharacterBase, IPlayerController
 {
     // ==============================================================================
-    // 1) 사전 정의
+    // 1) 정의
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 사전 정의 - UI 참조
-    //    -> 상호작용 / 타이머 / 대사창 출력
-    //    -> Mobile(Android) 플랫폼 빌드 시 가상패드 출력
-    // ------------------------------------------------------------------------------
-    public class UI : List<IUIBase>
-    {
-        public Canvas                             canvas          { get; }
-        public IPlayerInteractableUIController    interactable    { get; }
-        public IPlayerTimerUIController           timer           { get; }
-        public IPlayerConversationUIController    conversation    { get; }
-        public IPlayerVirtualJoystickUIController virtualJoystick { get; }
-        
-        public UI(Transform transform) : base(transform.GetComponentsInChildren<IUIBase>(true))
-        {
-            canvas          = transform.GetComponent<Canvas>();
-            interactable    = transform.GetComponentInChildren<IPlayerInteractableUIController>(true);
-            timer           = transform.GetComponentInChildren<IPlayerTimerUIController>(true);
-            conversation    = transform.GetComponentInChildren<IPlayerConversationUIController>(true);
-            virtualJoystick = transform.GetComponentInChildren<IPlayerVirtualJoystickUIController>(true);
-        }
-        
-        public void Initialize() { foreach (var element in this) element.gameObject.SetActive(false); }
-
-        public void Hide(bool paused)
-        {
-            if (interactable.gameObject.activeInHierarchy)       interactable.root.main.gameObject.SetActive(!paused);
-            if (timer.gameObject.activeInHierarchy)              timer.root.main.gameObject.SetActive(!paused);
-            if (Application.platform == RuntimePlatform.Android) virtualJoystick.Display(!paused);
-        }
-    }
-
-    // ------------------------------------------------------------------------------
-    // 1-2) 사전 정의 - 리소스 참조(CharacterBase.Resources 클래스 상속)
-    //    -> 부모 클래스를 대체하여 새로 정의
-    //    -> 캐릭터 모델링의 회전
-    //    -> 캐릭터의 보이스, 이펙트 호출
-    // ------------------------------------------------------------------------------
-    public new class Resources : CharacterBase.Resources
-    {
-        // Definition
-        public class Effects : CharacterEffects<MainState>
-        {
-            public class HipDrop : Value
-            {
-                public IPlayerHipDropEffectController loop { get; }
-
-                public HipDrop(Transform transform) : base(transform)
-                {
-                    loop = transform.GetComponentInChildren<IPlayerHipDropEffectController>(true);
-                }
-            }
-
-            public class Attack : Details<AttackState>
-            {
-                public IPlayerSpinEffectController spin { get; }
-
-                public Attack(Transform transform) : base(transform)
-                {
-                    spin = transform.GetComponentInChildren<IPlayerSpinEffectController>(true);
-                }
-            }
-
-            public class Interact : Details<InteractState>
-            {
-                public class Transport : Details<TransporterType>
-                {
-                    public class Launcher : Details<LauncherState>
-                    {
-                        public IPlayerLauncherEffectController launch { get; }
-
-                        public Launcher(Transform transform) : base(transform)
-                        {
-                            launch = transform.GetComponentInChildren<IPlayerLauncherEffectController>(true);
-                        }
-                    }
-
-                    public Launcher launcher { get; }
-
-                    public Transport(Transform transform) : base(transform)
-                    {
-                        launcher = new Launcher(transform.Find("Launcher"));
-                    }
-                }
-
-                public Transport transport { get; }
-
-                public Interact(Transform transform) : base(transform)
-                {
-                    transport = new Transport(transform.Find("Transport"));
-                }
-            }
-
-            public class Goal : Value
-            {
-                #region Field
-
-                public IPlayerGoalEffectController end { get; }
-
-                public Goal(Transform transform) : base(transform)
-                {
-                    end = transform.GetComponentInChildren<IPlayerGoalEffectController>(true);
-                }
-            }
-
-            public class Other : Dictionary<string, IEffectController>
-            {
-                public IPlayerFootEffectController  foot      { get; }
-                public IPlayerSmokeEffectController smokeLand { get; }
-                public IPlayerSmokeEffectController smokeJump { get; }
-
-                public Other(Transform transform) : base()
-                {
-                    foreach (var effect in transform.GetComponentsInChildren<IEffectController>(true))
-                        Add(effect.transform.name, effect);
-
-                    foot      = transform.GetComponentInChildren<IPlayerFootEffectController>(true);
-                    smokeLand = transform.Find("Smoke Land").GetComponent<IPlayerSmokeEffectController>();
-                    smokeJump = transform.Find("Smoke Jump").GetComponent<IPlayerSmokeEffectController>();
-                }
-            }
-            
-            public IPlayerLandEffectController    land     { get; }
-            public IPlayerJumpEffectController    jump     { get; }
-            public HipDrop                        hipDrop  { get; }
-            public Attack                         attack   { get; }
-            public Interact                       interact { get; }
-            public Details<DieState>              die      { get; }
-            public Goal                           goal     { get; }
-            public IPlayerPowerUpEffectController powerUp  { get; }
-            public new Other                      other    { get; }
-
-            public Effects(Transform transform) : base(transform)
-            {
-                land     = transform.GetComponentInChildren<IPlayerLandEffectController>(true);
-                jump     = transform.GetComponentInChildren<IPlayerJumpEffectController>(true);
-                hipDrop  = new HipDrop(transform.Find("Hip Drop"));
-                attack   = new Attack(transform.Find("Attack"));         Remove(MainState.Attack);
-                interact = new Interact(transform.Find("Interact"));     Remove(MainState.Interact);
-                die      = new Details<DieState>(transform.Find("Die")); Remove(MainState.Die);
-                goal     = new Goal(transform.Find("Goal"));
-                powerUp  = transform.GetComponentInChildren<IPlayerPowerUpEffectController>(true);
-                other    = new Other(transform.Find("Other"));
-            }
-        }
-
-        public class Audios : List<IAudioBase>
-        {
-            public IPlayerBackGroundMusicController bgm    { get; }
-            public IPlayerSystemAudioController     system { get; }
-
-            public Audios(Transform transform) : base(transform.GetComponentsInChildren<IAudioBase>(true))
-            {
-                bgm    = transform.GetComponentInChildren<IPlayerBackGroundMusicController>(true);
-                system = transform.GetComponentInChildren<IPlayerSystemAudioController>(true);
-            }
-        }
-        
-        // Field
-        public new IPlayerModelController model   { get; }
-        public new IPlayerVoiceController voice   { get; }
-        public new Effects                effects { get; }
-        public Audios                     audios  { get; }
-
-        // Method
-        public Resources(Transform transform) : base(transform)
-        {
-            model   = transform.GetComponentInChildren<IPlayerModelController>(true);
-            voice   = transform.GetComponentInChildren<IPlayerVoiceController>(true);
-            effects = new Effects(transform.Find("Effects"));
-            audios  = new Audios(transform.Find("Audios"));
-        }
-        
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.Play(type, subType));
-        }
-
-        public float Play(LandState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(MainState.Land, subType), effects.land.Play(type));
-        }
-
-        public float Play(JumpState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.jump.Play(type));
-        }
-
-        public float Play(AttackState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(MainState.Attack, subType), effects.attack.Play(type, subType));
-        }
-
-        public float Play(InteractState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.interact.Play(type, subType));
-        }
-
-        public float Play(TransporterType type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.interact.transport.Play(type, subType));
-        }
-
-        public float Play(DieState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.die.Play(type, subType));
-        }
-
-        public float Play(GoalType type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.goal.Play(subType));
-        }
-    }
-
-    // ------------------------------------------------------------------------------
-    // 1-3) 사전 정의 - 캐릭터 상태(CharacterBase.State 클래스 상속)
+    // 1-1) 정의 - 캐릭터 상태(CharacterBase.State 클래스 상속)
     //    -> 부모 클래스를 대체하여 새로 정의
     //    -> 캐릭터의 메인 상태
     //    -> 메인 상태의 진행도
@@ -386,7 +168,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-4) 사전 정의 - 캐릭터 설정
+    // 1-2) 정의 - 캐릭터 설정
     //    -> 부모(CharacterBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
     //    -> 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
