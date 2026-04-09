@@ -2,8 +2,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 36
 //    2. 클래스 ....... Line 76
-//        1) 사전 정의 ... Line 82
-//            1- 리소스 참조 ......... Line 85
+//        1) 정의 ... Line 82
 //            2- 지면(Ground) 상태 ... Line 135
 //            3- 캐릭터 상태 ......... Line 181
 //            4- 캐릭터 설정 ......... Line 196
@@ -79,60 +78,10 @@ public interface ICharacterBase
 public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamageable
 {
     // ==============================================================================
-    // 1) 사전 정의
+    // 1) 정의
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 사전 정의 - 리소스 참조
-    //    -> 캐릭터 모델링의 회전
-    //    -> 캐릭터의 보이스, 이펙트 호출
-    // ------------------------------------------------------------------------------
-    public class Resources
-    {
-        public Transform                   transform { get; }
-        public ICharacterModelBase         model     { get; }
-        public ICharacterVoiceBase         voice     { get; }
-        public CharacterEffects<MainState> effects   { get; }
-
-        public Resources(Transform transform)
-        {
-            this.transform = transform;
-            model          = transform.GetComponentInChildren<ICharacterModelBase>(true);
-            voice          = transform.GetComponentInChildren<ICharacterVoiceBase>(true);
-            effects        = new CharacterEffects<MainState>(transform.Find("Effects"));
-        }
-
-        public void Follow(ICharacterDirectionBase direction, float speed)
-        {
-            Quaternion rotation = direction.transform.localRotation;
-
-            transform.localRotation
-                = Quaternion.Slerp(transform.localRotation, rotation, speed * Time.fixedDeltaTime);
-        }
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), (effects != null) ? effects.Play(type, subType) : default);
-        }
-
-        public float Play(DamageType type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), (effects != null) ? effects.Play(type, subType) : default);
-        }
-
-        public float Play(string type)
-        {
-            model.Play(type);
-
-            return Mathf.Max(voice.Play(type), (effects != null) ? effects.Play(type) : default);
-        }
-    }
-
-    // ------------------------------------------------------------------------------
-    // 1-2) 사전 정의 - 지면(Ground) 상태
+    // 1-1) 정의 - 지면(Ground) 상태
     //    -> 지면에 대한 충돌 또는 접지, 경사각 정보 갱신
     // ------------------------------------------------------------------------------
     public class GroundState
@@ -178,7 +127,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 1-3) 사전 정의 - 캐릭터 상태
+    // 1-2) 정의 - 캐릭터 상태
     //    -> 캐릭터의 메인 상태
     //    -> 메인 상태의 진행도
     // ------------------------------------------------------------------------------
@@ -193,7 +142,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 1-4) 사전 정의 - 캐릭터 설정
+    // 1-3) 정의 - 캐릭터 설정
     //    -> 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
     [Serializable] public class CharacterSetting
