@@ -234,7 +234,7 @@ public class EnemyBase : CharacterBase, IEnemyBase
     // ******************************************************************************
     // 3-3-2) 메서드 -> 액션 -> 피격(Damage)
     //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
-    //    - 상태 종료 다음에 Die 호출
+    //    - 상태 종료 후 Die 호출
     // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
