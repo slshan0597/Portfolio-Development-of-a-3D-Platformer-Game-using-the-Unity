@@ -27,7 +27,7 @@ using SubState     = CharacterBase.State.Sub;
 using DamageType   = IDamageable.Type;
 
 // //////////////////////////////////////////////////////////////////////////////
-// 1. 인터페이스 (ICharacterBase 인터페이스 상속)
+// 1. 인터페이스(ICharacterBase 인터페이스 상속)
 // //////////////////////////////////////////////////////////////////////////////
 public interface IEnemyBase : ICharacterBase
 {
@@ -53,7 +53,7 @@ public interface IEnemyBase : ICharacterBase
 }
 
 // //////////////////////////////////////////////////////////////////////////////
-// 2. 클래스 (CharacterBase 클래스 상속)
+// 2. 클래스(CharacterBase 클래스 상속)
 // //////////////////////////////////////////////////////////////////////////////
 public class EnemyBase : CharacterBase, IEnemyBase
 {
@@ -62,7 +62,7 @@ public class EnemyBase : CharacterBase, IEnemyBase
     // ==============================================================================
     // ------------------------------------------------------------------------------
     // 1-1) 정의 -> 캐릭터 상태
-    //    - 부모 클래스를 대체하여 새로 정의
+    //    - 부모 클래스(CharacterBase.State)를 대체하여 새로 정의
     // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
