@@ -63,7 +63,7 @@ using PowerUpType        = PowerUpItemController.Type;
 using CameraShakeType    = CameraController.ShakeSetting.Type;
 
 // //////////////////////////////////////////////////////////////////////////////
-// 1. 인터페이스 (ICharacterBase 인터페이스 상속)
+// 1. 인터페이스(ICharacterBase 인터페이스 상속)
 // //////////////////////////////////////////////////////////////////////////////
 public interface IPlayerController : ICharacterBase
 {
@@ -111,7 +111,7 @@ public interface IPlayerController : ICharacterBase
 }
 
 // //////////////////////////////////////////////////////////////////////////////
-// 2. 클래스 (CharacterBase 클래스 상속)
+// 2. 클래스(CharacterBase 클래스 상속)
 // //////////////////////////////////////////////////////////////////////////////
 public class PlayerController : CharacterBase, IPlayerController
 {
@@ -120,9 +120,9 @@ public class PlayerController : CharacterBase, IPlayerController
     // ==============================================================================
     // ------------------------------------------------------------------------------
     // 1-1) 정의 -> 캐릭터 상태
-    //    - 부모 클래스를 대체하여 새로 정의
+    //    - 부모 클래스(CharacterBase.State)를 대체하여 새로 정의
     //    - Main State 외에 각 상태에 대한 Sub State
-    //    - 다중 상태를 허용하는 Overlab State
+    //    - 다중 상태를 허용하는 Overlap State
     // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
@@ -185,7 +185,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ------------------------------------------------------------------------------
     // 1-2) 정의 -> 캐릭터 설정
-    //    - 부모(CharacterBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
+    //    - 부모 클래스(CharacterBase.Setting)는 그대로 사용, 별도의 추가 클래스 정의
     //    - 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
@@ -902,7 +902,7 @@ public class PlayerController : CharacterBase, IPlayerController
     // 3-4-4) 메서드 -> 액션 -> 착지(Land)
     //    - 타입: Light, Stunt, Hard
     //    - Fall, Jump 상태 다음에 호출
-    //    - 특수 액션(3단 점프, 백 점프 등)시 Stunt 타입, 낙하 속도가 기준값을 넘어서면 Hard 타입
+    //    - 특수 액션(3단 점프, 백 점프 등) 시 Stunt 타입, 낙하 속도가 기준값을 넘어서면 Hard 타입
     // ******************************************************************************
     public virtual Coroutine Land(LandState type)
     {
