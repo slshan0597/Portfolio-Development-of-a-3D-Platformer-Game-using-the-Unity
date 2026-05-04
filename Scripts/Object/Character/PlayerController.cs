@@ -27,8 +27,8 @@
 //                14_ 도착(Goal) .............. Line 00
 //            5- 오버랩(Overlap) ... Line 00
 //                1_ 면역(Immunize) ....... Line 00
-//                2_ 파워 업(Power Up) .... Line 00
-//                3_ 쿨 타임(Cool Down) ... Line 00
+//                2_ 파워업(Power Up) ..... Line 00
+//                3_ 쿨타임(Cool Down) .... Line 00
 //                4_ 물건 나르기(Carry) ... Line 00
 // //////////////////////////////////////////////////////////////////////////////
 using System;
@@ -647,7 +647,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ------------------------------------------------------------------------------
     // 3-3) 메서드 - 셋(Set)
-    //    -> 캐릭터의 배치(Transform) 및 형태(Collider) 설정
+    //    -> 캐릭터의 배치(Transform) 및 형태(Collider, Rigidbody) 설정
     //    -> 플레이어의 체력 설정
     // ------------------------------------------------------------------------------
     public override Coroutine Set(ICharacterTargetController target, bool resetDirection = false, bool setIdle = false, float duration = 0)
@@ -664,8 +664,10 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ------------------------------------------------------------------------------
     // 3-4) 메서드 - 액션(Common)
-    //    -> 이동 및 모든 행동에 대한 정지 기능
+    //    -> 모든 행동에 대한 정지
+    //    -> 캐릭터의 회전 및 이동
     //    -> 지면(Ground)과의 충돌에 대한 지연 처리
+    //    -> 루틴: 시작(TryMethod, Method) -> 반복(_Method) -> 종료(StopMethod)
     // ------------------------------------------------------------------------------
     public override void StopAction()
     {
@@ -756,6 +758,8 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-2) 메서드 - 액션 - 피격(Damage)
+    //    -> 타입: Normal 고정
+    //    -> 피격 시 캐릭터 넉백 및 체력 감소, 이후 체력 상태에 따라 Idle 또는 Die 호출
     // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
@@ -780,7 +784,8 @@ public class PlayerController : CharacterBase, IPlayerController
         state.main   = MainState.Damage;
         state.damage = type;
 
-        int amount = ((type == DamageType.PressDown) ? setting.maxHitPoint : 1) * -1;
+        //int amount = ((type == DamageType.PressDown) ? setting.maxHitPoint : 1) * -1;
+        int amount = -1;
 
         SetHitPoint(amount);
         SetCollision(false);
@@ -826,7 +831,8 @@ public class PlayerController : CharacterBase, IPlayerController
         if (state.hitPoint > 0)
         {
             Immunize();
-            Idle(type == DamageType.PressDown);
+            //Idle(type == DamageType.PressDown);
+            Idle();
         }
         else Die(DieState.Normal);
     }
@@ -894,6 +900,9 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-4) 메서드 - 액션 - 착지(Land)
+    //    -> 타입: Light, Stunt, Hard
+    //    -> Fall 또는 Jump 상태 다음에 호출
+    //    -> 특수액션(3단 점프, 백 점프 등)시 Stunt 타입, 낙하 속도가 기준값을 넘어서면 Hard 타입
     // ******************************************************************************
     public virtual Coroutine Land(LandState type)
     {
@@ -996,7 +1005,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
             var setting = settings.GetOrDefault(state.overlap.powerUp);
 
-            RotateAndMove(setting.move);
+            RotateAndMove(setting.move);    // Move Method
             resources.model.SetMoveRate(speedRate);
 
             yield return new WaitForFixedUpdate();
@@ -1014,6 +1023,8 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-6) 메서드 - 액션 - 멈추기(Brake)
+    //    -> Run 상태 도중에 호출
+    //    -> 캐릭터의 급제동
     // ******************************************************************************
     public virtual Coroutine Brake()
     {
@@ -1048,6 +1059,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-7) 메서드 - 액션 - 웅크리기(Crouch)
+    //    -> Crouch 상태에서의 캐릭터 이동
     // ******************************************************************************
     protected virtual void TryCrouch()
     {
@@ -1135,6 +1147,13 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-8) 메서드 - 액션 - 뛰기(Jump)
+    //    -> 타입: Normal(Low, Middle, High), Turn, Long, Back, Hip, Bounce, Supper
+    //    -> Normal 타입은 3단 점프, Normal 타입 시 상태 값을 잠시 저장
+    //    -> Turn 타입은 Brake 상태 도중에 호출, 캐릭터의 방향의 반대로 점프
+    //    -> Long, Back 타입은 Crouch 상태 도중에 호출, Long은 멀리뛰기, Back은 백덤블링
+    //    -> Hip 타입은 Hip Drop 상태 도중에 호출
+    //    -> Bounce 타입은 적을 밟은 후에 호출
+    //    -> Supper 타입은 Power Up(Supper Star) 상태 도중에 호출
     // ******************************************************************************
     protected virtual void TryJump()
     {
@@ -1277,6 +1296,8 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-9) 메서드 - 액션 - 엉덩이 찍기(Hip Drop)
+    //    -> Fall, Jump 상태 도중에 호출
+    //    -> 최대 속력(Gravity)으로 낙하 및 적을 Press Down 타입으로 공격
     // ******************************************************************************
     protected virtual void TryHipDrop()
     {
@@ -1357,6 +1378,10 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-10) 메서드 - 액션 - 공격(Attack)
+    //    -> 타입: Spin(Normal), Fire, Throw, Dive
+    //    -> Fire 타입은 Power Up(Fire Flower) 상태 도중에 호출, Power Up 타입에 따라 지정된 Projectile 발사
+    //    -> Throw 타입은 Carry 상태 도중에 호출, 들고 있는 Throwable(Interactable)을 투척
+    //    -> Dive 타입은 Hip Drop 상태 도중에 호출, 공중에서 Hip Drop을 멈추고 앞으로 다이빙
     // ******************************************************************************
     protected virtual void TryAttack()
     {
@@ -1552,6 +1577,9 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-11) 메서드 - 액션 - 상호작용(Interact)
+    //    -> 타입: Carry Up, Transport, Talk
+    //    -> Interactable 속성을 가진 오브젝트를 스캔 및 Interact 호출
+    //    -> 각 기능은 Interactable 오브젝트 내에 구현
     // ******************************************************************************
     protected virtual void TrySetTempInteractable(IInteractable interactable)
     {
@@ -1638,6 +1666,9 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-12) 메서드 - 액션 - 부딪치기(Bump)
+    //    -> Long Jump, Dive Attack 상태 도중에 벽에 부딪히면 호출
+    //    -> Hip Drop 상태 도중에 NPC에 부딪히면 호출
+    //    -> Damage 상태와 유사한 기능 (속도 증가, 체력감소 없음)
     // ******************************************************************************
     protected virtual void TryBump(Collision collision)
     {
@@ -1730,6 +1761,8 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-13) 메서드 - 액션 - 죽기(Die)
+    //    -> 타입: Noraml, Bungee
+    //    -> Stage.PlayerController 클래스에서 확장 및 호출
     // ******************************************************************************
     public virtual Coroutine Die(DieState type)
     {
@@ -1782,6 +1815,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-14) 메서드 - 액션 - 도착하기(Goal)
+    //    -> Stage.PlayerController 클래스에서 확장 및 호출
     // ******************************************************************************
     public virtual Coroutine Goal(GoalType type)
     {
@@ -1872,7 +1906,7 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ******************************************************************************
-    // 3-5-2) 메서드 - 오버랩 - 파워 업(Power Up)
+    // 3-5-2) 메서드 - 오버랩 - 파워업(Power Up)
     // ******************************************************************************
     public virtual Coroutine PowerUp(PowerUpType state)
     {
