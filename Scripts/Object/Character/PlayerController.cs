@@ -1668,7 +1668,7 @@ public class PlayerController : CharacterBase, IPlayerController
     // 3-4-12) 메서드 - 액션 - 부딪치기(Bump)
     //    -> Long Jump, Dive Attack 상태 도중에 벽에 부딪히면 호출
     //    -> Hip Drop 상태 도중에 NPC에 부딪히면 호출
-    //    -> Damage 상태와 유사한 기능 (속도 증가, 체력감소 없음)
+    //    -> Damage 상태와 유사한 기능 (진행 속도 증가, 체력감소 없음)
     // ******************************************************************************
     protected virtual void TryBump(Collision collision)
     {
@@ -1762,7 +1762,7 @@ public class PlayerController : CharacterBase, IPlayerController
     // ******************************************************************************
     // 3-4-13) 메서드 - 액션 - 죽기(Die)
     //    -> 타입: Noraml, Bungee
-    //    -> Stage.PlayerController 클래스에서 확장 및 호출
+    //    -> 기반 기능만을 구현, Stage.PlayerController 클래스에서 확장 및 호출
     // ******************************************************************************
     public virtual Coroutine Die(DieState type)
     {
@@ -1815,7 +1815,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-14) 메서드 - 액션 - 도착하기(Goal)
-    //    -> Stage.PlayerController 클래스에서 확장 및 호출
+    //    -> 기반 기능만을 구현, Stage.PlayerController 클래스에서 확장 및 호출
     // ******************************************************************************
     public virtual Coroutine Goal(GoalType type)
     {
@@ -1870,6 +1870,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ------------------------------------------------------------------------------
     // 3-5) 메서드 - 오버랩(Overlap)
+    //    -> 
     // ------------------------------------------------------------------------------
     // ******************************************************************************
     // 3-5-1) 메서드 - 오버랩 - 면역(Immunize)
