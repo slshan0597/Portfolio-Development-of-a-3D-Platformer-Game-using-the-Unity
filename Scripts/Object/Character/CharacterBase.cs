@@ -81,8 +81,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     // 1) 정의
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 - 지면(Ground) 상태
-    //    -> 지면에 대한 충돌 또는 접지, 경사각 정보 갱신
+    // 1-1) 정의 -> 지면(Ground) 상태
+    //    - 지면에 대한 충돌 또는 접지, 경사각 정보 갱신
     // ------------------------------------------------------------------------------
     public class GroundState
     {
@@ -127,9 +127,9 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 - 캐릭터 상태
-    //    -> 캐릭터의 메인 상태
-    //    -> 메인 상태의 진행도
+    // 1-2) 정의 -> 캐릭터 상태
+    //    - 캐릭터의 메인 상태
+    //    - 메인 상태의 진행도
     // ------------------------------------------------------------------------------
     public class State
     {
@@ -142,8 +142,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 1-3) 정의 - 캐릭터 설정
-    //    -> 각 상태에 대한 설정 프로퍼티
+    // 1-3) 정의 -> 캐릭터 설정
+    //    - 각 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
     [Serializable] public class CharacterSetting
     {
@@ -251,7 +251,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     // 3) 메서드
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 3-1) 메서드 - 이벤트 함수(Unity 호출)
+    // 3-1) 메서드 -> 이벤트 함수(Unity 호출)
     // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
 
@@ -287,7 +287,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 3-2) 메서드 - 초기화
+    // 3-2) 메서드 -> 초기화
     // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
@@ -325,8 +325,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 3-3) 메서드 - 셋(Set)
-    //    -> 캐릭터의 배치(Transform) 및 형태(Collider, Rigidbody) 설정
+    // 3-3) 메서드 -> 셋(Set)
+    //    - 캐릭터의 배치(Transform) 및 형태(Collider, Rigidbody) 설정
     // ------------------------------------------------------------------------------
     public virtual Coroutine Set(ICharacterTargetController target, bool resetDirection = false, 
         bool setIdle = false, float duration = 0f)
@@ -433,10 +433,10 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ------------------------------------------------------------------------------
-    // 3-4) 메서드 - 액션(Common)
-    //    -> 모든 행동에 대한 정지
-    //    -> 캐릭터의 기본 이동
-    //    -> 지면(Ground)과의 충돌에 대한 지연 처리
+    // 3-4) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    //    - 캐릭터의 기본 이동
+    //    - 지면(Ground)과의 충돌에 대한 지연 처리
     // ------------------------------------------------------------------------------
     public virtual void StopAction()
     {
@@ -498,7 +498,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ******************************************************************************
-    // 3-4-1) 메서드 - 액션 - 대기(Idle)
+    // 3-4-1) 메서드 -> 액션 -> 대기(Idle)
     // ******************************************************************************
     public virtual Coroutine Idle(bool playAnimation = false) 
     {
@@ -523,10 +523,10 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     }
 
     // ******************************************************************************
-    // 3-4-2) 메서드 - 액션 - 피격(Damage)
-    //    -> 타입: Normal(Explode), PressDown(Foot)
-    //    -> 루틴: 시작(TryDamage, Damage) -> 반복(_Damage) -> 종료(StopDamage)
-    //    -> Normal 타입은 캐릭터 넉백, PressDown 타입은 캐릭터 압축
+    // 3-4-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - 타입: Normal(Explode), PressDown(Foot)
+    //    - 루틴: 시작(TryDamage, Damage) -> 반복(_Damage) -> 종료(StopDamage)
+    //    - Normal 타입은 캐릭터 넉백, PressDown 타입은 캐릭터 압축
     // ******************************************************************************
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
