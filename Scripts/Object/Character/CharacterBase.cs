@@ -11,7 +11,7 @@
 //            1- 이벤트 함수(Unity 호출) ... Line 254
 //            2- 초기화 ................... Line 290
 //            3- 셋(Set) .................. Line 328
-//            4- 액션 ..................... Line 436
+//            4- 액션(Common) ............. Line 436
 //                1_ 대기(Idle) ..... Line 500
 //                2_ 피격(Damage) ... Line 525
 // //////////////////////////////////////////////////////////////////////////////
@@ -326,7 +326,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 3-3) 메서드 - 셋(Set)
-    //    -> 캐릭터의 배치(Transform) 및 형태(Collider) 설정
+    //    -> 캐릭터의 배치(Transform) 및 형태(Collider, Rigidbody) 설정
     // ------------------------------------------------------------------------------
     public virtual Coroutine Set(ICharacterTargetController target, bool resetDirection = false, 
         bool setIdle = false, float duration = 0f)
@@ -434,7 +434,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 3-4) 메서드 - 액션(Common)
-    //    -> 이동 및 모든 행동에 대한 정지 기능
+    //    -> 모든 행동에 대한 정지
+    //    -> 캐릭터의 기본 이동
     //    -> 지면(Ground)과의 충돌에 대한 지연 처리
     // ------------------------------------------------------------------------------
     public virtual void StopAction()
@@ -523,9 +524,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ******************************************************************************
     // 3-4-2) 메서드 - 액션 - 피격(Damage)
-    //    -> 시작 : TryDamage(), Damage()
-    //    -> 반복 : _Damage()
-    //    -> 종료 : StopDamage()
+    //    -> 시작(TryDamage, Damage) -> 반복(_Damage) -> 종료(StopDamage)
     // ******************************************************************************
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
