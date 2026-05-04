@@ -901,7 +901,6 @@ public class PlayerController : CharacterBase, IPlayerController
     // ******************************************************************************
     // 3-4-4) 메서드 -> 액션 -> 착지(Land)
     //    - 타입: Light, Stunt, Hard
-    //    - Fall, Jump 상태 다음에 호출
     //    - 특수 액션(3단 점프, 백 점프 등) 시 Stunt 타입, 낙하 속도가 기준값을 넘어서면 Hard 타입
     // ******************************************************************************
     public virtual Coroutine Land(LandState type)
@@ -1005,7 +1004,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
             var setting = settings.GetOrDefault(state.overlap.powerUp);
 
-            RotateAndMove(setting.move);    // Move Method
+            RotateAndMove(setting.move);    // Move Method(CharacterBase)
             resources.model.SetMoveRate(speedRate);
 
             yield return new WaitForFixedUpdate();
@@ -1971,7 +1970,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-5-3) 메서드 -> 오버랩 -> 쿨타임(Cool Down)
-    //    - Spin Attack, Dive Attack 상태 다음에 호출
+    //    - Spin Attack, Dive Attack 상태 종료 후 호출
     //    - 다음 공격에 대한 재사용 대기 시간
     // ******************************************************************************
     public virtual Coroutine CoolDown()
