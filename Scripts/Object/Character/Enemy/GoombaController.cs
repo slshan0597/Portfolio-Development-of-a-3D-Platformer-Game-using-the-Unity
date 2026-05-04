@@ -1,3 +1,20 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 정의 ... Line 
+//            1- 캐릭터 상태 ... Line 
+//            2- 캐릭터 설정 ... Line 
+//        2) 필드 ..... Line 
+//        3) 메서드 ... Line 
+//            1- 이벤트 함수 ... Line 
+//            2- 초기화 ........ Line 
+//            3- 액션 .......... Line 
+//                1_ 대기(Idle) ..... Line 
+//                2_ 피격(Damage) ... Line 
+//                3_ 발견(Find) ..... Line 
+//                4_ 죽기(Die) ...... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,11 +28,12 @@ using SubState    = CharacterBase.State.Sub;
 using MoveSetting = CharacterBase.CharacterSetting.Move;
 using DamageType  = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(IEnemyBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface IGoombaController : IEnemyBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     new Resources resources { get; }
 
@@ -25,147 +43,73 @@ public interface IGoombaController : IEnemyBase
     // Setting
     Setting setting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     Coroutine Walk();
     Coroutine Chase(IPlayerController player);
     Coroutine Brake();
     Coroutine Attack(IDamageable target);
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(EnemyBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class GoombaController : EnemyBase, IGoombaController
 {
-    #region Definition
-
-    public new class Resources : EnemyBase.Resources
-    {
-        #region Field
-
-        public new IGoombaModelController      model   { get; }
-        public new CharacterEffects<MainState> effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            model   = transform.GetComponentInChildren<IGoombaModelController>(true);
-            effects = new CharacterEffects<MainState>(transform.Find("Effects"));
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return effects.Play(type, subType);
-        }
-
-        #endregion
-    }
-
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 캐릭터 상태
+    //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
+    // ------------------------------------------------------------------------------
     public new class State : EnemyBase.State
     {
-        #region Definition
-
         public new enum Main 
         {
             None = 0, Idle = 1, Damage = 2, Find = 4, Die = 8, Walk = 16, Chase = 32, Brake = 64, Attack = 128
         }
-
-        #endregion
-
-
-        #region Field
-
+        
         public new Main main;
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 캐릭터 설정
+    //    - 부모(EnemyBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
+    //    - 각 상태에 대한 설정 프로퍼티
+    // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public class Idle
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Idle(float duration) { _duration = duration; }
-
-            #endregion
         }
-
 
         [Serializable] public class Walk : SimpleData<SubState, Walk.Value>
         {
-            #region Definition
-
             [Serializable] public class Value
             {
-                #region Field
-
                 [SerializeField] protected MoveSetting _move;
 
                 public MoveSetting move { get { return _move; } }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Value(MoveSetting move) { _move = move; }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Walk(List<Element> elements, float duration) : base(elements) {  _duration = duration; }
-
-            #endregion
         }
-
 
         [Serializable] public class Chase
         {
-            #region Field
-
             [SerializeField]                  protected MoveSetting _move;
             [SerializeField, Range(0f, 180f)] protected float       _angle;
             [SerializeField, Range(1f, 10f)]  protected float       _triggerRadiusRate;
@@ -174,70 +118,39 @@ public class GoombaController : EnemyBase, IGoombaController
             public float       angle             { get { return _angle; } }
             public float       triggerRadiusRate { get { return _triggerRadiusRate; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Chase(MoveSetting move, float angle, float triggerRadiusRate) 
             {
                 _move              = move;
                 _angle             = angle;
                 _triggerRadiusRate = triggerRadiusRate;
             }
-
-            #endregion
         }
-
 
         [Serializable] public class Brake
         {
-            #region Field
-
             [SerializeField] protected MoveSetting _move;
             [SerializeField] protected float       _duration;
 
             public MoveSetting move     { get { return _move; } }
             public float       duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Brake(MoveSetting move, float duration) 
             {
                 _move     = move;
                 _duration = duration;
             }
-
-            #endregion
         }
-
 
         [Serializable] public class Attack
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Attack(float duration) { _duration = duration; }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Idle   _idle;
         [SerializeField] protected Walk   _walk;
         [SerializeField] protected Chase  _chase;
@@ -250,11 +163,7 @@ public class GoombaController : EnemyBase, IGoombaController
         public Brake  brake  { get { return _brake; } }
         public Attack attack { get { return _attack; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Method
         public Setting(Idle idle, Walk walk, Chase chase, Brake brake, Attack attack)
         {
             _idle   = idle;
@@ -263,30 +172,30 @@ public class GoombaController : EnemyBase, IGoombaController
             _brake  = brake;
             _attack = attack;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public new Resources resources { get; protected set; }
 
+    // State
     public new State state { get; protected set; } = new State();
 
+    // Setting
     [SerializeField] protected Setting _setting;
 
     public Setting setting { get { return _setting; } }
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 플레이어와 충돌하면 Attack 호출
+    // ------------------------------------------------------------------------------
     protected override void OnCollisionStay(Collision collision)
     {
         var invalidType = MainState.Damage | MainState.Die;
@@ -298,11 +207,9 @@ public class GoombaController : EnemyBase, IGoombaController
         else                               ((IDamageable)target).TryDamage(transform, DamageType.Normal);
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -330,11 +237,11 @@ public class GoombaController : EnemyBase, IGoombaController
             new Setting.Attack(2f));
     }
 
-    #endregion
-
-
-    #region Action
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    //    - 루틴: 시작(TryMethod, Method) -> 반복(_Method) -> 종료(StopMethod)
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
@@ -348,9 +255,10 @@ public class GoombaController : EnemyBase, IGoombaController
         }
     }
 
-
-    #region Idle
-
+    // ******************************************************************************
+    // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
+    //    - Walk 상태와 사이클 반복
+    // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
         StopAction();
@@ -375,11 +283,10 @@ public class GoombaController : EnemyBase, IGoombaController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ******************************************************************************
+    // 3-3-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
+    // ******************************************************************************
     public override Coroutine Damage(Transform attacker, DamageType type)
     {
         StopAction();
@@ -398,11 +305,10 @@ public class GoombaController : EnemyBase, IGoombaController
         state.damage = DamageType.None;
     }
 
-    #endregion
-
-
-    #region Find
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 발견(Find)
+    //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
+    // ******************************************************************************
     public override Coroutine Find(IPlayerController player)
     {
         StopAction();
@@ -426,11 +332,10 @@ public class GoombaController : EnemyBase, IGoombaController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Die
-
+    // ******************************************************************************
+    // 3-3-4) 메서드 -> 액션 -> 죽기(Die)
+    //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
+    // ******************************************************************************
     public override Coroutine Die()
     {
         StopAction();
@@ -447,11 +352,10 @@ public class GoombaController : EnemyBase, IGoombaController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Walk
-
+    // ******************************************************************************
+    // 3-3-5) 메서드 -> 액션 -> 걷기(Walk)
+    //    - Idle 상태와 사이클 반복
+    // ******************************************************************************
     public virtual Coroutine Walk()
     {
         StopAction();
@@ -474,7 +378,7 @@ public class GoombaController : EnemyBase, IGoombaController
 
         while (elapsedTime < setting.duration)
         {
-            Move(setting[state.sub].move);
+            Move(setting[state.sub].move);    // Move Method(CharacterBase)
             resources.model.SetMoveRate(moveSpeed / setting[SubState.Loop].move.speed);
 
             elapsedTime += Time.fixedDeltaTime;
@@ -502,11 +406,11 @@ public class GoombaController : EnemyBase, IGoombaController
         trigger.enabled = false;
     }
 
-    #endregion
-
-
-    #region Chase
-
+    // ******************************************************************************
+    // 3-3-6) 메서드 -> 액션 -> 추격(Chase)
+    //    - Find 상태 종료 후 호출
+    //    - 플레이어를 향해 이동
+    // ******************************************************************************
     public virtual Coroutine Chase(IPlayerController player)
     {
         StopAction();
@@ -528,7 +432,7 @@ public class GoombaController : EnemyBase, IGoombaController
         while ((angle <= setting.angle) && (distance <= (trigger.radius * setting.triggerRadiusRate)))
         {
             direction.LookAtSmooth(_player);
-            Move(setting.move);
+            Move(setting.move);    // Move Method(CharacterBase)
             resources.model.SetMoveRate(moveSpeed / setting.move.speed);
 
             yield return new WaitForFixedUpdate();
@@ -542,11 +446,11 @@ public class GoombaController : EnemyBase, IGoombaController
 
     protected virtual void StopChase() { state.main = MainState.None; }
 
-    #endregion
-
-
-    #region Brake
-
+    // ******************************************************************************
+    // 3-3-7) 메서드 -> 액션 -> 멈추기(Brake)
+    //    - Chase 상태 종료 후 호출
+    //    - 캐릭터의 급제동
+    // ******************************************************************************
     public Coroutine Brake()
     {
         StopAction();
@@ -584,11 +488,11 @@ public class GoombaController : EnemyBase, IGoombaController
         resources.effects[MainState.Brake].Stop(setting.brake.duration);
     }
 
-    #endregion
-
-
-    #region Attack
-
+    // ******************************************************************************
+    // 3-3-8) 메서드 -> 액션 -> 공격(Attack)
+    //    - 플레이어와 충돌하면 호출
+    //    - 플레이어에게 Damage 호출
+    // ******************************************************************************
     public virtual Coroutine Attack(IDamageable target)
     {
         StopAction();
@@ -617,10 +521,4 @@ public class GoombaController : EnemyBase, IGoombaController
 
         SetFriction(false);
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
