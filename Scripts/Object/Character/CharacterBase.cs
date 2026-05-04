@@ -524,7 +524,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ******************************************************************************
     // 3-4-2) 메서드 - 액션 - 피격(Damage)
-    //    -> 시작(TryDamage, Damage) -> 반복(_Damage) -> 종료(StopDamage)
+    //    -> 루틴: 시작(TryDamage, Damage) -> 반복(_Damage) -> 종료(StopDamage)
     // ******************************************************************************
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
