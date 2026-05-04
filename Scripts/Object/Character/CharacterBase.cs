@@ -19,7 +19,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-using Game;    // Game Director
+using Game;    // Game Director Namespace
 
 using Resources        = CharacterBase.Resources;
 using GroundState      = CharacterBase.GroundState;
@@ -128,8 +128,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 1-2) 정의 -> 캐릭터 상태
-    //    - 캐릭터의 메인 상태
-    //    - 메인 상태의 진행도
+    //    - 캐릭터의 Main State
+    //    - State의 진행도
     // ------------------------------------------------------------------------------
     public class State
     {
@@ -143,7 +143,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 1-3) 정의 -> 캐릭터 설정
-    //    - 각 상태에 대한 설정 프로퍼티
+    //    - 캐릭터 상태에 대한 설정 프로퍼티
     // ------------------------------------------------------------------------------
     [Serializable] public class CharacterSetting
     {
@@ -253,6 +253,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     // ==============================================================================
     // ------------------------------------------------------------------------------
     // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화 및 Idle 함수 호출
+    //    - Ground State 갱신
     // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
 
@@ -289,6 +291,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 3-2) 메서드 -> 초기화
+    //    
     // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
