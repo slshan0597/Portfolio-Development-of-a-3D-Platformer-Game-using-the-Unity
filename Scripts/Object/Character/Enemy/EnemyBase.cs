@@ -1,3 +1,20 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 00
+//    2. 클래스 ....... Line 00
+//        1) 정의 ... Line 00
+//            1- 지면(Ground) 상태 ... Line 00
+//            2- 캐릭터 상태 ......... Line 00
+//            3- 캐릭터 설정 ......... Line 00
+//        2) 필드 ..... Line 00
+//        3) 메서드 ... Line 00
+//            1- 이벤트 함수(Unity 호출) ... Line 00
+//            2- 초기화 ................... Line 00
+//            3- 셋(Set) .................. Line 00
+//            4- 액션 ..................... Line 00
+//                1_ 대기(Idle) ..... Line 00
+//                2_ 피격(Damage) ... Line 00
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using UnityEngine;
@@ -9,11 +26,12 @@ using EnemySetting = EnemyBase.EnemySetting;
 using SubState     = CharacterBase.State.Sub;
 using DamageType   = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스 (ICharacterBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface IEnemyBase : ICharacterBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     SphereCollider                trigger   { get; }
     new IEnemyDirectionController direction { get; }
@@ -28,157 +46,95 @@ public interface IEnemyBase : ICharacterBase
     // Setting
     EnemySetting enemySetting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     Coroutine Find(IPlayerController player);
     Coroutine Die();
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스 (CharacterBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class EnemyBase : CharacterBase, IEnemyBase
 {
-    #region Definition
-
-    public new class Resources : CharacterBase.Resources
-    {
-        #region Field
-
-        public new IEnemyModelBase             model   { get; }
-        public new IEnemyVoiceBase             voice   { get; }
-        public new CharacterEffects<MainState> effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            model   = transform.GetComponentInChildren<IEnemyModelBase>(true);
-            voice   = transform.GetComponentInChildren<IEnemyVoiceBase>(true);
-            effects = new CharacterEffects<MainState>(transform.Find("Effects"));
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), (effects != null) ? effects.Play(type, subType) : default);
-        }
-
-        #endregion
-    }
-
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 캐릭터 상태
+    //    - 부모 클래스를 대체하여 새로 정의
+    // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
-        #region Definition
-
         public new enum Main { None = 0, Idle = 1, Damage = 2, Find = 4, Die = 8 }
 
-        #endregion
-
-
-        #region Field
-
         public new Main main;
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 캐릭터 설정
+    //    - 부모(CharacterBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
+    //    - 각 상태에 대한 설정 프로퍼티
+    // ------------------------------------------------------------------------------
     [Serializable] public class EnemySetting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public class Find
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Find(float duration) { _duration = duration; }
-
-            #endregion
         }
-
 
         [Serializable] public class Die
         {
-            #region Field
-
             [SerializeField] protected GameObject _drop;
 
             public GameObject drop { get { return _drop; } }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Find _find;
         [SerializeField] protected Die  _die;
 
         public Find find { get { return _find; } }
         public Die  die  { get { return _die; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Method
         public EnemySetting(Find find)
         { 
             _find = find;
             _die  = new Die();
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public SphereCollider                trigger   { get; protected set; }
     public new IEnemyDirectionController direction { get; protected set; }
     public new Resources                 resources { get; protected set; }
     public IEnemySpawner                 spawner   { get; set; }
 
+    // State
     public new State state { get; protected set; } = new State();
 
+    // Setting
     [SerializeField] protected EnemySetting _enemySetting;
 
     public EnemySetting enemySetting { get { return _enemySetting; } }
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    //    - Enemy 클래스 확장을 위한 기반 기능만을 구현
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수(Unity 호출)
+    // ------------------------------------------------------------------------------
     protected virtual void OnCollisionStay(Collision collision)
     {
         var invalidType = MainState.Damage | MainState.Die;
@@ -196,11 +152,9 @@ public class EnemyBase : CharacterBase, IEnemyBase
         if (state.main != MainState.Find) TryFind(player);
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -224,134 +178,12 @@ public class EnemyBase : CharacterBase, IEnemyBase
         trigger.enabled = false;
     }
 
-    #endregion
-
-
-    #region Action
-
-    //protected Vector3 GetMovement(Vector3 moveAmount, bool isFirst = true, Vector3? originMoveAmount = null,
-    //    float originSign = 0f, int count = 0)
-    //{
-    //    Vector3 prediction = transform.position + moveAmount * Time.fixedDeltaTime;
-
-    //    #region Test
-
-    //    //// Stack over flow
-    //    //if (count > 10) return transform.position;
-
-    //    //Ray   upRay       = new Ray(prediction, transform.up);
-    //    //float height      = _collider.height;
-    //    //float radius      = _collider.radius;
-    //    //float bodyLength  = height - (radius * 2f);
-    //    //float offset      = 0.5f;
-    //    //float maxDistance = bodyLength * (1f + offset);
-    //    //int   layerMask   = 1 << LayerMask.NameToLayer("Planet Ground");
-
-    //    //if (Physics.SphereCast(upRay, radius, out RaycastHit headHit, maxDistance, layerMask))
-    //    //    return CorrectMovement_Head(moveAmount, headHit.normal, isFirst, originMoveAmount, originSign, count);
-
-    //    //Vector3 downOrigin = prediction + transform.up * bodyLength;
-    //    //Ray     downRay    = new Ray(downOrigin, -transform.up);
-
-    //    //float temp = 10f;
-
-    //    //if (Physics.SphereCast(downRay, radius, out RaycastHit sphereHit, maxDistance * temp, layerMask))
-    //    //{
-    //    //    if (Physics.Raycast(downRay, out RaycastHit rayHit, maxDistance * temp, layerMask))
-    //    //    {
-    //    //        Vector3 slopeDirection = (sphereHit.point - rayHit.point).normalized;
-    //    //        float   angle          = (slopeDirection != Vector3.zero) ? 90f - (Vector3.Angle(transform.up, slopeDirection))
-    //    //                                                                  : 0f;
-
-    //    //        if (sphereHit.distance <= groundHit.distance && angle >= maxSlopeAngle)
-    //    //            return CorrectMovement_UpHill(moveAmount, sphereHit.normal, isFirst, originMoveAmount, originSign, count);
-
-    //    //        if (sphereHit.distance > groundHit.distance && angle >= maxSlopeAngle)
-    //    //            return CorrectMovement_DownHill(moveAmount, sphereHit.normal, isFirst, originMoveAmount, originSign, count);
-
-    //    //        return prediction;
-    //    //    }
-
-    //    //    return CorrectMovement_DownHill(moveAmount, sphereHit.normal, isFirst, originMoveAmount, originSign, count);
-    //    //}
-
-    //    #endregion
-
-    //    return prediction;
-    //}
-
-    //private Vector3 CorrectMovement_Head(Vector3 moveAmount, Vector3 wallNormal, bool isFirst = true,
-    //    Vector3? originMoveAmount = null, float originSign = 0f, int count = 0)
-    //{
-    //    Vector3 correctedNormal = Vector3.ProjectOnPlane(wallNormal, -projection.up).normalized;
-    //    Vector3 correctedAmount = Vector3.ProjectOnPlane(moveAmount, -correctedNormal);
-
-    //    if (correctedAmount == Vector3.zero) return transform.position;
-
-    //    if (isFirst)
-    //    {
-    //        float originAngle = Vector3.SignedAngle(moveAmount, -correctedNormal, projection.up);
-
-    //        return GetMovement(correctedAmount, false, moveAmount, Mathf.Sign(originAngle), ++count);
-    //    }
-
-    //    if (originMoveAmount is null) return transform.position;
-
-    //    float signedAngle = Vector3.SignedAngle((Vector3)originMoveAmount, -correctedNormal, projection.up);
-
-    //    if (Mathf.Sign(signedAngle) != originSign) return transform.position;
-
-    //    return GetMovement(correctedAmount, false, (Vector3)originMoveAmount, originSign, ++count);
-    //}
-
-    //private Vector3 CorrectMovement_UpHill(Vector3 moveAmount, Vector3 groundNormal, bool isFirst = true,
-    //    Vector3? originMoveAmount = null, float originSign = 0f, int count = 0)
-    //{
-    //    Vector3 correctedNormal = Vector3.ProjectOnPlane(groundNormal, projection.up).normalized;
-    //    Vector3 correctedAmount = Vector3.ProjectOnPlane(moveAmount, -correctedNormal);
-
-    //    if (correctedAmount == Vector3.zero) return transform.position;
-
-    //    if (isFirst)
-    //    {
-    //        float originAngle = Vector3.SignedAngle(moveAmount, -correctedNormal, projection.up);
-
-    //        return GetMovement(correctedAmount, false, moveAmount, Mathf.Sign(originAngle), ++count);
-    //    }
-
-    //    if (originMoveAmount is null) return transform.position;
-
-    //    float signedAngle = Vector3.SignedAngle((Vector3)originMoveAmount, -correctedNormal, projection.up);
-
-    //    if (Mathf.Sign(signedAngle) != originSign) return transform.position;
-
-    //    return GetMovement(correctedAmount, false, (Vector3)originMoveAmount, originSign, ++count);
-    //}
-
-    //private Vector3 CorrectMovement_DownHill(Vector3 moveAmount, Vector3 groundNormal, bool isFirst = true,
-    //    Vector3? originMoveAmount = null, float originSign = 0f, int count = 0)
-    //{
-    //    Vector3 correctedNormal = Vector3.ProjectOnPlane(groundNormal, projection.up).normalized;
-    //    Vector3 correctedAmount = Vector3.ProjectOnPlane(moveAmount, correctedNormal);
-
-    //    if (correctedAmount == Vector3.zero) return transform.position;
-
-    //    if (isFirst)
-    //    {
-    //        float originAngle = Vector3.SignedAngle(moveAmount, correctedNormal, projection.up);
-
-    //        return GetMovement(correctedAmount, false, moveAmount, Mathf.Sign(originAngle), ++count);
-    //    }
-
-    //    if (originMoveAmount is null) return transform.position;
-
-    //    float signedAngle = Vector3.SignedAngle((Vector3)originMoveAmount, correctedNormal, projection.up);
-
-    //    if (Mathf.Sign(signedAngle) != originSign) return transform.position;
-
-    //    return GetMovement(correctedAmount, false, (Vector3)originMoveAmount, originSign, ++count);
-    //}
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    //    - 플레이어에 대한 록온(Look At) 기능
+    //    - 루틴: 시작(TryMethod, Method) -> 반복(_Method) -> 종료(StopMethod)
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
@@ -378,9 +210,9 @@ public class EnemyBase : CharacterBase, IEnemyBase
         direction.LookAt(player.transform);
     }
 
-
-    #region Idle
-
+    // ******************************************************************************
+    // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
         state.main      = MainState.Idle;
@@ -399,11 +231,11 @@ public class EnemyBase : CharacterBase, IEnemyBase
         trigger.enabled = false;
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ******************************************************************************
+    // 3-3-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
+    //    - 상태 종료 다음에 Die 호출
+    // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
         MainState invalidType = MainState.Damage | MainState.Die;
@@ -436,11 +268,10 @@ public class EnemyBase : CharacterBase, IEnemyBase
         state.damage = DamageType.None;
     }
 
-    #endregion
-
-
-    #region Find
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 발견(Find)
+    //    - 영역 내에 플레이어가 감지되면 록온(Look At)
+    // ******************************************************************************
     protected virtual void TryFind(IPlayerController player)
     {
         Vector3 startPosition           = transform.position;
@@ -475,11 +306,11 @@ public class EnemyBase : CharacterBase, IEnemyBase
         SetFriction(false);
     }
 
-    #endregion
-
-
-    #region Die
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 죽기(Die)
+    //    - 오브젝트 제거와 동시에 아이템 드롭
+    //    - 지정된 스포너가 존재할 경우 리스폰 호출
+    // ******************************************************************************
     public virtual Coroutine Die()
     {
         state.main            = MainState.Die;
@@ -512,10 +343,4 @@ public class EnemyBase : CharacterBase, IEnemyBase
         rigidbody.isKinematic = false;
         collider.enabled      = true;
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
