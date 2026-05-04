@@ -63,7 +63,7 @@ using PowerUpType        = PowerUpItemController.Type;
 using CameraShakeType    = CameraController.ShakeSetting.Type;
 
 // //////////////////////////////////////////////////////////////////////////////
-// 1. 인터페이스(ICharacterBase 인터페이스 상속)
+// 1. 인터페이스 (ICharacterBase 인터페이스 상속)
 // //////////////////////////////////////////////////////////////////////////////
 public interface IPlayerController : ICharacterBase
 {
@@ -111,7 +111,7 @@ public interface IPlayerController : ICharacterBase
 }
 
 // //////////////////////////////////////////////////////////////////////////////
-// 2. 클래스(CharacterBase 클래스 상속)
+// 2. 클래스 (CharacterBase 클래스 상속)
 // //////////////////////////////////////////////////////////////////////////////
 public class PlayerController : CharacterBase, IPlayerController
 {
@@ -119,10 +119,10 @@ public class PlayerController : CharacterBase, IPlayerController
     // 1) 정의
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태(CharacterBase.State 클래스 상속)
+    // 1-1) 정의 -> 캐릭터 상태
     //    - 부모 클래스를 대체하여 새로 정의
-    //    - 캐릭터의 메인 상태
-    //    - 메인 상태의 진행도
+    //    - Main State 외에 각 상태에 대한 Sub State
+    //    - 다중 상태를 허용하는 Overlab State
     // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
@@ -457,7 +457,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     public Setting setting { get { return _setting; } }
 
-    // Action
+    // etc.
     protected Dictionary<OverlapState, Coroutine> overlapActions;
     protected Coroutine                           jumpKeepAction;
     protected Coroutine                           interactableSetAction;
