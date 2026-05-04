@@ -527,7 +527,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     // 3-4-2) 메서드 -> 액션 -> 피격(Damage)
     //    - 타입: Normal(Explode), Press Down(Foot)
     //    - 루틴: 시작(Try Damage, Damage) -> 반복(_Damage) -> 종료(Stop Damage)
-    //    - Normal 타입은 캐릭터 넉백, Press Down 타입은 캐릭터 압축
+    //    - Normal 타입 시 캐릭터 넉백, Press Down 타입 시 캐릭터 압축
     // ******************************************************************************
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
