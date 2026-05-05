@@ -19,7 +19,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-using Game;    // Game Director Namespace
+using Game;
 
 using Resources        = CharacterBase.Resources;
 using GroundState      = CharacterBase.GroundState;
@@ -82,7 +82,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     // ==============================================================================
     // ------------------------------------------------------------------------------
     // 1-1) 정의 -> 지면(Ground) 상태
-    //    - 지면에 대한 충돌 또는 접지, 경사각 정보 갱신
+    //    - 지면에 대한 접지, 경사각 정보 갱신
     // ------------------------------------------------------------------------------
     public class GroundState
     {
@@ -128,8 +128,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 1-2) 정의 -> 캐릭터 상태
-    //    - 캐릭터의 Main State
-    //    - State의 진행도
+    //    - 캐릭터의 주 상태 저장
+    //    - 상태의 진행도 저장
     // ------------------------------------------------------------------------------
     public class State
     {
@@ -143,7 +143,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 1-3) 정의 -> 캐릭터 설정
-    //    - 캐릭터 상태에 대한 설정 프로퍼티
+    //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class CharacterSetting
     {
@@ -249,12 +249,12 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ==============================================================================
     // 3) 메서드
-    //    - Character 클래스 확장을 위한 기반 기능만을 구현
+    //    - 클래스 확장을 위한 기반 기능만을 구현
     // ==============================================================================
     // ------------------------------------------------------------------------------
     // 3-1) 메서드 -> 이벤트 함수
-    //    - 오브젝트 초기화 및 Idle 함수 호출
-    //    - Ground State 갱신
+    //    - 오브젝트 초기화
+    //    - 지면 상태 갱신
     // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
 
@@ -291,7 +291,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 3-2) 메서드 -> 초기화
-    //    
+    //    - 필드 영역 초기화
+    //    - 컴포넌트 프로퍼티 초기화
     // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
@@ -330,7 +331,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
 
     // ------------------------------------------------------------------------------
     // 3-3) 메서드 -> 셋(Set)
-    //    - 캐릭터의 배치(Transform) 및 형태(Collider, Rigidbody) 설정
+    //    - 캐릭터의 배치, 형태 설정
     // ------------------------------------------------------------------------------
     public virtual Coroutine Set(ICharacterTargetController target, bool resetDirection = false, 
         bool setIdle = false, float duration = 0f)
@@ -440,7 +441,7 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     // 3-4) 메서드 -> 액션(Common)
     //    - 모든 행동에 대한 정지
     //    - 캐릭터의 기본 이동
-    //    - 지면(Ground)과의 충돌에 대한 지연 처리
+    //    - 지면과의 접지에 대한 지연 처리
     // ------------------------------------------------------------------------------
     public virtual void StopAction()
     {
@@ -530,7 +531,8 @@ public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamag
     // 3-4-2) 메서드 -> 액션 -> 피격(Damage)
     //    - 타입: Normal(Explode), Press Down(Foot)
     //    - 루틴: 시작(Try Damage, Damage) -> 반복(_Damage) -> 종료(Stop Damage)
-    //    - Normal 타입 시 캐릭터 넉백, Press Down 타입 시 캐릭터 압축
+    //    - Normal 타입 시 캐릭터 넉백
+    //    - Press Down 타입 시 캐릭터 압축
     // ******************************************************************************
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
