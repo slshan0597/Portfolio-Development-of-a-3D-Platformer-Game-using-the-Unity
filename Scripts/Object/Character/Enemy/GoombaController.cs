@@ -10,10 +10,15 @@
 //            1- 이벤트 함수 ... Line 
 //            2- 초기화 ........ Line 
 //            3- 액션 .......... Line 
-//                1_ 대기(Idle) ..... Line 
-//                2_ 피격(Damage) ... Line 
-//                3_ 발견(Find) ..... Line 
-//                4_ 죽기(Die) ...... Line 
+//                1_ 대기(Idle) ...... Line 
+//                2_ 피격(Damage) .... Line 
+//                3_ 발견(Find) ...... Line 
+//                4_ 죽기(Die) ....... Line 
+//                5_ 걷기(Walk) ...... Line 
+//                6_ 추격(Chase) ..... Line 
+//                7_ 멈추기(Brake) ... Line 
+//                8_ 공격(Attack) .... Line 
+//                
 // //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
