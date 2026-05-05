@@ -17,8 +17,7 @@
 //                5_ 걷기(Walk) ...... Line 
 //                6_ 추격(Chase) ..... Line 
 //                7_ 멈추기(Brake) ... Line 
-//                8_ 공격(Attack) .... Line 
-//                
+//                8_ 공격(Attack) .... Line     
 // //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
