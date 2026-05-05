@@ -235,6 +235,7 @@ public class EnemyBase : CharacterBase, IEnemyBase
 
     // ******************************************************************************
     // 3-3-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - 피격 이후 Die 함수 호출
     // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
