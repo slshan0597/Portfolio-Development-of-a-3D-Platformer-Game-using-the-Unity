@@ -1,9 +1,41 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 66
+//    2. 클래스 ....... Line 114
+//        1) 정의 ... Line 119
+//            1- 캐릭터 상태 ... Line 122
+//            2- 캐릭터 설정 ... Line 187
+//        2) 필드 ..... Line 440
+//        3) 메서드 ... Line 469
+//            1- 이벤트 함수 ... Line 473
+//            2- 초기화 ........ Line 534
+//            3- 셋(Set) ....... Line 652
+//            4- 액션 .......... Line 668
+//                1_  대기(Idle) .............. Line 731
+//                2_  피격(Damage) ............ Line 761
+//                3_  낙하(Fall) .............. Line 865
+//                4_  착지(Land) .............. Line 904
+//                5_  달리기(Run) ............. Line 966
+//                6_  멈추기(Brake) ........... Line 1028
+//                7_  웅크리기(Crouch) ........ Line 1063
+//                8_  뛰기(Jump) .............. Line 1152
+//                9_  엉덩이 찍기(Hip Drop) ... Line 1301
+//                10_ 공격(Attack) ............ Line 1383
+//                11_ 상호작용(Interact) ...... Line 1583
+//                12_ 부딪치기(Bump) .......... Line 1674
+//                13_ 죽기(Die) ............... Line 1769
+//                14_ 도착(Goal) .............. Line 1823
+//            5- 오버랩(Overlap) ... Line 1878
+//                1_ 면역(Immunize) ....... Line 1883
+//                2_ 파워업(Power Up) ..... Line 1918
+//                3_ 쿨타임(Cool Down) .... Line 1983
+//                4_ 물건 나르기(Carry) ... Line 2019
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 using Game;
-
 
 namespace Stage
 {
@@ -23,83 +55,37 @@ namespace Stage
     using CharacterStatType  = Game.DataManager.Setting.CharacterStat.Type;
     using ChallengeType      = Game.DataManager.Setting.Stage.Level.Challenge.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IPlayerController 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IPlayerController : global::IPlayerController
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         CameraTargets cameraTargets { get; }
         new Resources resources     { get; }
 
         // Reference
         new ISceneDirector scene { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(PlayerController 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class PlayerController : global::PlayerController, IPlayerController
     {
-        #region Definition
-
-        public class CameraTargets : List<ICameraTargetController>
-        {
-            #region Field
-
-            public IPlayerCameraTargetController main    { get; }
-            public ICameraTargetController       gameSet { get; }
-
-            #endregion
-
-
-            #region Constructor
-
-            public CameraTargets(Transform transform) : base(transform.GetComponentsInChildren<ICameraTargetController>(true))
-            {
-                main    = transform.GetComponentInChildren<IPlayerCameraTargetController>(true);
-                gameSet = transform.Find("Game Set").GetComponent<ICameraTargetController>();
-            }
-
-            #endregion
-        }
-
-
-        public new class Resources : global::PlayerController.Resources
-        {
-            #region Field
-
-            public new IPlayerModelController model { get; }
-
-            #endregion
-
-
-            #region Constructor
-
-            public Resources(Transform transform) : base(transform)
-            {
-                model = transform.GetComponentInChildren<IPlayerModelController>(true);
-            }
-
-            #endregion
-        }
-
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 1) 필드
+        // ==============================================================================
+        // Component & Reference
         public CameraTargets      cameraTargets { get; protected set; }
         public new Resources      resources     { get; protected set; }
         public new ISceneDirector scene         { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        //    - 부모 클래스의 함수들을 재정의하여 확장
+        // ==============================================================================
         protected override void SetField()
         {
             base.SetField();
@@ -109,11 +95,10 @@ namespace Stage
             scene         = FindObjectOfType<SceneDirector>(true);
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 셋(Set)
+        //    - 캐릭터의 체력 설정 후 UI 와 Score 정보 갱신
+        // ------------------------------------------------------------------------------
         public override void SetHitPoint(int amount)
         {
             IMainUIController ui    = scene.ui.main;
@@ -128,13 +113,13 @@ namespace Stage
             if (_amount < 0) score.TryIncrease(ChallengeType.Hit);
         }
 
-        #endregion
-
-
-        #region Action
-
-        #region Run
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 액션
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-2-1) 메서드 -> 액션 -> 달리기(Run)
+        //    - 글로벌 캐릭터 능력치(Run Speed)에 따른 달리기 속도 조정
+        // ******************************************************************************
         protected override IEnumerator _Run()
         {
             Game.IDataManager data = GameDirector.instance.data;
@@ -143,7 +128,7 @@ namespace Stage
             Vector3 prevDirection  = Vector3.zero;
             var     settings       = setting.run;
             var     defaultSetting = settings[PowerUpType.None];
-            float   rate           = 1f + data.characterStats[CharacterStatType.RunSpeed].rate;
+            float   rate           = 1f + data.characterStats[CharacterStatType.RunSpeed].rate;    // 속도 조정
             var     moveSetting    = MoveSetting.MultiplySpeed(defaultSetting.move, rate);
 
             do
@@ -174,11 +159,10 @@ namespace Stage
             Idle();
         }
 
-        #endregion
-
-
-        #region Jump
-
+        // ******************************************************************************
+        // 3-2-2) 메서드 -> 액션 -> 뛰기(Jump)
+        //    - 글로벌 캐릭터 능력치(Jump Force)에 따른 점프 높이 조정
+        // ******************************************************************************
         public override Coroutine Jump(JumpState type)
         {
             Game.IDataManager data = GameDirector.instance.data;
@@ -203,7 +187,7 @@ namespace Stage
             }
 
             var   setting = this.setting.jump.GetOrDefault(type);
-            float rate    = 1f + data.characterStats[CharacterStatType.JumpForce].rate;
+            float rate    = 1f + data.characterStats[CharacterStatType.JumpForce].rate;    // 점프 높이 조정
             float force   = this.setting.jump.force * rate;
 
             if (setting.angle != 90f) StopMove();
@@ -218,11 +202,10 @@ namespace Stage
             return action = StartCoroutine(_Jump(type));
         }
 
-        #endregion
-
-
-        #region Attack
-
+        // ******************************************************************************
+        // 3-2-2) 메서드 -> 액션 -> 공격(Attack)
+        //    - 공격 횟수에 따른 Score 정보 갱신
+        // ******************************************************************************
         public override Coroutine Attack(State.Attack type)
         {
             IScoreManager score = scene.score;
@@ -232,11 +215,10 @@ namespace Stage
             return base.Attack(type);
         }
 
-        #endregion
-
-
-        #region Die
-
+        // ******************************************************************************
+        // 3-2-3) 메서드 -> 액션 -> 죽기(Die)
+        //    - 실행 후 Stage 씬의 Fail Level 함수 호출(실질적 호출은 캐릭터 애니메이션 이벤트를 통해 호출됨)
+        // ******************************************************************************
         protected override IEnumerator _Die(DieState type)
         {
             ICameraController        mainCamera    = scene.cameras.main;
@@ -252,6 +234,8 @@ namespace Stage
 
                         gameSetCamera.Set(cameraTargets.main, 0f);
                         gameSetCamera.Set(cameraTargets.gameSet);
+
+                        // scene.FailLevel(type);    캐릭터 애니메이션 이벤트를 통해 호출됨
                     }
                     break;
 
@@ -266,11 +250,10 @@ namespace Stage
             yield return base._Die(type);
         }
 
-        #endregion
-
-
-        #region Goal
-
+        // ******************************************************************************
+        // 3-2-4) 메서드 -> 액션 -> 도착하기(Goal)
+        //    - 실행 후 Stage 씬의 Clear Level 함수 호출(실질적 호출은 캐릭터 애니메이션 이벤트를 통해 호출됨)
+        // ******************************************************************************
         protected override IEnumerator _Goal(GoalType type)
         {
             IGameSetCameraController gameSetCamera = scene.cameras.gameSet;
@@ -283,17 +266,17 @@ namespace Stage
 
             gameSetCamera.Set(cameraTargets.main, 0f);
             gameSetCamera.Set(cameraTargets.gameSet);
+
+            // scene.ClearLevel(type);    캐릭터 애니메이션 이벤트를 통해 호출됨
         }
 
-        #endregion
-
-        #endregion
-
-
-        #region Overlap
-
-        #region Power Up
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 오버랩(Overlap)
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-3-1) 메서드 -> 오버랩 -> 파워업(Power Up)
+        //    - 글로벌 캐릭터 능력치(Power Up Duration)에 따른 지속 시간 조정
+        // ******************************************************************************
         protected override IEnumerator _PowerUp(PowerUpType prevType, PowerUpType type)
         {
             Game.IDataManager data = GameDirector.instance.data;
@@ -309,7 +292,7 @@ namespace Stage
             else resources.effects.powerUp.Play(PowerUpEffectState.On);
 
             OverlapState state    = OverlapState.PowerUp;
-            float        rate     = 1f + data.characterStats[CharacterStatType.PowerUpDuration].rate;
+            float        rate     = 1f + data.characterStats[CharacterStatType.PowerUpDuration].rate;    // 지속 시간 조정
             float        duration = setting.overlap[state].duration * rate;
 
             yield return ui.timer.Display(state, duration);
@@ -317,28 +300,21 @@ namespace Stage
             StopPowerUp();
         }
 
-        #endregion
-
-
-        #region Cool Down
-
+        // ******************************************************************************
+        // 3-3-2) 메서드 -> 오버랩 -> 쿨타임(Cool Down)
+        //    - 글로벌 캐릭터 능력치(Attack Cool Down)에 따른 대기 시간 조정
+        // ******************************************************************************
         protected override IEnumerator _CoolDown()
         {
             Game.IDataManager data = GameDirector.instance.data;
 
             OverlapState state    = OverlapState.CoolDown;
-            float        rate     = 1f - data.characterStats[CharacterStatType.AttackCoolDown].rate;
+            float        rate     = 1f - data.characterStats[CharacterStatType.AttackCoolDown].rate;    // 대기 시간 조정
             float        duration = setting.overlap[state].duration * rate;
 
             yield return ui.timer.Display(state, duration);
 
             StopCoolDown();
         }
-
-        #endregion
-
-        #endregion
-
-        #endregion
     }
 }
