@@ -1768,7 +1768,7 @@ public class PlayerController : CharacterBase, IPlayerController
     // ******************************************************************************
     // 3-4-13) 메서드 -> 액션 -> 죽기(Die)
     //    - 타입: Noraml, Bungee
-    //    - 기반 기능만을 구현, Stage.PlayerController 클래스에서 확장 및 호출
+    //    - 실행과 동시에 Scene 일시 정지
     // ******************************************************************************
     public virtual Coroutine Die(DieState type)
     {
@@ -1821,7 +1821,7 @@ public class PlayerController : CharacterBase, IPlayerController
 
     // ******************************************************************************
     // 3-4-14) 메서드 -> 액션 -> 도착하기(Goal)
-    //    - 기반 기능만을 구현, Stage.PlayerController 클래스에서 확장 및 호출
+    //    - 실행과 동시에 Scene 일시 정지
     // ******************************************************************************
     public virtual Coroutine Goal(GoalType type)
     {
