@@ -62,6 +62,7 @@ public class GoombaController : EnemyBase, IGoombaController
     // ------------------------------------------------------------------------------
     // 1-1) 정의 -> 캐릭터 상태
     //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
+    //    - 캐릭터의 주 상태 저장
     // ------------------------------------------------------------------------------
     public new class State : EnemyBase.State
     {
@@ -75,8 +76,7 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ------------------------------------------------------------------------------
     // 1-2) 정의 -> 캐릭터 설정
-    //    - 부모(EnemyBase.Setting) 클래스는 그대로 사용, 별도의 추가 클래스 정의
-    //    - 캐릭터 상태에 대한 설정 프로퍼티
+    //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
@@ -194,7 +194,7 @@ public class GoombaController : EnemyBase, IGoombaController
     // ==============================================================================
     // ------------------------------------------------------------------------------
     // 3-1) 메서드 -> 이벤트 함수
-    //    - 플레이어와 충돌 시 Attack 함수 호출
+    //    - 플레이어와 충돌 시 공격
     // ------------------------------------------------------------------------------
     protected override void OnCollisionStay(Collision collision)
     {
@@ -209,8 +209,7 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ------------------------------------------------------------------------------
     // 3-2) 메서드 -> 초기화
-    //    - 컴포넌트와 래퍼런스 할당
-    //    - 
+    //    - 필드(컴포넌트 등) 초기화
     // ------------------------------------------------------------------------------
     protected override void SetField()
     {
@@ -242,7 +241,6 @@ public class GoombaController : EnemyBase, IGoombaController
     // ------------------------------------------------------------------------------
     // 3-3) 메서드 -> 액션(Common)
     //    - 모든 행동에 대한 정지
-    //    - 루틴: 시작(TryMethod, Method) -> 반복(_Method) -> 종료(StopMethod)
     // ------------------------------------------------------------------------------
     public override void StopAction()
     {
@@ -259,7 +257,7 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
-    //    - Walk 상태와 사이클 반복
+    //    - Walk 함수와 사이클 반복
     // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
@@ -287,7 +285,6 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-2) 메서드 -> 액션 -> 피격(Damage)
-    //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
     // ******************************************************************************
     public override Coroutine Damage(Transform attacker, DamageType type)
     {
@@ -309,7 +306,7 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-3) 메서드 -> 액션 -> 발견(Find)
-    //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
+    //    - 실행 후 Chase 함수 호출
     // ******************************************************************************
     public override Coroutine Find(IPlayerController player)
     {
@@ -336,7 +333,6 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-4) 메서드 -> 액션 -> 죽기(Die)
-    //    - 부모 클래스 내 함수에 상태값 변환 기능만 추가
     // ******************************************************************************
     public override Coroutine Die()
     {
@@ -356,7 +352,7 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-5) 메서드 -> 액션 -> 걷기(Walk)
-    //    - Idle 상태와 사이클 반복
+    //    - Idle 함수와 사이클 반복
     // ******************************************************************************
     public virtual Coroutine Walk()
     {
@@ -410,8 +406,8 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-6) 메서드 -> 액션 -> 추격(Chase)
-    //    - Find 상태 종료 후 호출
-    //    - 플레이어를 향해 이동
+    //    - 플레이어를 향해 회전 및 이동
+    //    - 일정 시간이 지나거나 시야각에서 벗어나면 Brake 함수 호출
     // ******************************************************************************
     public virtual Coroutine Chase(IPlayerController player)
     {
@@ -450,7 +446,6 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-7) 메서드 -> 액션 -> 멈추기(Brake)
-    //    - Chase 상태 종료 후 호출
     //    - 캐릭터의 급제동
     // ******************************************************************************
     public Coroutine Brake()
@@ -492,8 +487,7 @@ public class GoombaController : EnemyBase, IGoombaController
 
     // ******************************************************************************
     // 3-3-8) 메서드 -> 액션 -> 공격(Attack)
-    //    - 플레이어와 충돌하면 호출
-    //    - 플레이어의 Damage 기능 호출
+    //    - 플레이어의 Damage 함수 호출
     // ******************************************************************************
     public virtual Coroutine Attack(IDamageable target)
     {
