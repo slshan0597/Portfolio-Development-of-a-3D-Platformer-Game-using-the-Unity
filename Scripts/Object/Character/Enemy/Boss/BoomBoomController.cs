@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 using Resources   = BoomBoomController.Resources;
 using ModelType   = BoomBoomController.Resources.Models.Type;
 using State       = BoomBoomController.State;
@@ -13,11 +12,12 @@ using SubState    = CharacterBase.State.Sub;
 using MoveSetting = CharacterBase.CharacterSetting.Move;
 using DamageType  = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(IBossBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface IBoomBoomController : IBossBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     new Resources resources { get; }
 
@@ -27,244 +27,67 @@ public interface IBoomBoomController : IBossBase
     // Setting
     Setting setting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     Coroutine Chase(IPlayerController player, ModelType type);
     Coroutine Brake(ModelType type);
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(BossBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class BoomBoomController : BossBase, IBoomBoomController
 {
-    #region Definition
-
-    public new class Resources : BossBase.Resources
-    {
-        #region Definition
-
-        public class Models : Dictionary<ModelType, IBossModelBase>
-        {
-            #region Definition
-
-            public enum Type { Body, Shell }
-
-            #endregion
-
-
-            #region Field
-
-            public IBoomBoomModelController      body  { get; }
-            public IBoomBoomShellModelController shell { get; }
-
-            #endregion
-
-
-            #region Constructor
-
-            public Models(Transform transform) : base()
-            {
-                foreach (var model in transform.GetComponentsInChildren<IBossModelBase>(true))
-                {
-                    string name = model.gameObject.name.Replace(" ", string.Empty);
-
-                    if (Enum.TryParse(name, out Type type)) Add(type, model);
-                }
-
-                body  = transform.GetComponentInChildren<IBoomBoomModelController>(true);
-                shell = transform.GetComponentInChildren<IBoomBoomShellModelController>(true);
-            }
-
-            #endregion
-
-
-            #region Method
-
-            public void Set(ModelType type)
-            {
-                foreach (var element in this)
-                {
-                    ModelType _type = element.Key;
-                    var       model = element.Value;
-
-                    model.gameObject.SetActive(type == _type);
-                }
-            }
-
-            #endregion
-        }
-
-
-        public class Effects : CharacterEffects<MainState>
-        {
-            #region Definition
-
-            public class Other : Dictionary<string, IEffectController>
-            {
-                #region Field
-
-                public IBoomBoomJumpEffectController jump { get; }
-                public IBoomBoomLandEffectController land { get; }
-
-                #endregion
-
-
-                #region Constructor
-
-                public Other(Transform transform) : base()
-                {
-                    foreach (var effect in transform.GetComponentsInChildren<IEffectController>(true))
-                        Add(effect.transform.name, effect);
-
-                    jump = transform.GetComponentInChildren<IBoomBoomJumpEffectController>(true);
-                    land = transform.GetComponentInChildren<IBoomBoomLandEffectController>(true);
-                }
-
-                #endregion
-            }
-
-            #endregion
-
-
-            #region Field
-
-            public new Other other { get; }
-
-            #endregion
-
-
-            #region Constructor
-
-            public Effects(Transform transform) : base(transform)
-            {
-                other = new Other(transform.Find("Other"));
-            }
-
-            #endregion
-        }
-
-        #endregion
-
-
-        #region Field
-
-        public Models                       models  { get; }
-        public new IBoomBoomVoiceController voice   { get; }
-        public new Effects                  effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            models  = new Models(transform.Find("Models"));
-            voice   = transform.GetComponentInChildren<IBoomBoomVoiceController>(true);
-            effects = new Effects(transform.Find("Effects"));
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            models.body.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.Play(type, subType));
-        }
-
-        #endregion
-    }
-
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 캐릭터 상태
+    //    - 부모 클래스(BossBase.State)를 대체하여 새로 정의
+    //    - 캐릭터의 주 상태 저장
+    //    - 캐릭터의 형태 저장
+    // ------------------------------------------------------------------------------
     public new class State : BossBase.State
     {
-        #region Definition
-
         public new enum Main { None = 0, Idle = 1, Damage = 2, Find = 4, Die = 8, Appear = 16, Chase = 32, Brake = 64 }
-
-        #endregion
-
-
-        #region Field
 
         public new Main  main;
         public ModelType model;
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 캐릭터 설정
+    //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
+    // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public class Find : SimpleData<ModelType, Find.Value>
         {
-            #region Definition
-
             [Serializable] public class Value
             {
-                #region Field
-
                 [SerializeField] protected float _duration;
 
                 public float duration { get { return _duration; } }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Value(float duration) { _duration = duration; }
 
                 #endregion
             }
 
-            #endregion
-
-
-            #region Constructor
-
             public Find(SimpleData<ModelType, Value> _base) : base(_base) { }
-
-            #endregion
         }
-
 
         [Serializable] public class Chase : SimpleData<ModelType, Chase.Value>
         {
-            #region Definition
-
             [Serializable] public class Value
             {
-                #region Field
-
                 [SerializeField] protected SimpleData<SubState, MoveSetting> _move;
 
                 public SimpleData<SubState, MoveSetting> move { get { return _move; } }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Value(SimpleData<SubState, MoveSetting> move) { _move = move; }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             [SerializeField]                  protected float _duration;
             [SerializeField, Range(0f, 180f)] protected float _angle;
@@ -272,67 +95,32 @@ public class BoomBoomController : BossBase, IBoomBoomController
             public float duration { get { return _duration; } }
             public float angle    { get { return _angle; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Chase(SimpleData<ModelType, Value> _base, float duration, float angle) : base(_base)
             {
                 _duration = duration;
                 _angle    = angle;
             }
-
-            #endregion
         }
-
 
         [Serializable] public class Brake : SimpleData<ModelType, Brake.Value>
         {
-            #region Definition
-
             [Serializable] public class Value
             {
-                #region Field
-
                 [SerializeField] protected SimpleData<SubState, float> _durations;
 
                 public SimpleData<SubState, float> durations { get { return _durations; } }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Value(SimpleData<SubState, float> durations) { _durations = durations; }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             [SerializeField] protected MoveSetting _move;
 
             public MoveSetting move { get { return _move; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Brake(SimpleData<ModelType, Value> _base, MoveSetting move) : base(_base) { _move = move; }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Find  _find;
         [SerializeField] protected Chase _chase;
         [SerializeField] protected Brake _brake;
@@ -341,45 +129,43 @@ public class BoomBoomController : BossBase, IBoomBoomController
         public Chase chase { get { return _chase; } }
         public Brake brake { get { return _brake; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Method
         public Setting(Find find, Chase chase, Brake brake)
         {
             _find  = find;
             _chase = chase;
             _brake = brake;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public new Resources resources { get; protected set; }
 
+    // State
     public new State state { get; protected set; } = new State();
 
+    // Setting
     [SerializeField] protected Setting _setting;
 
     public Setting setting { get { return _setting; } }
 
+    // etc.
     protected IPlayerController player;
 
     protected Coroutine chaseAction;
 
-    #endregion
-
-
-    #region Method
-
-    #region Initialization
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    //    - 클래스 확장을 위한 기반 기능만을 구현
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -452,11 +238,10 @@ public class BoomBoomController : BossBase, IBoomBoomController
                 new MoveSetting(0f, 5f)));
     }
 
-    #endregion
-
-
-    #region Action
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
@@ -468,9 +253,9 @@ public class BoomBoomController : BossBase, IBoomBoomController
         }
     }
 
-
-    #region Idle
-
+    // ******************************************************************************
+    // 3-2-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
         StopAction();
@@ -494,11 +279,10 @@ public class BoomBoomController : BossBase, IBoomBoomController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ******************************************************************************
+    // 3-2-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - 피격 이후 Find 함수 호출
+    // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
         MainState invalidType    = MainState.Damage | MainState.Die | MainState.Appear;
@@ -547,7 +331,7 @@ public class BoomBoomController : BossBase, IBoomBoomController
 
         yield return base._Damage(attacker, type);
 
-        Find(null);
+        Find(null);    // 호출 전 상태가 Damage임을 확인하기 위해 null 값을 전달(임시로 클래스 내에 플레이어 정보를 별도로 저장)
     }
 
     protected override void StopDamage()
@@ -561,11 +345,13 @@ public class BoomBoomController : BossBase, IBoomBoomController
         SetFriction(false);
     }
 
-    #endregion
-
-
-    #region Find
-
+    // ******************************************************************************
+    // 3-2-3) 메서드 -> 액션 -> 발견(Find)
+    //    - 직전 상태(Idle, Damage)에 의해 캐릭터의 형태를 결정
+    //    - 직전 상태의 유형은 전달받은 매개변수(플레이어)로 판단
+    //    - 직전 상태가 Idle일 경우   -> Model 타입: Normal
+    //    - 직전 상태가 Damage일 경우 -> Model 타입: Shell(등껍질)
+    // ******************************************************************************
     public override Coroutine Find(IPlayerController player)
     {
         StopAction();
@@ -595,11 +381,9 @@ public class BoomBoomController : BossBase, IBoomBoomController
         state.model = ModelType.Body;
     }
 
-    #endregion
-
-
-    #region Die
-
+    // ******************************************************************************
+    // 3-2-4) 메서드 -> 액션 -> 죽기(Die)
+    // ******************************************************************************
     public override Coroutine Die()
     {
         StopAction();
@@ -616,11 +400,10 @@ public class BoomBoomController : BossBase, IBoomBoomController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Appear
-
+    // ******************************************************************************
+    // 3-2-5) 메서드 -> 액션 -> 등장(Appear)
+    //    - 보스 캐릭터는 필드 등장 연출 추가
+    // ******************************************************************************
     public override Coroutine Appear()
     {
         gameObject.SetActive(true);
@@ -637,11 +420,10 @@ public class BoomBoomController : BossBase, IBoomBoomController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Chase
-
+    // ******************************************************************************
+    // 3-2-6) 메서드 -> 액션 -> 추격(Chase)
+    //    - 
+    // ******************************************************************************
     public virtual Coroutine Chase(IPlayerController player, ModelType type)
     {
         StopAction();
