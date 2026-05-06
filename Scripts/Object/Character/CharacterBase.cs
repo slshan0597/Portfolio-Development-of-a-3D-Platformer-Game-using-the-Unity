@@ -73,6 +73,8 @@ public interface ICharacterBase
 
 // //////////////////////////////////////////////////////////////////////////////
 // 2. 클래스
+//    - Gravityable 속성 -> 커스텀 중력의 영향을 받음
+//    - Danageable 속성  -> 공격에 대한 피해를 입을 수 있음
 // //////////////////////////////////////////////////////////////////////////////
 [RequireComponent(typeof(Rigidbody))]
 public class CharacterBase : MonoBehaviour, ICharacterBase, IGravityable, IDamageable
