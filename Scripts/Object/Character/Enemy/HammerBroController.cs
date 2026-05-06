@@ -284,7 +284,8 @@ public class HammerBroController : EnemyBase, IHammerBroController
 
     // ******************************************************************************
     // 3-2-5) 메서드 -> 액션 -> 공격(Attack)
-    //    - 
+    //    - Projectile 오브젝트를 생성하고 플레이어를 향해 발사
+    //    - 지정된 횟수만큼 반복
     // ******************************************************************************
     public virtual Coroutine Attack(IPlayerController player)
     {
@@ -310,7 +311,7 @@ public class HammerBroController : EnemyBase, IHammerBroController
 
         resources.Play(state.main, state.sub);
         resources.models.weapon.gameObject.SetActive(false);
-        Throw(player.transform);
+        Throw(player.transform);    // 공격
 
         yield return LookAt(player, setting.durations[state.sub]);
 
@@ -349,11 +350,10 @@ public class HammerBroController : EnemyBase, IHammerBroController
         resources.models.weapon.gameObject.SetActive(true);
     }
 
-    #endregion
-
-
-    #region Jump
-
+    // ******************************************************************************
+    // 3-2-6) 메서드 -> 액션 -> 뛰기(Jump)
+    //    - 다음 공격 전의 인터벌 기능
+    // ******************************************************************************
     public virtual Coroutine Jump(IPlayerController player)
     {
         StopAction();
@@ -390,11 +390,11 @@ public class HammerBroController : EnemyBase, IHammerBroController
 
     protected virtual void StopJump() { state.main = MainState.None; }
 
-    #endregion
-
-
-    #region Land
-
+    // ******************************************************************************
+    // 3-2-7) 메서드 -> 액션 -> 착지(Land)
+    //    - 다음 공격 전의 인터벌 기능
+    //    - 실행 후 범위 내에 플레이어가 존재할 경우, Find 함수를 건너뛰고 바로 Attack 함수 호출 (Attack, Jump 함수와 사이클 반복)
+    // ******************************************************************************
     public virtual Coroutine Land(IPlayerController player)
     {
         StopAction();
@@ -423,10 +423,4 @@ public class HammerBroController : EnemyBase, IHammerBroController
 
         SetFriction(false);
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
