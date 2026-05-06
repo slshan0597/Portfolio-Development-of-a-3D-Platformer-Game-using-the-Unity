@@ -10,12 +10,13 @@ using Setting    = NonPlayerCharacterController.Setting;
 using SubState   = CharacterBase.State.Sub;
 using DamageType = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(ICharacterBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface INonPlayerCharacterController : ICharacterBase
 {
-    #region Property
-
-    // Components
+    // 프로퍼티
+    // Component
     SphereCollider                             trigger   { get; }
     new INonPlayerCharacterDirectionController direction { get; }
     new Resources                              resources { get; }
@@ -26,161 +27,93 @@ public interface INonPlayerCharacterController : ICharacterBase
     // Setting
     Setting setting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     Coroutine Talk(IPlayerController player);
     Coroutine Farewell();
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(CharacterBase 클래스 상속)
+//    - Interactable 타입 -> 플레이어와 상호작용 가능
+// //////////////////////////////////////////////////////////////////////////////
 public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterController, IInteractable
 {
-    #region Definition
-
-    public new class Resources : CharacterBase.Resources
-    {
-        #region Field
-
-        public new INonPlayerCharacterModelController model { get; }
-        public new INonPlayerCharacterVoiceController voice { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            model = transform.GetComponentInChildren<INonPlayerCharacterModelController>(true);
-            voice = transform.GetComponentInChildren<INonPlayerCharacterVoiceController>(true);
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return voice.Play(type, subType);
-        }
-
-        #endregion
-    }
-
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 캐릭터 상태
+    //    - 부모 클래스(CharacterBase.State)를 대체하여 새로 정의
+    //    - 캐릭터의 주 상태 저장
+    // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
-        #region Definition
-
         public new enum Main { None = 0, Idle = 1, Damage = 2, Talk = 4, Farewell = 8 }
 
-        #endregion
-
-
-        #region Field
-
         public new Main main;
-
-        #endregion
     }
-
 
     [Serializable] public class Setting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public class Talk
         {
-            #region Field
-
             [SerializeField] protected List<string> _script;
 
             public List<string> script { get { return _script; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Talk(List<string> script) { _script = script; }
-
-            #endregion
         }
-
 
         [Serializable] public class Farewell
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Farewell(float duration) { _duration = duration; }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Talk     _talk;
         [SerializeField] protected Farewell _farewell;
 
         public Talk     talk     { get { return _talk; } }
         public Farewell farewell { get { return _farewell; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Method
         public Setting(Talk talk, Farewell farewell)
         {
             _talk     = talk;
             _farewell = farewell;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public SphereCollider                             trigger   { get; protected set; }
     public new INonPlayerCharacterDirectionController direction { get; protected set; }
     public new Resources                              resources { get; protected set; }
 
+    // State
     public new State state { get; protected set; } = new State();
 
+    // Setting
     [SerializeField] protected Setting _setting;
 
     public Setting setting { get { return _setting; } }
 
-    #endregion
-
-
-    #region Method
-
-    #region Initialization
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -208,11 +141,10 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
             new Setting.Farewell(0.5f));
     }
 
-    #endregion
-
-
-    #region Action
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
@@ -224,9 +156,9 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
         }
     }
 
-
-    #region Idle
-
+    // ******************************************************************************
+    // 3-2-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
         StopAction();
@@ -252,11 +184,10 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
         trigger.enabled = false;
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ******************************************************************************
+    // 3-2-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - 실질적으로 피해를 입지 않고 공격에 대한 단순 피드백
+    // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
         MainState invalidType = MainState.Damage | MainState.Talk;
@@ -301,11 +232,11 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
         SetFriction(false);
     }
 
-    #endregion
-
-
-    #region Talk
-
+    // ******************************************************************************
+    // 3-2-3) 메서드 -> 액션 -> 대화(Talk)
+    //    - 플레이어에 의해 Interactable 타입으로 호출됨
+    //    - 대화창(UI)이 종료될 때까지 플레이어와 대화
+    // ******************************************************************************
     public virtual Coroutine Interact(IPlayerController player) { return Talk(player); }
 
     public virtual void StopInteract(IPlayerController player) { }
@@ -366,11 +297,10 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
         scene.Pause(false);
     }
 
-    #endregion
-
-
-    #region Farewell
-
+    // ******************************************************************************
+    // 3-2-4) 메서드 -> 액션 -> 작별(Farewell)
+    //    - 대화 종료에 대한 단순 피드백
+    // ******************************************************************************
     public virtual Coroutine Farewell()
     {
         StopAction();
@@ -396,10 +326,4 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
 
         SetFriction(false);
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
