@@ -51,7 +51,7 @@ public interface INonPlayerCharacterController : ICharacterBase
 
 // //////////////////////////////////////////////////////////////////////////////
 // 2. 클래스(CharacterBase 클래스 상속)
-//    - Interactable 타입 -> 플레이어와 상호작용 가능
+//    - Interactable 속성 -> 플레이어와 상호작용
 // //////////////////////////////////////////////////////////////////////////////
 public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterController, IInteractable
 {
