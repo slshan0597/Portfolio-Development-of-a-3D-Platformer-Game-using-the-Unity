@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-
 using Resources   = BossBase.Resources;
 using State       = BossBase.State;
 using MainState   = BossBase.State.Main;
@@ -10,11 +9,12 @@ using BossSetting = BossBase.BossSetting;
 using SubState    = CharacterBase.State.Sub;
 using DamageType  = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(IEnemyBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface IBossBase : IEnemyBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     new Resources resources { get; }
 
@@ -24,130 +24,63 @@ public interface IBossBase : IEnemyBase
     // Setting
     BossSetting bossSetting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     Coroutine Appear();
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(EnemyBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class BossBase : EnemyBase, IBossBase
 {
-    #region Definition
-
-    public new class Resources : EnemyBase.Resources
-    {
-        #region Field
-
-        public new IBossModelBase              model   { get; }
-        public new IBossVoiceBase              voice   { get; }
-        public new CharacterEffects<MainState> effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            model   = transform.GetComponentInChildren<IBossModelBase>(true);
-            voice   = transform.GetComponentInChildren<IBossVoiceBase>(true);
-            effects = new CharacterEffects<MainState>(transform.Find("Effects"));
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return Mathf.Max(voice.Play(type, subType), effects.Play(type, subType));
-        }
-
-        #endregion
-    }
-
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 캐릭터 상태
+    //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
+    //    - 캐릭터의 주 상태 저장
+    //    - 캐릭터의 체력 저장
+    // ------------------------------------------------------------------------------
     public new class State : EnemyBase.State
     {
-        #region Definition
-
         public new enum Main { None = 0, Idle = 1, Damage = 2, Find = 4, Die = 8, Appear = 16 }
-
-        #endregion
-
-
-        #region Field
 
         public new Main main;
         public int      hitPoint;
 
-        #endregion
-
-
-        #region Constructor
-
         public State() : base() { }
 
         public State(int hitPoint) : base() { this.hitPoint = hitPoint; }
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 캐릭터 설정
+    //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
+    // ------------------------------------------------------------------------------
     [Serializable] public class BossSetting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public class Die
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Die(float duration) { _duration = duration; }
-
-            #endregion
         }
-
 
         [Serializable] public class Appear
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Appear(float duration) { _duration = duration; }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Die    _die;
         [SerializeField] protected Appear _appear;
         [SerializeField] protected int    _maxHitPoint;
@@ -156,41 +89,38 @@ public class BossBase : EnemyBase, IBossBase
         public Appear appear      { get { return _appear; } }
         public int    maxHitPoint { get { return _maxHitPoint; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Method
         public BossSetting(Die die, Appear appear, int maxHitPoint)
         {
             _die         = die;
             _appear      = appear;
             _maxHitPoint = maxHitPoint;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public new Resources resources { get; protected set; }
 
+    // State
     public new State state { get; protected set; }
 
+    // Setting
     [SerializeField] protected BossSetting _bossSetting;
 
     public BossSetting bossSetting { get { return _bossSetting; } }
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    //    - 클래스 확장을 위한 기반 기능만을 구현
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화
+    // ------------------------------------------------------------------------------
     protected override void Start()
     {
         if ((planet == null) || planet.characters.Contains(this)) return;
@@ -213,11 +143,10 @@ public class BossBase : EnemyBase, IBossBase
         base.OnCollisionStay(collision);
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -237,11 +166,10 @@ public class BossBase : EnemyBase, IBossBase
             3);
     }
 
-    #endregion
-
-
-    #region Action
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
@@ -252,11 +180,9 @@ public class BossBase : EnemyBase, IBossBase
         }
     }
 
-    #endregion
-
-
-    #region Idle
-
+    // ******************************************************************************
+    // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
         state.main = MainState.Idle;
@@ -271,11 +197,11 @@ public class BossBase : EnemyBase, IBossBase
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ******************************************************************************
+    // 3-3-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - 체력 감소
+    //    - 피격 이후 체력이 0이면 Die 함수 호출
+    // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
         MainState invalidType = MainState.Damage | MainState.Die | MainState.Appear;
@@ -313,11 +239,9 @@ public class BossBase : EnemyBase, IBossBase
         state.damage = DamageType.None;
     }
 
-    #endregion
-
-
-    #region Find
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 발견(Find)
+    // ******************************************************************************
     public override Coroutine Find(IPlayerController player)
     {
         state.main = MainState.Find;
@@ -332,11 +256,9 @@ public class BossBase : EnemyBase, IBossBase
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Die
-
+    // ******************************************************************************
+    // 3-3-4) 메서드 -> 액션 -> 죽기(Die)
+    // ******************************************************************************
     public override Coroutine Die()
     {
         state.main = MainState.Die;
@@ -373,11 +295,10 @@ public class BossBase : EnemyBase, IBossBase
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Appear
-
+    // ******************************************************************************
+    // 3-3-5) 메서드 -> 액션 -> 등장(Appear)
+    //    - 보스 캐릭터는 필드 등장 연출 추가
+    // ******************************************************************************
     public virtual Coroutine Appear()
     {
         gameObject.SetActive(true);
@@ -406,8 +327,4 @@ public class BossBase : EnemyBase, IBossBase
         rigidbody.isKinematic = false;
         collider.enabled      = true;
     }
-
-    #endregion
-
-    #endregion
 }
