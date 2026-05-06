@@ -12,11 +12,12 @@ using MoveSetting    = CharacterBase.CharacterSetting.Move;
 using DamageType     = IDamageable.Type;
 using ThrowableState = ThrowableBase.State;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(IEnemyBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface IBobombController : IEnemyBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     new Resources   resources { get; }
     IBombController bomb      { get; }
@@ -27,161 +28,76 @@ public interface IBobombController : IEnemyBase
     // Setting
     Setting setting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     Coroutine Walk();
     Coroutine Chase(IPlayerController player);
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(EnemyBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class BobombController : EnemyBase, IBobombController
 {
-    #region Definition
-
-    public new class Resources : EnemyBase.Resources
-    {
-        #region Field
-
-        public new IBobombModelController      model   { get; }
-        public new CharacterEffects<MainState> effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            model   = transform.GetComponentInChildren<IBobombModelController>(true);
-            effects = new CharacterEffects<MainState>(transform.Find("Effects"));
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            model.Play(type, subType);
-
-            return effects.Play(type, subType);
-        }
-
-        #endregion
-    }
-
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 캐릭터 상태
+    //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
+    //    - 캐릭터의 주 상태 저장
+    // ------------------------------------------------------------------------------
     public new class State : EnemyBase.State
     {
-        #region Definition
-
         public new enum Main { None = 0, Idle = 1, Damage = 2, Find = 4, Die = 8, Walk = 16, Chase = 32 }
 
-        #endregion
-
-
-        #region Field
-
         public new Main main;
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 캐릭터 설정
+    //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
+    // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public class Idle
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Idle(float duration) { _duration = duration; }
-
-            #endregion
         }
-
 
         [Serializable] public class Walk : SimpleData<SubState, Walk.Value>
         {
-            #region Definition
-
             [Serializable] public class Value
             {
-                #region Field
-
                 [SerializeField] protected MoveSetting _move;
 
                 public MoveSetting move { get { return _move; } }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Value(MoveSetting move) { _move = move; }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Walk(List<Element> elements, float duration) : base(elements) { _duration = duration; }
-
-            #endregion
         }
-
 
         [Serializable] public class Chase
         {
-            #region Field
-
             [SerializeField] protected MoveSetting _move;
 
             public MoveSetting move { get { return _move; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Chase(MoveSetting move) { _move = move; }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Idle  _idle;
         [SerializeField] protected Walk  _walk;
         [SerializeField] protected Chase _chase;
@@ -190,49 +106,44 @@ public class BobombController : EnemyBase, IBobombController
         public Walk  walk  { get { return _walk; } }
         public Chase chase { get { return _chase; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Method
         public Setting(Idle idle, Walk walk, Chase chase)
         {
             _idle  = idle;
             _walk  = walk;
             _chase = chase;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public new Resources   resources { get; protected set; }
     public IBombController bomb      { get; protected set; }
 
+    // State
     public new State state { get; protected set; } = new State();
 
+    // Setting
     [SerializeField] protected Setting _setting;
 
     public Setting setting { get { return _setting; } }
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 부모 클래스의 충돌 기능(Attack)을 제거하기 위한 임시 함수
+    // ------------------------------------------------------------------------------
     protected override void OnCollisionStay(Collision collision) { }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -262,11 +173,10 @@ public class BobombController : EnemyBase, IBobombController
             new Setting.Chase(new MoveSetting(7.5f, 5f)));
     }
 
-    #endregion
-
-
-    #region Action
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
@@ -277,10 +187,11 @@ public class BobombController : EnemyBase, IBobombController
             case MainState.Chase: StopChase(); break;
         }
     }
-
-
-    #region Idle
-
+    
+    // ******************************************************************************
+    // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
+    //    - Walk 함수와 사이클 반복
+    // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
         StopAction();
@@ -305,11 +216,10 @@ public class BobombController : EnemyBase, IBobombController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ******************************************************************************
+    // 3-3-2) 메서드 -> 액션 -> 피격(Damage)
+    //    - Damage 타입이 Explode일 경우, 내장된 Bomb 오브젝트(Throwable)를 바로 폭발시키며 소멸
+    // ******************************************************************************
     public override bool TryDamage(Transform attacker, DamageType type)
     {
         if (type == DamageType.Explode) return Explode();
@@ -317,6 +227,16 @@ public class BobombController : EnemyBase, IBobombController
         return base.TryDamage(attacker, type);
     }
 
+    protected virtual bool Explode()
+    {
+        if (bomb.state != ThrowableState.Destroy) bomb.Destroy();    // 내장된 Bomb가 이미 폭발중이면 건너뜀(재귀 방지)
+        if (spawner    != null)                   spawner.SpawnEnemy();
+
+        Destroy(gameObject);
+
+        return true;
+    }
+    
     public override Coroutine Damage(Transform attacker, DamageType type)
     {
         StopAction();
@@ -338,11 +258,10 @@ public class BobombController : EnemyBase, IBobombController
         state.damage = DamageType.None;
     }
 
-    #endregion
-
-
-    #region Find
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 발견(Find)
+    //    - 실행 후 Chase 함수 호출
+    // ******************************************************************************
     public override Coroutine Find(IPlayerController player)
     {
         StopAction();
@@ -366,11 +285,10 @@ public class BobombController : EnemyBase, IBobombController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Die
-
+    // ******************************************************************************
+    // 3-3-4) 메서드 -> 액션 -> 죽기(Die)
+    //    - 아이템 대신 Bomb 오브젝트(Throwable)를 드롭
+    // ******************************************************************************
     public override Coroutine Die()
     {
         StopAction();
@@ -387,21 +305,10 @@ public class BobombController : EnemyBase, IBobombController
         state.main = MainState.None;
     }
 
-    protected virtual bool Explode()
-    {
-        if (bomb.state != ThrowableState.Destroy) bomb.Destroy();
-        if (spawner    != null)                   spawner.SpawnEnemy();
-
-        Destroy(gameObject);
-
-        return true;
-    }
-
-    #endregion
-
-
-    #region Walk
-
+    // ******************************************************************************
+    // 3-3-5) 메서드 -> 액션 -> 걷기(Walk)
+    //    - Idle 함수와 사이클 반복
+    // ******************************************************************************
     public virtual Coroutine Walk()
     {
         StopAction();
@@ -452,11 +359,11 @@ public class BobombController : EnemyBase, IBobombController
         trigger.enabled = false;
     }
 
-    #endregion
-
-
-    #region Chase
-
+    // ******************************************************************************
+    // 3-3-6) 메서드 -> 액션 -> 추격(Chase)
+    //    - 플레이어를 향해 회전 및 이동
+    //    - 실행 시 내장된 Bomb 오브젝트(Throwable)의 타이머를 실행, 타이머 종료 시 내장된 Bomb 오브젝트 폭발
+    // ******************************************************************************
     public virtual Coroutine Chase(IPlayerController player)
     {
         StopAction();
@@ -484,10 +391,4 @@ public class BobombController : EnemyBase, IBobombController
     }
 
     protected virtual void StopChase() { state.main = MainState.None; }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
