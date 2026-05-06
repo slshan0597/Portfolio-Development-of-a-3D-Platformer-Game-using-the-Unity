@@ -1,3 +1,19 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 정의 ... Line 
+//            1- 캐릭터 상태 ... Line 
+//            2- 캐릭터 설정 ... Line 
+//        2) 필드 ..... Line 
+//        3) 메서드 ... Line 
+//            1- 초기화 ... Line 
+//            2- 액션 ..... Line 
+//                1_ 대기(Idle) ....... Line 
+//                2_ 피격(Damage) ..... Line 
+//                3_ 대화(Talk) ....... Line 
+//                4_ 작별(Farewell) ... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -54,6 +70,10 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
         public new Main main;
     }
 
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 캐릭터 설정
+    //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
+    // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
         // Definition
