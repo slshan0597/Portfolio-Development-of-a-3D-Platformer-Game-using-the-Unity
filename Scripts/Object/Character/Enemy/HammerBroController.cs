@@ -10,11 +10,12 @@ using Setting    = HammerBroController.Setting;
 using SubState   = CharacterBase.State.Sub;
 using DamageType = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(IEnemyBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface IHammerBroController : IEnemyBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     new Resources resources { get; }
 
@@ -24,108 +25,42 @@ public interface IHammerBroController : IEnemyBase
     // Setting
     Setting setting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     Coroutine Attack(IPlayerController player);
     Coroutine Jump(IPlayerController player);
     Coroutine Land(IPlayerController player);
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(EnemyBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class HammerBroController : EnemyBase, IHammerBroController
 {
-    #region Definition
-
-    public new class Resources : EnemyBase.Resources
-    {
-        #region Definition
-
-        public class Models : List<IModelController>
-        {
-            #region Field
-
-            public IHammerBroModelController       body   { get; }
-            public IHammerBroWeaponModelController weapon { get; }
-
-            #endregion
-
-
-            #region Constructor
-
-            public Models(Transform transform) : base(transform.GetComponentsInChildren<IModelController>(true))
-            {
-                body   = transform.GetComponentInChildren<IHammerBroModelController>(true);
-                weapon = transform.GetComponentInChildren<IHammerBroWeaponModelController>(true);
-            }
-
-            #endregion
-        }
-
-        #endregion
-
-
-        #region Field
-
-        public Models                          models  { get; }
-        public new CharacterEffects<MainState> effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            models  = new Models(transform.Find("Models"));
-            effects = new CharacterEffects<MainState>(transform.Find("Effects"));
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState type, SubState subType = SubState.None)
-        {
-            models.body.Play(type, subType);
-
-            return effects.Play(type, subType);
-        }
-
-        #endregion
-    }
-
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 캐릭터 상태
+    //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
+    //    - 캐릭터의 주 상태 저장
+    // ------------------------------------------------------------------------------
     public new class State : EnemyBase.State
     {
-        #region Definition
-
         public new enum Main { None = 0, Idle = 1, Damage = 2, Find = 4, Die = 8, Attack = 16, Jump = 32, Land = 64 }
 
-        #endregion
-
-
-        #region Field
-
         public new Main main;
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 캐릭터 설정
+    //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
+    // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        #region Definition
-
+        // Definition
         [Serializable] public class Attack
         {
-            #region Variable
-
             [SerializeField] protected SimpleData<SubState, float> _durations;
             [SerializeField] protected int                         _repeatCount;
             [SerializeField] protected GameObject                  _projectile;
@@ -134,40 +69,20 @@ public class HammerBroController : EnemyBase, IHammerBroController
             public int                         repeatCount { get { return _repeatCount; } }
             public GameObject                  projectile  { get { return _projectile; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Attack(SimpleData<SubState, float> durations, int repeatCount)
             {
                 _durations   = durations;
                 _repeatCount = repeatCount;
             }
-
-            #endregion
         }
-
 
         [Serializable] public class Jump
         {
-            #region Field
-
             [SerializeField] protected float _force;
 
             public float force { get { return _force; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Jump(float force) { _force = force; }
-
-            #endregion
-
-
-            #region Method
 
             public Vector3 GetRandomForce(Transform transform)
             {
@@ -177,34 +92,18 @@ public class HammerBroController : EnemyBase, IHammerBroController
 
                 return transform.TransformDirection(force);
             }
-
-            #endregion
         }
-
 
         [Serializable] public class Land
         {
-            #region Field
-
             [SerializeField] protected float _duration;
 
             public float duration { get { return _duration; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Land(float duration) { _duration = duration; }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // Field
         [SerializeField] protected Attack _attack;
         [SerializeField] protected Jump   _jump;
         [SerializeField] protected Land   _land;
@@ -213,43 +112,40 @@ public class HammerBroController : EnemyBase, IHammerBroController
         public Jump   jump   { get { return _jump; } }
         public Land   land   { get { return _land; } }
 
-        #endregion
-
-
-        #region Constructor
-
+        // Method
         public Setting(Attack attack, Jump jump, Land land)
         {
             _attack = attack;
             _jump   = jump;
             _land   = land;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public new Resources resources { get; protected set; }
 
+    // State
     public new State state { get; protected set; } = new State();
 
+    // Setting
     [SerializeField] protected Setting _setting;
 
     public Setting setting { get { return _setting; } }
 
+    // etc.
     protected int attackCount;
 
-    #endregion
-
-
-    #region Method
-
-    #region Initialization
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -275,11 +171,10 @@ public class HammerBroController : EnemyBase, IHammerBroController
             new Setting.Land(0.5f));
     }
 
-    #endregion
-
-
-    #region Action
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 액션(Common)
+    //    - 모든 행동에 대한 정지
+    // ------------------------------------------------------------------------------
     public override void StopAction()
     {
         base.StopAction();
@@ -292,9 +187,9 @@ public class HammerBroController : EnemyBase, IHammerBroController
         }
     }
 
-
-    #region Idle
-
+    // ******************************************************************************
+    // 3-2-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public override Coroutine Idle(bool playAnimation = false)
     {
         StopAction();
@@ -318,11 +213,9 @@ public class HammerBroController : EnemyBase, IHammerBroController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Damage
-
+    // ******************************************************************************
+    // 3-2-2) 메서드 -> 액션 -> 피격(Damage)
+    // ******************************************************************************
     public override Coroutine Damage(Transform attacker, DamageType type)
     {
         StopAction();
@@ -343,11 +236,10 @@ public class HammerBroController : EnemyBase, IHammerBroController
         state.damage = DamageType.None;
     }
 
-    #endregion
-
-
-    #region Find
-
+    // ******************************************************************************
+    // 3-2-3) 메서드 -> 액션 -> 발견(Find)
+    //    - 실행 후 Attack 함수 호출
+    // ******************************************************************************
     public override Coroutine Find(IPlayerController player)
     {
         StopAction();
@@ -371,11 +263,9 @@ public class HammerBroController : EnemyBase, IHammerBroController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Die
-
+    // ******************************************************************************
+    // 3-2-4) 메서드 -> 액션 -> 죽기(Die)
+    // ******************************************************************************
     public override Coroutine Die()
     {
         StopAction();
@@ -392,11 +282,10 @@ public class HammerBroController : EnemyBase, IHammerBroController
         state.main = MainState.None;
     }
 
-    #endregion
-
-
-    #region Attack
-
+    // ******************************************************************************
+    // 3-2-5) 메서드 -> 액션 -> 공격(Attack)
+    //    - 
+    // ******************************************************************************
     public virtual Coroutine Attack(IPlayerController player)
     {
         StopAction();
