@@ -347,10 +347,8 @@ public class BoomBoomController : BossBase, IBoomBoomController
 
     // ******************************************************************************
     // 3-2-3) 메서드 -> 액션 -> 발견(Find)
-    //    - 직전 상태(Idle, Damage)에 의해 캐릭터의 형태를 결정
+    //    - 직전 상태(Idle, Damage)에 의해 캐릭터의 형태(모델 타입)를 결정
     //    - 직전 상태의 유형은 전달받은 매개변수(플레이어)로 판단
-    //    - 직전 상태가 Idle일 경우   -> Model 타입: Normal
-    //    - 직전 상태가 Damage일 경우 -> Model 타입: Shell(등껍질)
     // ******************************************************************************
     public override Coroutine Find(IPlayerController player)
     {
@@ -402,7 +400,7 @@ public class BoomBoomController : BossBase, IBoomBoomController
 
     // ******************************************************************************
     // 3-2-5) 메서드 -> 액션 -> 등장(Appear)
-    //    - 보스 캐릭터는 필드 등장 연출 추가
+    //    - 필드 등장 연출 추가
     // ******************************************************************************
     public override Coroutine Appear()
     {
@@ -422,7 +420,9 @@ public class BoomBoomController : BossBase, IBoomBoomController
 
     // ******************************************************************************
     // 3-2-6) 메서드 -> 액션 -> 추격(Chase)
-    //    - 
+    //    - 시야각을 벗어날 때까지 플레이어를 향해 회전 및 이동
+    //    - 지정 시간 내에 위의 루틴을 반복
+    //    - 캐릭터 형태(모델 타입)에 따라 속도 조절
     // ******************************************************************************
     public virtual Coroutine Chase(IPlayerController player, ModelType type)
     {
@@ -499,11 +499,11 @@ public class BoomBoomController : BossBase, IBoomBoomController
         resources.effects[MainState.Chase].Stop();
     }
 
-    #endregion
-
-
-    #region Brake
-
+    // ******************************************************************************
+    // 3-2-7) 메서드 -> 액션 -> 멈추기(Brake)
+    //    - 캐릭터의 급제동
+    //    - 다음 행동까지의 인터벌
+    // ******************************************************************************
     public virtual Coroutine Brake(ModelType type)
     {
         StopAction();
@@ -552,10 +552,4 @@ public class BoomBoomController : BossBase, IBoomBoomController
 
         SetFriction(false);
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
