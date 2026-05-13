@@ -1,8 +1,17 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 17
+//    2. 클래스 ....... Line 27
+//        1) 필드 ..... Line 32
+//        2) 메서드 ... Line 44
+//            1- 초기화 ... Line 48
+//            2- 액션 ..... Line 59
+//                1_ 죽기(Die) ... Line 62
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using UnityEngine;
 
 using Game;
-
 
 namespace Stage
 {
@@ -10,31 +19,35 @@ namespace Stage
     using BGMType          = BackGroundMusicController.SoundType;
     using LetterboxUIState = LetterboxUIController.State;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IBoomBoomController 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IBoomBoomController : global::IBoomBoomController
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         new IBossPlanetController planet { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(BoomBoomController 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class BoomBoomController : global::BoomBoomController
     {
-        #region Field
-
+        // ==============================================================================
+        // 1) 필드
+        // ==============================================================================
+        // Component & Reference
         public new IBossPlanetController planet { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 2) 메서드
+        //    - 부모 클래스의 함수들을 재정의하여 확장
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 2-1) 메서드 -> 초기화
+        //    - 필드(컴포넌트 등) 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -42,13 +55,14 @@ namespace Stage
             planet = GetComponentInParent<IBossPlanetController>(true);
         }
 
-        #endregion
-
-
-        #region Action
-
-        #region Appear
-
+        // ------------------------------------------------------------------------------
+        // 2-2) 메서드 -> 액션
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 2-2-1) 메서드 -> 액션 -> 등장(Appear)
+        //    - 필드(Planet) 초기화
+        //    - Stage 씬의 UI 호출
+        // ******************************************************************************
         public override Coroutine Appear()
         {
             gameObject.SetActive(true);
@@ -84,11 +98,10 @@ namespace Stage
             foreach (var effect in resources.effects.elements) effect.audioSource.spatialBlend = 1f;
         }
 
-        #endregion
-
-
-        #region Die
-
+        // ******************************************************************************
+        // 2-2-2) 메서드 -> 액션 -> 죽기(Die)
+        //    - 필드 클리어 트리거 기능 추가
+        // ******************************************************************************
         public override Coroutine Die()
         {
             planet.Set(BossState.Die);
@@ -115,11 +128,5 @@ namespace Stage
 
             foreach (var effect in resources.effects.elements) effect.audioSource.spatialBlend = 1f;
         }
-
-        #endregion
-
-        #endregion
-
-        #endregion
     }
 }
