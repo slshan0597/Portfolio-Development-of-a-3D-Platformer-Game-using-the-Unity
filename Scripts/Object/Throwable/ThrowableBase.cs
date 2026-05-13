@@ -113,6 +113,7 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
     // ------------------------------------------------------------------------------
     // 3-1) 메서드 -> 이벤트 함수
     //    - 오브젝트 초기화
+    //    - 오브젝트가 지면에 닿으면 기본 상태(Idle)로 초기화
     // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
 
