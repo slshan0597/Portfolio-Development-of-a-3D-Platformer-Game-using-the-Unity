@@ -2,21 +2,21 @@
 // - 플레이어를 지정된 궤적(경로)에 따라 일정 시간에 걸쳐 이동시키는 오브젝트
 //
 // * 목차
-//    1. 인터페이스 ... Line 
-//    2. 클래스 ....... Line 
-//        1) 정의 ..... Line 
-//        2) 필드 ..... Line 
-//        3) 메서드 ... Line 
-//            1- 이벤트 함수 ... Line 
-//            2- 초기화 ........ Line 
-//            3- 액션 .......... Line 
-//                1_ 대기(Idle) ............ Line 
-//                2_ 활성화(Appear) ........ Line 
-//                3_ 비활성화(Disappear) ... Line 
-//                4_ 전송(Transport) ....... Line 
-//                    1-> 준비(Ready) .... Line
-//                    2-> 발사(Launch) ... Line 
-//                    3-> 착지(Land) ..... Line 
+//    1. 인터페이스 ... Line 46
+//    2. 클래스 ....... Line 66
+//        1) 정의 ..... Line 71
+//        2) 필드 ..... Line 131
+//        3) 메서드 ... Line 150
+//            1- 이벤트 함수 ... Line 154
+//            2- 초기화 ........ Line 175
+//            3- 액션 .......... Line 222
+//                1_ 대기(Idle) ............ Line 225
+//                2_ 활성화(Appear) ........ Line 241
+//                3_ 비활성화(Disappear) ... Line 264
+//                4_ 전송(Transport) ....... Line 285
+//                    1-> 준비(Ready) .... Line 308
+//                    2-> 발사(Launch) ... Line 391
+//                    3-> 착지(Land) ..... Line 466
 // //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
@@ -388,7 +388,7 @@ public class LauncherController : TransporterBase, ILauncherController
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // 3-3-4-2) 메서드 -> 액션 -> 전송(Transport) -> 발사(Launch)
-    //    - 플레이어 발사 및 지정 경로를 따라 이동
+    //    - 플레이어 발사 및 지정 경로(Spline)를 따라 이동
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     protected virtual IEnumerator Launch(IPlayerController player)
     {
@@ -445,7 +445,7 @@ public class LauncherController : TransporterBase, ILauncherController
             float      rate           = elapsedTime / totalDuration;
             float      nextRate       = (elapsedTime + Time.fixedDeltaTime) / totalDuration;
             Vector3    targetPosition = spline.GetPoint(rate);
-            Vector3    nextPosition   = spline.GetPoint(nextRate);
+            Vector3    nextPosition   = spline.GetPoint(nextRate);    // 플레이어의 다음 이동 경로
             Vector3    direction      = (nextPosition - targetPosition).normalized;
             Quaternion targetRotation
                 = (elapsedTime < rotateDuration) ? Quaternion.LookRotation(direction, player.transform.up)
