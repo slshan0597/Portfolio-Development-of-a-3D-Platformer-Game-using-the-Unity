@@ -7,11 +7,12 @@ using Resources    = ThrowableBase.Resources;
 using ThrowSetting = ThrowableBase.ThrowSetting;
 using DamageType   = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스
+// //////////////////////////////////////////////////////////////////////////////
 public interface IThrowableBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     GameObject gameObject { get; }
     Transform  transform  { get; }
@@ -26,62 +27,35 @@ public interface IThrowableBase
     float        carryDuration { get; }
     ThrowSetting throwSetting  { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     void      Idle();
     Coroutine Carry(IPlayerController player);
     void      Throw(IPlayerController player);
     Coroutine Destroy();
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스
+//    - Gravityable 속성  -> 커스텀 중력의 영향을 받음
+//    - Interactable 속성 -> 플레이어에 의해 상호작용될 수 있음
+//    - Danageable 속성   -> 공격에 대한 피해를 입을 수 있음
+// //////////////////////////////////////////////////////////////////////////////
 [RequireComponent(typeof(Rigidbody))]
 public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInteractable, IDamageable
 {
-    #region Definition
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
     public enum State { None, Idle, Carry, Throw, Destroy }
-
-
-    public class Resources
-    {
-        #region Field
-
-        public IModelController model { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform)
-        {
-            model = transform.GetComponentInChildren<IModelController>(true);
-        }
-
-        #endregion
-    }
-
 
     [Serializable] public struct ThrowSetting
     {
-        #region Field
-
         [SerializeField, Range(0f, 90f)] private float _angle;
         [SerializeField]                 private float _force;
 
         public float angle { get { return _angle; } }
         public float force { get { return _force; } }
-
-        #endregion
-
-
-        #region Constructor
 
         public ThrowSetting(float angle, float force)
         {
@@ -94,23 +68,22 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
             _angle = other.angle;
             _force = other.force;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public new Rigidbody  rigidbody { get; protected set; }
     public new Collider   collider  { get; protected set; }
     public Resources      resources { get; protected set; }
     public SphereCollider trigger   { get; protected set; }
 
+    // State
     public Vector3 gravity { get; set; } = Vector3.zero;
     public State   state   { get; protected set; }
 
+    // Setting
     [Header("Gravity Setting")]
     [SerializeField] protected bool  _useGravity;
     [SerializeField] protected float _radius;
@@ -130,15 +103,17 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
     public float        carryDuration { get { return _carryDuration; } }
     public ThrowSetting throwSetting  { get { return _throwSetting; } }
 
+    // etc.
     protected Coroutine carryAction;
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 클래스 확장을 위한 기반 기능만을 구현
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화
+    // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
 
     protected virtual void Reset()
@@ -157,11 +132,10 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
         Idle();
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
         rigidbody = GetComponent<Rigidbody>();
@@ -181,11 +155,12 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
         _throwSetting        = new ThrowSetting(45f, 250f);
     }
 
-    #endregion
-
-
-    #region Idle
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 액션
+    // ------------------------------------------------------------------------------
+    // ******************************************************************************
+    // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public virtual void Idle()
     {
         state                 = State.Idle;
@@ -194,11 +169,12 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
         trigger.enabled       = true;
     }
 
-    #endregion
-
-
-    #region Carry
-
+    // ******************************************************************************
+    // 3-3-2) 메서드 -> 액션 -> 나르기(Carry)
+    //    - 플레이어의 상호작용에 의해 호출됨
+    //    - 플레이어가 물건을 들어올림
+    //    - 플레이어가 물건을 들어올린 상태를 유지(플레이어의 Carry 함수 호출)
+    // ******************************************************************************
     public virtual Coroutine Interact(IPlayerController player) { return Carry(player); }
 
     public virtual void StopInteract(IPlayerController player) 
@@ -228,11 +204,11 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
         carryAction = null;
     }
 
-    #endregion
-
-
-    #region Throw
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 던지기(Throw)
+    //    - 플레이어의 공격에 의해 호출됨
+    //    - 지정된 각도와 힘으로 오브젝트 발사
+    // ******************************************************************************
     public virtual void Throw(IPlayerController player)
     {
         state                 = State.Throw;
@@ -250,11 +226,10 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
         rigidbody.AddForce(force * direction, ForceMode.VelocityChange);
     }
 
-    #endregion
-
-
-    #region Destroy
-
+    // ******************************************************************************
+    // 3-3-4) 메서드 -> 액션 -> 파괴(Destroy)
+    //    - 데미지를 입으면 오브젝트 파괴
+    // ******************************************************************************
     public virtual bool TryDamage(Transform attacker, DamageType type)
     {
         if (!mask.HasFlag(type)) return false;
@@ -283,8 +258,4 @@ public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInter
     }
 
     protected virtual IEnumerator _Destroy(bool useUnscaledTime) { yield break; }
-
-    #endregion
-
-    #endregion
 }
