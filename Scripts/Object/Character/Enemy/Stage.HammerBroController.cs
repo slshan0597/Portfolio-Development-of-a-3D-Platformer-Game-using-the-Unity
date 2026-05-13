@@ -1,38 +1,53 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 17
+//    2. 클래스 ....... Line 27
+//        1) 필드 ..... Line 32
+//        2) 메서드 ... Line 44
+//            1- 초기화 ... Line 48
+//            2- 액션 ..... Line 59
+//                1_ 죽기(Die) ... Line 62
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using UnityEngine;
 
-
 namespace Stage
 {
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IHammerBroController 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IHammerBroController : global::IHammerBroController
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         new IPlanetController planet { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(HammerBroController 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class HammerBroController : global::HammerBroController, ITriggerable
     {
-        #region Field
-
+        // ==============================================================================
+        // 1) 필드
+        // ==============================================================================
+        // Component & Reference
         public new IPlanetController planet { get; protected set; }
 
+        // Setting
         [Header("Trigger Setting")]
         [SerializeField] protected bool _useTrigger;
 
         public bool useTrigger { get { return _useTrigger; } }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 2) 메서드
+        //    - 부모 클래스의 함수들을 재정의하여 확장
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 2-1) 메서드 -> 초기화
+        //    - 필드(컴포넌트 등) 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -40,24 +55,19 @@ namespace Stage
             planet = GetComponentInParent<IPlanetController>(true);
         }
 
-        #endregion
-
-
-        #region Action
-
-        #region Die
-
+        // ------------------------------------------------------------------------------
+        // 2-2) 메서드 -> 액션
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 2-2-1) 메서드 -> 액션 -> 죽기(Die)
+        //    - 하나의 레벨 내에 다수의 필드(Planet)가 존재
+        //    - 다음 필드로 진행하기 위한 트리거 기능 추가
+        // ******************************************************************************
         protected override IEnumerator _Die()
         {
             yield return base._Die();
 
             if (useTrigger) planet.TryClear();
         }
-
-        #endregion
-
-        #endregion
-
-        #endregion
     }
 }
