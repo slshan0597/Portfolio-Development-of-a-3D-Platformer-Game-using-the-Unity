@@ -77,7 +77,7 @@ public interface IInteractable
 // ==============================================================================
 public interface IDamageable
 {
-    // 정
+    // 정의
     [Flags] public enum Type { None = 0, Normal = 1, PressDown = 2, Explode = 4, Foot = 8, Head = 16 }
 
     // 프로퍼티
