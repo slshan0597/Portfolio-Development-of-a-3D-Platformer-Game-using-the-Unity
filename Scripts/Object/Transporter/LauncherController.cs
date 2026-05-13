@@ -236,6 +236,7 @@ public class LauncherController : TransporterBase, ILauncherController
 
     // ******************************************************************************
     // 3-3-2) 메서드 -> 액션 -> 활성화(Appear)
+    //    - 활성화 시 궤적(경로) 표시
     // ******************************************************************************
     public override Coroutine Appear()
     {
@@ -300,7 +301,10 @@ public class LauncherController : TransporterBase, ILauncherController
         Idle();
     }
 
-    // 준비
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // 3-3-4-1) 메서드 -> 액션 -> 전송(Transport) -> 준비(Ready)
+    //    - 플레이어를 발사대에 위치
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     protected virtual IEnumerator Ready(IPlayerController player)
     {
         state.sub       = SubState.Start;
@@ -379,7 +383,10 @@ public class LauncherController : TransporterBase, ILauncherController
         character.position = endPosition;
     }
 
-    // 발사
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // 3-3-4-2) 메서드 -> 액션 -> 전송(Transport) -> 발사(Launch)
+    //    - 플레이어 발사 및 지정 경로를 따라 이동
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     protected virtual IEnumerator Launch(IPlayerController player)
     {
         ICameraController camera = scene.camera;
@@ -401,7 +408,7 @@ public class LauncherController : TransporterBase, ILauncherController
         camera.Shake(CameraShakeType.Hard);
         camera.Zoom(0.75f, camera.shakeSettings[CameraShakeType.Hard].duration);
 
-        StartCoroutine(Move(player, duration));
+        StartCoroutine(Move(player, duration));    // 플레이어 이동
 
         yield return new WaitForSeconds(duration[state.sub]);
 
@@ -423,7 +430,7 @@ public class LauncherController : TransporterBase, ILauncherController
         player.resources.model.PlayNext();
     }
 
-    // 실질적으로 이동하는 함수
+    // 플레이어 이동
     protected virtual IEnumerator Move(IPlayerController player, Duration duration)
     {
         float totalDuration  = duration.total;
@@ -452,7 +459,9 @@ public class LauncherController : TransporterBase, ILauncherController
         player.transform.rotation = points.end.transform.rotation;
     }
 
-    // 착지
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // 3-3-4-3) 메서드 -> 액션 -> 전송(Transport) -> 착지(Land)
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     protected virtual IEnumerator Land(IPlayerController player)
     {
         ICameraController camera = scene.camera;
@@ -476,65 +485,3 @@ public class LauncherController : TransporterBase, ILauncherController
         player.resources.model.SetHand();
     }
 }
-
-#if UNITY_EDITOR
-
-[CustomEditor(typeof(LauncherController), true)]
-public class LauncherControllerEditor : Editor
-{
-    // Field
-    private LauncherController launcher;
-    private Transform          transform;
-    private Transform          startPoint;
-    private Transform          endPoint;
-    private SplineCreator      spline;
-    private IModelController   model;
-
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
-    protected void OnEnable()
-    {
-        launcher   = (LauncherController)target;
-        transform  = launcher.GetComponent<Transform>();
-        startPoint = transform.Find("Points").GetChild(0);
-        endPoint   = transform.Find("Points").GetChild(1);
-        spline     = launcher.GetComponentInChildren<SplineCreator>(true);
-        model      = transform.GetComponentInChildren<IModelController>(true);
-    }
-
-    protected void OnSceneGUI() { SetPoints(); }
-
-    #endregion
-
-
-    private void SetPoints()
-    {
-        var nodes = spline.GetNodes();
-
-        if (nodes.Length == 0) return;
-
-        Vector3    firstPosition  = spline.GetPoint(0f);
-        Vector3    secondPosition = spline.GetPoint(Time.fixedDeltaTime);
-        Vector3    direction      = (secondPosition - firstPosition).normalized;
-        Quaternion rotation       = Quaternion.LookRotation(direction, transform.up);
-
-        startPoint.position       = nodes.First().startPosition;
-        startPoint.rotation       = rotation;
-        endPoint.position         = nodes.Last().endPosition;
-        spline.transform.position = (startPoint.position + endPoint.position) * 0.5f;
-
-        if (model == null) return;
-
-        model.transform.position = startPoint.position;
-        model.transform.rotation = startPoint.rotation;
-    }
-
-    #endregion
-}
-
-#endif
