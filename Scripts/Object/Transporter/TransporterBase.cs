@@ -8,11 +8,12 @@ using State     = TransporterBase.State;
 using MainState = TransporterBase.State.Main;
 using Type      = TransporterBase.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스
+// //////////////////////////////////////////////////////////////////////////////
 public interface ITransporterBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     GameObject gameObject { get; }
     Transform  transform  { get; }
@@ -27,113 +28,38 @@ public interface ITransporterBase
     // Setting
     Type type { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
+    // Action
     void      Idle();
     Coroutine Appear();
     Coroutine Disappear();
     Coroutine Transport(IPlayerController player);
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스
+//    - Interactable 속성 -> 플레이어에 의해 상호작용될 수 있음
+// //////////////////////////////////////////////////////////////////////////////
 public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
 {
-    #region Definition
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
     public enum Type { None, Launcher, Pipe }
-
-
-    public class Resources
-    {
-        #region Definition
-
-        public class Effects : Dictionary<MainState, IEffectController>
-        {
-            #region Constructor
-
-            public Effects(Transform transform) : base()
-            {
-                foreach (var effect in transform.GetComponentsInChildren<IEffectController>(true))
-                {
-                    string name = effect.gameObject.name.Replace(" ", string.Empty);
-
-                    if (Enum.TryParse(name, out MainState state)) Add(state, effect);
-                }
-            }
-
-            #endregion
-
-
-            #region Method
-
-            public float Play(MainState state) => ContainsKey(state) ? this[state].Play() : default;
-
-            #endregion
-        }
-
-        #endregion
-
-
-        #region Field
-
-        public IModelController model   { get; }
-        public Effects          effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform)
-        {
-            model   = transform.GetComponentInChildren<IModelController>(true);
-            effects = new Effects(transform.Find("Effects"));
-        }
-
-        #endregion
-
-
-        #region Method
-
-        public float Play(MainState state)
-        {
-            model.Play(state.ToString());
-
-            return effects.Play(state);
-        }
-
-        #endregion
-    }
-
 
     public class State
     {
-        #region Definition
-
         public enum Main { None, Idle, Appear, Disappear, Transport }
         public enum Sub  { None, Start, Loop, End }
 
-        #endregion
-
-
-        #region Field
-
         public Main main;
         public Sub  sub;
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public SphereCollider trigger   { get; protected set; }
     public Resources      resources { get; protected set; }
     public ISceneBase     scene     { get; protected set; }
@@ -142,22 +68,22 @@ public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
 
     public Type type { get; protected set; }
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 클래스 확장을 위한 기반 기능만을 구현
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화
+    // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
 
     protected virtual void Start() { if (state.main != MainState.Appear) Idle(); }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
         trigger   = Array.Find(GetComponents<SphereCollider>(), collider => collider.isTrigger);
@@ -165,11 +91,12 @@ public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
         scene     = FindObjectOfType<SceneBase>(true);
     }
 
-    #endregion
-
-
-    #region Idle
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 액션
+    // ------------------------------------------------------------------------------
+    // ******************************************************************************
+    // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public virtual void Idle() 
     {
         state.main      = MainState.Idle;
@@ -180,11 +107,9 @@ public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
         resources.model.animator.updateMode = AnimatorUpdateMode.Normal;
     }
 
-    #endregion
-
-
-    #region Appear
-
+    // ******************************************************************************
+    // 3-3-2) 메서드 -> 액션 -> 활성화(Appear)
+    // ******************************************************************************
     public virtual Coroutine Appear()
     {
         state.main      = MainState.Appear;
@@ -202,11 +127,9 @@ public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
         Idle();
     }
 
-    #endregion
-
-
-    #region Disappear
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 비활성화(Disappear)
+    // ******************************************************************************
     public virtual Coroutine Disappear()
     {
         state.main      = MainState.Disappear;
@@ -224,11 +147,10 @@ public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
         gameObject.SetActive(false);
     }
 
-    #endregion
-
-
-    #region Transport
-
+    // ******************************************************************************
+    // 3-3-4) 메서드 -> 액션 -> 전송(Transport)
+    //    - 플레이어를 지정된 위치로 이동
+    // ******************************************************************************
     public Coroutine Interact(IPlayerController player) { return Transport(player); }
 
     public void StopInteract(IPlayerController player) { }
@@ -245,8 +167,4 @@ public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
     }
 
     protected virtual IEnumerator _Transport(IPlayerController player) { yield break; }
-
-    #endregion
-
-    #endregion
 }
