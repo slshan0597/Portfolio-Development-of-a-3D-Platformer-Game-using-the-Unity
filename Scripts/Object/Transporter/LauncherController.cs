@@ -22,11 +22,12 @@ using PlayerFaceType  = PlayerModelController.Meshes.FaceType;
 using PlayerHandType  = PlayerModelController.Meshes.HandType;
 using CameraShakeType = CameraController.ShakeSetting.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(ITransporterBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface ILauncherController : ITransporterBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     SplineCreator                   spline       { get; }
     Points                          points       { get; }
@@ -39,119 +40,39 @@ public interface ILauncherController : ITransporterBase
     // Setting
     Durations durations     { get; }
     float     rotationSpeed { get; }
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(TransporterBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class LauncherController : TransporterBase, ILauncherController
 {
-    #region Definition
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
     public class Points
     {
-        #region Field
-
         public Transform                  start { get; }
         public ICharacterTargetController end   { get; }
-
-        #endregion
-
-
-        #region Constructor
 
         public Points(Transform transform)
         {
             start = transform.Find("Start");
             end   = transform.GetComponentInChildren<ICharacterTargetController>(true);
         }
-
-        #endregion
     }
-
-
-    public new class Resources : TransporterBase.Resources
-    {
-        #region Definition
-
-        public new class Effects : TransporterBase.Resources.Effects
-        {
-            #region Field
-
-            public Dictionary<TransportState, IEffectController> transport { get; }
-            public IEffectController                             contact   { get; }
-
-            #endregion
-
-
-            #region Constructor
-
-            public Effects(Transform transform) : base(transform)
-            {
-                transport = new Dictionary<TransportState, IEffectController>();
-
-                foreach (var effect in transform.GetComponentsInChildren<IEffectController>(true))
-                {
-                    string name = effect.gameObject.name.Replace(" ", string.Empty);
-
-                    if      (Enum.TryParse(name, out TransportState state)) transport.Add(state, effect);
-                    else if (name == "Contact")                             contact = effect;
-                }
-            }
-
-            #endregion
-
-
-            #region Method
-
-            public float Play(TransportState state) => transport.ContainsKey(state) ? transport[state].Play() : default;
-
-            #endregion
-        }
-
-        #endregion
-
-
-        #region Field
-
-        public new Effects effects { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform) { effects = new Effects(transform.Find("Effects")); }
-
-        #endregion
-    }
-
 
     public new class State : TransporterBase.State
     {
-        #region Definition
-
         public enum Transport { None, Ready, Launch, Land }
 
-        #endregion
-
-
-        #region Field
-
         public Transport transport;
-
-        #endregion
     }
-
 
     [Serializable] public class Durations : SimpleData<TransportState, Duration>
     {
-        #region Definition
-
         [Serializable] public class Duration : SimpleData<SubState, float>
         {
-            #region Field
-
             public float total
             {
                 get
@@ -164,22 +85,10 @@ public class LauncherController : TransporterBase, ILauncherController
                 }
             }
 
-            #endregion
-
-
-            #region Constructor
-
             public Duration(List<Element> elements) : base(elements) { }
 
             public Duration(Duration other) : base(other) { }
-
-            #endregion
         }
-
-        #endregion
-
-
-        #region Field
 
         public float total
         {
@@ -193,43 +102,39 @@ public class LauncherController : TransporterBase, ILauncherController
             }
         }
 
-        #endregion
-
-
-        #region Constructor
-
         public Durations(List<Element> elements) : base(elements) { }
 
         public Durations(Durations other) : base(other) { }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public SplineCreator                   spline       { get; protected set; }
     public Points                          points       { get; protected set; }
     public ILauncherTrajectoryController[] trajectories { get; protected set; }
     public new Resources                   resources    { get; protected set; }
 
+    // State
     public new State state { get; protected set; } = new State();
 
+    // Setting
     [SerializeField] protected Durations _durations;
     [SerializeField] protected float     _rotationSpeed;
 
     public Durations durations     { get { return _durations; } }
     public float     rotationSpeed { get { return _rotationSpeed; } }
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화
+    //    - 플레이어 접근 시 반응
+    // ------------------------------------------------------------------------------
     protected virtual void Reset() { ResetField(); }
 
     protected virtual void OnTriggerEnter(Collider other)
@@ -246,11 +151,10 @@ public class LauncherController : TransporterBase, ILauncherController
         resources.effects.contact.Stop(0.5f);
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -294,11 +198,12 @@ public class LauncherController : TransporterBase, ILauncherController
             });
     }
 
-    #endregion
-
-
-    #region Idle
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 액션
+    // ------------------------------------------------------------------------------
+    // ******************************************************************************
+    // 3-3-1) 메서드 -> 액션 -> 대기(Idle)
+    // ******************************************************************************
     public override void Idle()
     {
         base.Idle();
@@ -312,11 +217,9 @@ public class LauncherController : TransporterBase, ILauncherController
         resources.model.gameObject.SetActive(true);
     }
 
-    #endregion
-
-
-    #region Appear
-
+    // ******************************************************************************
+    // 3-3-2) 메서드 -> 액션 -> 활성화(Appear)
+    // ******************************************************************************
     public override Coroutine Appear()
     {
         gameObject.SetActive(true);
@@ -336,11 +239,9 @@ public class LauncherController : TransporterBase, ILauncherController
         yield return base._Appear(duration, useUnscaledTime);
     }
 
-    #endregion
-
-
-    #region Disappear
-
+    // ******************************************************************************
+    // 3-3-3) 메서드 -> 액션 -> 비활성화(Disappear)
+    // ******************************************************************************
     public override Coroutine Disappear()
     {
         state.main = MainState.Disappear;
@@ -359,11 +260,11 @@ public class LauncherController : TransporterBase, ILauncherController
         yield return base._Disappear(duration, useUnscaledTime);
     }
 
-    #endregion
-
-
-    #region Transport
-
+    // ******************************************************************************
+    // 3-3-4) 메서드 -> 액션 -> 전송(Transport)
+    //    - 플레이어를 지정된 경로에 따라 일정 시간에 걸쳐 이동
+    //    - 루틴: 준비(Ready) -> 발사(Launch) -> 착지(Land)
+    // ******************************************************************************
     public override Coroutine Transport(IPlayerController player)
     {
         state.main = MainState.Transport;
@@ -382,9 +283,7 @@ public class LauncherController : TransporterBase, ILauncherController
         Idle();
     }
 
-
-    #region Ready
-
+    // Ready
     protected virtual IEnumerator Ready(IPlayerController player)
     {
         state.sub       = SubState.Start;
@@ -463,11 +362,7 @@ public class LauncherController : TransporterBase, ILauncherController
         character.position = endPosition;
     }
 
-    #endregion
-
-
-    #region Launch
-
+    // Launch
     protected virtual IEnumerator Launch(IPlayerController player)
     {
         ICameraController camera = scene.camera;
@@ -539,11 +434,7 @@ public class LauncherController : TransporterBase, ILauncherController
         player.transform.rotation = points.end.transform.rotation;
     }
 
-    #endregion
-
-
-    #region Land
-
+    // Land
     protected virtual IEnumerator Land(IPlayerController player)
     {
         ICameraController camera = scene.camera;
@@ -566,22 +457,14 @@ public class LauncherController : TransporterBase, ILauncherController
         player.resources.model.SetFace();
         player.resources.model.SetHand();
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
-
 
 #if UNITY_EDITOR
 
 [CustomEditor(typeof(LauncherController), true)]
 public class LauncherControllerEditor : Editor
 {
-    #region Field
-
+    // Field
     private LauncherController launcher;
     private Transform          transform;
     private Transform          startPoint;
