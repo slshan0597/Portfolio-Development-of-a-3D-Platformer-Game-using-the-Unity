@@ -1,0 +1,806 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+
+
+namespace Game
+{
+    using State                  = ControlSettingManager.State;
+    using Data                   = ControlSettingManager.Data;
+    using Camera                 = ControlSettingManager.Data.Camera;
+    using InversionType          = ControlSettingManager.Data.Camera.InversionType;
+    using SystemType             = ControlSettingManager.Data.SystemType;
+    using ConnectedUI            = ControlSettingManager.ConnectedUI;
+    using PlayerMainState        = PlayerController.State.Main;
+    using Mappings               = ControlSettingManager.Data.Mappings;
+    using Mapping                = ControlSettingManager.Data.Mappings.Mapping;
+    using CursorVisibleEventType = GameDirector.CursorVisibleEventType;
+
+
+    public interface IControlSettingManager : ISettingBase
+    {
+        #region Property
+
+        // Reference
+        ConnectedUI                     connectedUI          { get; }
+        IControlSettingListUIController controlSettingListUI { get; }
+
+        // Data
+        Data data { get; }
+
+        // State
+        State state { get; }
+
+        // Setting
+        Data defaultData { get; }
+
+        #endregion
+
+
+        #region Method
+
+        public KeyCode GetKey(PlayerMainState type)
+        {
+            switch (state)
+            {
+                case State.Touch: return KeyCode.None;
+                default:          return data.GetKey(type, Application.platform, state);
+            }
+        }
+
+        public KeyCode GetKey(SystemType type)
+        {
+            switch (state)
+            {
+                case State.Touch: return KeyCode.None;
+                default:          return data.GetKey(type, Application.platform, state);
+            }
+        }
+
+        #endregion
+    }
+
+
+    public class ControlSettingManager : SettingBase, IControlSettingManager
+    {
+        #region Definition
+
+        public enum State { Keyboard, Joystick, Touch }
+
+
+        [Serializable] public class Data
+        {
+            #region Definition
+
+            [Serializable] public class Camera
+            {
+                #region Definition
+
+                public enum InversionType { Horizontal, Vertical }
+
+                #endregion
+
+
+                #region Field
+
+                [Range(0f, 100f)] public int                             sensitivity;
+                                  public SimpleData<InversionType, bool> inversions;
+
+                #endregion
+
+
+                #region Constructor
+
+                public Camera(int sensitivity, SimpleData<InversionType, bool> inversions)
+                {
+                    this.sensitivity = sensitivity;
+                    this.inversions  = new SimpleData<InversionType, bool>(inversions);
+                }
+
+                public Camera(Camera other)
+                {
+                    sensitivity = other.sensitivity;
+                    inversions  = new SimpleData<InversionType, bool>(other.inversions);
+                }
+
+                #endregion
+            }
+
+
+            public enum SystemType { Pause, Start, Submit, Cancel }
+
+
+            [Serializable] public class Mappings : SimpleData<RuntimePlatform, Mapping>
+            {
+                #region Definition
+
+                [Serializable] public class Mapping : SimpleData<State, KeyCode>
+                {
+                    #region Constructor
+
+                    public Mapping(List<Element> elements) : base(elements) { }
+
+                    public Mapping(Mapping other) : base(other) { }
+
+                    #endregion
+
+
+                    #region Method
+
+                    public KeyCode GetKey(State type) => ContainsKey(type) ? this[type] : KeyCode.None;
+
+                    #endregion
+                }
+
+                #endregion
+
+
+                #region Constructor
+
+                public Mappings(List<Element> elements)
+                {
+                    this.elements = new List<Element>();
+
+                    foreach (var element in elements)
+                    {
+                        RuntimePlatform type    = element.key;
+                        var             mapping = new Mapping(element.value);
+
+                        this.elements.Add(new Element(type, mapping));
+                    }
+                }
+
+                public Mappings(Mappings other) : base(other)
+                {
+                    elements = new List<Element>();
+
+                    foreach (var element in other.elements)
+                    {
+                        RuntimePlatform type    = element.key;
+                        var             mapping = new Mapping(element.value);
+
+                        elements.Add(new Element(type, mapping));
+                    }
+                }
+
+                #endregion
+
+
+                #region Method
+
+                public KeyCode GetKey(RuntimePlatform type, State subType)
+                    => ContainsKey(type) ? this[type].GetKey(subType) : KeyCode.None;
+
+                #endregion
+            }
+
+            #endregion
+
+
+            #region Field
+
+            public Camera                                camera;
+            public SimpleData<PlayerMainState, Mappings> character;
+            public SimpleData<SystemType,      Mappings> system;
+
+            #endregion
+
+
+            #region Constructor
+
+            public Data(Camera camera, SimpleData<PlayerMainState, Mappings> character,
+                SimpleData<SystemType, Mappings> system)
+            {
+                var _character = new List<SimpleData<PlayerMainState, Mappings>.Element>();
+                var _system    = new List<SimpleData<SystemType,      Mappings>.Element>();
+
+                foreach (var element in character)
+                {
+                    PlayerMainState type     = element.key;
+                    var             mappings = new Mappings(element.value);
+
+                    _character.Add(new SimpleData<PlayerMainState, Mappings>.Element(type, mappings));
+                }
+                foreach (var element in system)
+                {
+                    SystemType type     = element.key;
+                    var        mappings = new Mappings(element.value);
+
+                    _system.Add(new SimpleData<SystemType, Mappings>.Element(type, mappings));
+                }
+
+                this.camera    = new Camera(camera);
+                this.character = new SimpleData<PlayerMainState, Mappings>(_character);
+                this.system    = new SimpleData<SystemType,      Mappings>(_system);
+            }
+
+            public Data(Data other)
+            {
+                var _character = new List<SimpleData<PlayerMainState, Mappings>.Element>();
+                var _system    = new List<SimpleData<SystemType,      Mappings>.Element>();
+
+                foreach (var element in other.character)
+                {
+                    PlayerMainState type     = element.key;
+                    var             mappings = new Mappings(element.value);
+
+                    _character.Add(new SimpleData<PlayerMainState, Mappings>.Element(type, mappings));
+                }
+                foreach (var element in other.system)
+                {
+                    SystemType type     = element.key;
+                    var        mappings = new Mappings(element.value);
+
+                    _system.Add(new SimpleData<SystemType, Mappings>.Element(type, mappings));
+                }
+
+                camera    = new Camera(other.camera);
+                character = new SimpleData<PlayerMainState, Mappings>(_character);
+                system    = new SimpleData<SystemType,      Mappings>(_system);
+            }
+
+            #endregion
+
+
+            #region Method
+
+            public KeyCode GetKey(PlayerMainState type, RuntimePlatform secondType, State thirdType)
+                => character.ContainsKey(type) ? character[type].GetKey(secondType, thirdType) : KeyCode.None;
+
+            public KeyCode GetKey(SystemType type, RuntimePlatform secondType, State thirdType)
+                => system.ContainsKey(type) ? system[type].GetKey(secondType, thirdType) : KeyCode.None;
+
+            #endregion
+        }
+
+
+        public class ConnectedUI : List<IUIBase>
+        {
+            #region Field
+
+            public IUIBase current { get; set; }
+
+            #endregion
+        }
+
+        #endregion
+
+
+        #region Field
+
+        public ConnectedUI                     connectedUI          { get; protected set; }
+        public IControlSettingListUIController controlSettingListUI { get; protected set; }
+
+        public Data data { get; protected set; }
+
+        [SerializeField] protected Data _defaultData;
+
+        public Data defaultData { get { return _defaultData; } }
+
+        public State state { get; protected set; }
+
+        #endregion
+
+
+        #region Method
+
+        #region Event
+
+        protected virtual void Reset() { ResetField(); }
+
+        protected override void Start()
+        { 
+            base.Start();
+
+            switch (Application.platform)
+            {
+                case RuntimePlatform.Android: SetState(State.Touch);    break;
+                default:                      SetState(State.Keyboard); break;
+            }
+
+            StartCoroutine(DetectJoystick());
+        }
+
+        #endregion
+
+
+        #region Initialization
+
+        protected override void SetField()
+        {
+            base.SetField();
+
+            connectedUI          = new ConnectedUI();
+            controlSettingListUI = transform.parent.GetComponentInChildren<IControlSettingListUIController>(true);
+
+            type = Type.Control;
+        }
+
+        protected virtual void ResetField()
+        {
+            _defaultData = new Data(
+                new Camera(
+                    50,
+                    new SimpleData<InversionType, bool>(
+                        new List<SimpleData<InversionType, bool>.Element>()
+                        {
+                            new SimpleData<InversionType, bool>.Element(InversionType.Horizontal, false),
+                            new SimpleData<InversionType, bool>.Element(InversionType.Vertical,   false)
+                        })),
+                new SimpleData<PlayerMainState, Mappings>(
+                    new List<SimpleData<PlayerMainState, Mappings>.Element>()
+                    {
+                        new SimpleData<PlayerMainState, Mappings>.Element(
+                            PlayerMainState.Jump,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Space),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton0)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Space),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton0)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton0)
+                                            }))
+                                })),
+                        new SimpleData<PlayerMainState, Mappings>.Element(
+                            PlayerMainState.Crouch,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.C),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton4)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.C),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton4)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton4)
+                                            }))
+                                })),
+                        new SimpleData<PlayerMainState, Mappings>.Element(
+                            PlayerMainState.Attack,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Mouse0),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton2)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Mouse0),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton2)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton2)
+                                            }))
+                                })),
+                        new SimpleData<PlayerMainState, Mappings>.Element(
+                            PlayerMainState.Interact,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.F),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton3)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.F),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton3)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton3)
+                                            }))
+                                }))
+                    }),
+                new SimpleData<SystemType, Mappings>(
+                    new List<SimpleData<SystemType, Mappings>.Element>()
+                    {
+                        new SimpleData<SystemType, Mappings>.Element(
+                            SystemType.Pause,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Escape),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton7)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Escape),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton7)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton10)
+                                            }))
+                                })),
+                        new SimpleData<SystemType, Mappings>.Element(
+                            SystemType.Start,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton6)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton6)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton11)
+                                            }))
+                                })),
+                        new SimpleData<SystemType, Mappings>.Element(
+                            SystemType.Submit,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Space),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton0)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Space),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton0)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton0)
+                                            }))
+                                })),
+                        new SimpleData<SystemType, Mappings>.Element(
+                            SystemType.Cancel,
+                            new Mappings(
+                                new List<Mappings.Element>()
+                                {
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsPlayer,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Escape),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton1)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.WindowsEditor,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Keyboard, KeyCode.Escape),
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton1)
+                                            })),
+                                    new Mappings.Element(
+                                        RuntimePlatform.Android,
+                                        new Mapping(
+                                            new List<Mapping.Element>()
+                                            {
+                                                new Mapping.Element(State.Joystick, KeyCode.JoystickButton1)
+                                            }))
+                                }))
+                    }));
+        }
+
+        #endregion
+
+
+        #region Set
+
+        protected virtual IEnumerator DetectJoystick()
+        {
+            while (!Input.anyKeyDown) yield return null;
+
+            IConfirmUIController confirmUI = menu.game.ui.confirm;
+
+            if (confirmUI.state == ConfirmUIController.State.WaitingForInput) goto Skip;
+
+            State type = state;
+
+            switch (Application.platform)
+            {
+                case RuntimePlatform.Android:
+                    {
+                        if (Input.touchCount > 0) type = State.Touch;
+                        else
+                        {
+                            foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
+                            {
+                                if (Input.GetKeyDown(key) && key.ToString().Contains("Joystick"))
+                                {
+                                    type = State.Joystick;
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    break;
+
+                default:
+                    {
+                        foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
+                        {
+                            if (Input.GetKeyDown(key))
+                            {
+                                type = key.ToString().Contains("Joystick") ? State.Joystick : State.Keyboard;
+
+                                break;
+                            }
+                        }
+                    }
+                    break;
+            }
+
+            if (state != type) SetState(type);
+
+            Skip:
+
+            yield return null;
+
+            StartCoroutine(DetectJoystick());
+        }
+
+        protected virtual void SetState(State type)
+        {
+            IGameDirector game = menu.game;
+
+            state = type;
+
+            game.SetCursorVisible(CursorVisibleEventType.ControllerChange, type != State.Joystick);
+
+            foreach (var ui in connectedUI) ui.Set();
+
+            switch (state)
+            {
+                case State.Joystick: if (connectedUI.current != null) connectedUI.current.SelectFirstSelectable(); break;
+                default:             EventSystem.current.SetSelectedGameObject(null);                              break;
+            }
+        }
+
+        #endregion
+
+
+        #region Data
+
+        public override void Load()
+        {
+            var camera    = _Load(defaultData.camera);
+            var character = _Load(defaultData.character);
+
+            data = new Data(camera, character, defaultData.system);
+        }
+
+        protected virtual Camera _Load(Camera defaultData)
+        {
+            string key         = $"{type}_Camera_Sensitivity";
+            int    sensitivity = PlayerPrefs.GetInt(key, defaultData.sensitivity);
+            var    inversions  = __Load(defaultData.inversions);
+
+            return new Camera(sensitivity, inversions);
+        }
+
+        protected virtual SimpleData<InversionType, bool> __Load(SimpleData<InversionType, bool> defaultData)
+        {
+            var inversions = new List<SimpleData<InversionType, bool>.Element>();
+
+            foreach (var element in defaultData)
+            {
+                InversionType type      = element.key;
+                string        key       = $"{this.type}_Camera_Inversion_{type}";
+                bool          inversion = bool.TryParse(PlayerPrefs.GetString(key), out bool value) ? value : element.value;
+
+                inversions.Add(new SimpleData<InversionType, bool>.Element(type, inversion));
+            }
+
+            return new SimpleData<InversionType, bool>(inversions);
+        }
+
+        protected virtual SimpleData<PlayerMainState, Mappings> _Load(SimpleData<PlayerMainState, Mappings> defaultData)
+        {
+            var character = new List<SimpleData<PlayerMainState, Mappings>.Element>();
+
+            foreach (var element in defaultData)
+            {
+                PlayerMainState type     = element.key;
+                var             mappings = __Load(type, element.value);
+
+                character.Add(new SimpleData<PlayerMainState, Mappings>.Element(type, mappings));
+            }
+
+            return new SimpleData<PlayerMainState, Mappings>(character);
+        }
+
+        protected virtual Mappings __Load(PlayerMainState mappingsType, Mappings defaultData)
+        {
+            var mappings = new List<Mappings.Element>();
+
+            foreach (var element in defaultData)
+            {
+                RuntimePlatform type    = element.key;
+                var             mapping = ___Load(mappingsType, type, element.value);
+
+                mappings.Add(new Mappings.Element(type, mapping));
+            }
+
+            return new Mappings(mappings);
+        }
+
+        protected virtual Mapping ___Load(PlayerMainState mappingsType, RuntimePlatform mappingType, Mapping defaultData)
+        {
+            var mapping = new List<Mapping.Element>();
+
+            foreach (var element in defaultData)
+            {
+                State   type  = element.key;
+                string  key   = $"{this.type}_Character_{mappingsType}_{mappingType}_{type}";
+                KeyCode value = Enum.TryParse(PlayerPrefs.GetString(key), out KeyCode result) ? result : element.value;
+
+                mapping.Add(new Mapping.Element(type, value));
+            }
+
+            return new Mapping(mapping);
+        }
+
+        public override void Save()
+        {
+            _Save(data.camera);
+            _Save(data.character);
+        }
+
+        protected virtual void _Save(Camera data)
+        {
+            string key = $"{type}_Camera_Sensitivity";
+
+            PlayerPrefs.SetInt(key, data.sensitivity);
+            __Save(data.inversions);
+        }
+
+        protected virtual void __Save(SimpleData<InversionType, bool> data)
+        {
+            foreach (var element in data)
+            {
+                InversionType type = element.key;
+                string        key  = $"{this.type}_Camera_Inversion_{type}";
+
+                PlayerPrefs.SetString(key, element.value.ToString());
+            }
+        }
+
+        protected virtual void _Save(SimpleData<PlayerMainState, Mappings> data)
+        {
+            foreach (var element in data)
+            {
+                PlayerMainState type = element.key;
+
+                __Save(type, element.value);
+            }
+        }
+
+        protected virtual void __Save(PlayerMainState mappingsType, Mappings data)
+        {
+            foreach (var element in data)
+            {
+                RuntimePlatform type = element.key;
+
+                ___Save(mappingsType, type, element.value);
+            }
+        }
+
+        protected virtual void ___Save(PlayerMainState mappingsType, RuntimePlatform mappingType, Mapping data)
+        {
+            foreach (var element in data)
+            {
+                State  type = element.key;
+                string key  = $"{this.type}_Character_{mappingsType}_{mappingType}_{type}";
+
+                PlayerPrefs.SetString(key, element.value.ToString());
+            }
+        }
+
+        #endregion
+
+
+        #region Set
+
+        public override void Set(bool reset = false)
+        {
+            if (reset) data = new Data(defaultData);
+
+            foreach (var ui in connectedUI) ui.Set();
+
+            base.Set(reset);
+        }
+
+        #endregion
+
+        #endregion
+    }
+}
