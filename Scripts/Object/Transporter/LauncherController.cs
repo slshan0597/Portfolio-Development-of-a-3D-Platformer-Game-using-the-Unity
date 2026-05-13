@@ -49,7 +49,7 @@ public interface ILauncherController : ITransporterBase
 {
     // 프로퍼티
     // Component
-    SplineCreator                   spline       { get; }
+    SplineCreator                   spline       { get; }    // 플레이어의 이동 경로
     Points                          points       { get; }
     ILauncherTrajectoryController[] trajectories { get; }
     new Resources                   resources    { get; }
