@@ -1,3 +1,21 @@
+// //////////////////////////////////////////////////////////////////////////////
+// - 레벨 내 필드 오브젝트
+// - 필드 위의 오브젝트 위치에 따라 고유의 중력을 생성한 후 오브젝트에 부여
+//
+// * 목차
+//    1. 인터페이스 ... Line 28
+//    2. 클래스 ....... Line 56
+//        1) 정의 ..... Line 65
+//        2) 필드 ..... Line 91
+//        3) 메서드 ... Line 127
+//            1- 이벤트 함수 ... Line 131
+//            2- 초기화 ........ Line 154
+//            3- 액션 .......... Line 177
+//                1_ 대기(Idle) ...... Line 180
+//                2_ 나르기(Carry) ... Line 191
+//                3_ 던지기(Throw) ... Line 226
+//                4_ 파괴(Destroy) ... Line 248
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,11 +26,12 @@ using CoreType     = PlanetController.Setting.Core.Type;
 using CoreLocation = PlanetController.Setting.Core.Location;
 using CoreLineAxis = PlanetController.Setting.Core.LineAxis;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스
+// //////////////////////////////////////////////////////////////////////////////
 public interface IPlanetController
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     Transform                  transform       { get; }
     Collider                   area            { get; }
@@ -30,36 +49,26 @@ public interface IPlanetController
     bool    enabled { get; }
     Setting setting { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
     void    SetEnable(bool enabled, IPlayerController player);
     Vector3 GetGravity(IGravityable target);
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스
+// //////////////////////////////////////////////////////////////////////////////
 public class PlanetController : MonoBehaviour, IPlanetController
 {
-    #region Definition
-
+    // ==============================================================================
+    // 1) 정의
+    //    - 중력에 대한 설정값
+    //    - 코어(Core) 타입일 경우에 대한 프로퍼티
+    // ==============================================================================
     [Serializable] public class Setting
     {
-        #region Definition
-
         [Serializable] public struct Gravity
         {
-            #region Definition
-
-            public enum Type { None, Core, Normal }
-
-            #endregion
-
-
-            #region Field
+            public enum Type { None, Core }
 
             [SerializeField] private Type    _type;
             [SerializeField] private Vector3 _defaultDirection;
@@ -69,34 +78,19 @@ public class PlanetController : MonoBehaviour, IPlanetController
             public Vector3 defaultDirection { get { return _defaultDirection; } }
             public float   force            { get { return _force; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Gravity(Type type, Vector3 defaultDirection, float force)
             {
                 _type             = type;
                 _defaultDirection = defaultDirection;
                 _force            = force;
             }
-
-            #endregion
         }
-
 
         [Serializable] public struct Core
         {
-            #region Definition
-
             public enum Type     { None, Point, Line }
             public enum Location { None, Inside, Outside }
             public enum LineAxis { None, X_Axis, Y_Axis, Z_Axis }
-
-            #endregion
-
-
-            #region Field
 
             [SerializeField] private Type     _type;
             [SerializeField] private Location _location;
@@ -106,25 +100,13 @@ public class PlanetController : MonoBehaviour, IPlanetController
             public Location location { get { return _location; } }
             public LineAxis lineAxis { get { return _lineAxis; } }
 
-            #endregion
-
-
-            #region Constructor
-
             public Core(Type type, Location location, LineAxis lineAxis)
             {
                 _type     = type;
                 _location = location;
                 _lineAxis = lineAxis;
             }
-
-            #endregion
         }
-
-        #endregion
-
-
-        #region Field
 
         [SerializeField] protected Gravity _gravity;
         [SerializeField] protected Core    _core;
@@ -132,25 +114,17 @@ public class PlanetController : MonoBehaviour, IPlanetController
         public Gravity gravity { get { return _gravity; } }
         public Core    core    { get { return _core; } }
 
-        #endregion
-
-
-        #region Constructor
-
         public Setting(Gravity gravity, Core core)
         {
             _gravity = gravity;
             _core    = core;
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public Collider                   area            { get; protected set; }
     public Transform                  core            { get; protected set; }
     public IModelController           ground          { get; protected set; }
@@ -160,19 +134,23 @@ public class PlanetController : MonoBehaviour, IPlanetController
     public List<IModelController>     models          { get; protected set; }
     public ISceneBase                 scene           { get; protected set; }
 
+    // Setting
     [SerializeField] protected Setting _setting;
 
     public Setting setting { get { return _setting; } }
 
+    // etc.
     protected bool playerIsKinematic = false;
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화
+    //    - 필드 내에 중력의 영향을 받는 오브젝트에 중력을 부여
+    //    - 플레이어가 필드 내에 있으면 활성화
+    // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
 
     protected virtual void Reset() { ResetField(); }
@@ -205,11 +183,10 @@ public class PlanetController : MonoBehaviour, IPlanetController
         SetEnable(false, player);
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
         area       = GetComponent<Collider>();
@@ -235,11 +212,6 @@ public class PlanetController : MonoBehaviour, IPlanetController
             new Setting.Core(CoreType.Point, CoreLocation.Inside, CoreLineAxis.None));
     }
 
-    #endregion
-
-
-    #region Set
-
     public virtual void SetEnable(bool enabled, IPlayerController player)
     {
         this.enabled      = enabled;
@@ -253,11 +225,12 @@ public class PlanetController : MonoBehaviour, IPlanetController
                 if (character.gameObject.activeInHierarchy) character.Idle();
     }
 
-    #endregion
-
-
-    #region Gravity
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 중력(Gravity)
+    //    - 오브젝트와 코어 사이의 지면에 대한 법선을 기준으로 중력 생성
+    //    - 코어 타입이 Line일 경우 코어에서 오브젝트 사이의 벡터를 지정된 축에 투영한 위치를 대체 코어(위치)로 지정
+    //    - 방향 타입에 따라 중력의 방향을 반전
+    // ------------------------------------------------------------------------------
     public virtual Vector3 GetGravity(IGravityable target)
     {
         var     gravitySetting = setting.gravity;
@@ -265,8 +238,7 @@ public class PlanetController : MonoBehaviour, IPlanetController
 
         switch (gravitySetting.type)
         {
-            case GravityType.Core:   direction = GetCoreDirection(target);   break;
-            //case GravityType.Normal: direction = GetNormalDirection(target); break;
+            case GravityType.Core: direction = GetCoreDirection(target); break;
         }
 
         return direction * gravitySetting.force;
@@ -289,6 +261,7 @@ public class PlanetController : MonoBehaviour, IPlanetController
         else                                                                                return setting.gravity.defaultDirection;
     }
 
+    // 코어 타입이 Line일 경우 축에 투영된 위치를 대체 코어로 반환
     protected virtual Vector3 GetCorePosition(Vector3 targetPosition)
     {
         Vector3 displacement     = targetPosition - core.position;
@@ -303,20 +276,4 @@ public class PlanetController : MonoBehaviour, IPlanetController
 
         return transform.TransformPoint(axisDisplacement);
     }
-
-    //protected virtual Vector3 GetNormalDirection(IGravityable target)
-    //{
-    //    float   radius    = target.radius;
-    //    Vector3 origin    = target.transform.TransformPoint(Vector3.up * radius * 2f);
-    //    Vector3 direction = -target.transform.up;
-    //    Ray     ray       = new Ray(origin, direction);
-    //    int     layerMask = 1 << LayerMask.NameToLayer("Planet Ground");
-
-    //    if (Physics.SphereCast(ray, radius, out RaycastHit hit, float.MaxValue, layerMask)) return -hit.normal;
-    //    else                                                                                return setting.defaultDirection;
-    //}
-
-    #endregion
-
-    #endregion
 }
