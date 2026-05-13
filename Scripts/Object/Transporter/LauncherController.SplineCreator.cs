@@ -1,3 +1,23 @@
+// //////////////////////////////////////////////////////////////////////////////
+// - 플레이어를 이동시키기 위한 경로를 생성하는 오브젝트
+//
+// * 목차
+//    1. 인터페이스 ... Line 46
+//    2. 클래스 ....... Line 66
+//        1) 정의 ..... Line 71
+//        2) 필드 ..... Line 131
+//        3) 메서드 ... Line 150
+//            1- 이벤트 함수 ... Line 154
+//            2- 초기화 ........ Line 175
+//            3- 액션 .......... Line 222
+//                1_ 대기(Idle) ............ Line 225
+//                2_ 활성화(Appear) ........ Line 241
+//                3_ 비활성화(Disappear) ... Line 264
+//                4_ 전송(Transport) ....... Line 285
+//                    1-> 준비(Ready) .... Line 308
+//                    2-> 발사(Launch) ... Line 391
+//                    3-> 착지(Land) ..... Line 466
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Linq;
 using UnityEngine;
@@ -6,67 +26,64 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 클래스
+// //////////////////////////////////////////////////////////////////////////////
 public class SplineCreator : MonoBehaviour
 {
-    #region Definition
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
     [Serializable]public class SplineNode
     {
-        #region Field
-
                           public Vector3 startPosition;
                           public Vector3 startControlPosition;
                           public Vector3 endControlPosition;
                           public Vector3 endPosition;
         [HideInInspector] public float   curveLength;
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
-    // Values
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
     [Header("Setting")]
     [SerializeField, Range(1, 100)] public int           curveSmoothness = 50;
     [SerializeField]                private SplineNode[] nodes;
     [HideInInspector]               public  float        totalCurveLength;
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 에디터상에 경로 표시
+    // ------------------------------------------------------------------------------
     private void OnDrawGizmosSelected()
     {
         DrawCurves();
         DrawControllers();
     }
 
-    #endregion
-
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 겟(Get)
+    //    - 비율에 따른 경로의 위치(좌표)를 반환
+    // ------------------------------------------------------------------------------
     public SplineNode[] GetNodes() { return nodes; }
 
     public Vector3 GetPoint(float rate)
-    {
+    {     
         foreach (var node in nodes)
         {
-            float lengthRate = node.curveLength / totalCurveLength;
+            float lengthRate = node.curveLength / totalCurveLength;    // 각 노드(길이)의 비율
 
-            if (rate < lengthRate)
+            if (rate < lengthRate)    // 현재 비율(이전 노드들의 비율을 뺀 값)이 노드의 비율보다 작으면
             {
-                float subRate = rate / lengthRate;
+                float subRate = rate / lengthRate;    // 현재 노드 상의 비율
 
-                return _GetPoint(node, subRate);
+                return _GetPoint(node, subRate);    // 노드 상의 비율에 따른 위치(좌표)를 반환
             }
 
-            rate -= lengthRate;
+            rate -= lengthRate;    // 현재 비율이 노드의 비율을 넘어서면 현재 비율에 노드의 비율을 감소
         }
 
         return _GetPoint(nodes.Last(), 1f);
@@ -89,11 +106,10 @@ public class SplineCreator : MonoBehaviour
         return movePoint;
     }
 
-    #endregion
-
-
-    #region Gizmos
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 표시(Draw)
+    //    - 에디터 상에 노드들을 연결하여 기즈모(Gizmos)를 표시
+    // ------------------------------------------------------------------------------
     private void DrawCurves()
     {
         if (nodes is null) return;
@@ -166,25 +182,28 @@ public class SplineCreator : MonoBehaviour
         Gizmos.DrawLine(node.startPosition, node.startControlPosition);
         Gizmos.DrawLine(node.endPosition,   node.endControlPosition);
     }
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 에디터
+// //////////////////////////////////////////////////////////////////////////////
 #if UNITY_EDITOR
 
 [CustomEditor(typeof(SplineCreator))]
 public class SplineEditor : Editor
 {
-    #region Field
-
+    // ==============================================================================
+    // 1) 필드
+    // ==============================================================================
     private SplineCreator spline;
 
-    #endregion
-
-
-    #region Event Method
-
+    // ==============================================================================
+    // 2) 메서드
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 에디터 상의 노드 이동
+    // ------------------------------------------------------------------------------
     private void OnEnable()
     {
         spline = (SplineCreator)target;
@@ -195,11 +214,13 @@ public class SplineEditor : Editor
         MovePoints();
     }
 
-    #endregion
-
-
-    #region GUI Method
-
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 노드 이동
+    //    - 각 노드 내의 포인트들에 대한 이동
+    //    - Start Point, Start Control Point, End Point, End Control Point
+    //    - 각 노드의 End Point(마지막 노드 제외)와 그 다음 노드의 Start Point(첫 노드 제외)는 같은 위치를 공유(Control Point도 공유)
+    //    - Control Point를 이용해 각 노드의 방향 및 곡률을 조정
+    // ------------------------------------------------------------------------------
     private void MovePoints()
     {
         SplineCreator.SplineNode[] nodes  = spline.GetNodes();
@@ -236,8 +257,6 @@ public class SplineEditor : Editor
 
         return mirror;
     }
-
-    #endregion
 }
 
 #endif
