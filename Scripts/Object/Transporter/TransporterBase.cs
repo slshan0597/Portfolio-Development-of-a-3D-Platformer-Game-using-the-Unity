@@ -38,6 +38,7 @@ public interface ITransporterBase
 
 // //////////////////////////////////////////////////////////////////////////////
 // 2. 클래스
+//    - 플레이어를 지정된 위치로 이동하는 오브젝트
 //    - Interactable 속성 -> 플레이어에 의해 상호작용될 수 있음
 // //////////////////////////////////////////////////////////////////////////////
 public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
@@ -149,7 +150,6 @@ public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
 
     // ******************************************************************************
     // 3-3-4) 메서드 -> 액션 -> 전송(Transport)
-    //    - 플레이어를 지정된 위치로 이동
     // ******************************************************************************
     public Coroutine Interact(IPlayerController player) { return Transport(player); }
 
