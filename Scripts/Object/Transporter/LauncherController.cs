@@ -1,3 +1,20 @@
+// //////////////////////////////////////////////////////////////////////////////
+// - 플레이어를 지정된 궤적(경로)에 따라 일정 시간에 걸쳐 이동시키는 오브젝트
+//
+// * 목차
+//    1. 인터페이스 ... Line 29
+//    2. 클래스 ....... Line 57
+//        1) 정의 ..... Line 63
+//        2) 필드 ..... Line 77
+//        3) 메서드 ... Line 89
+//            1- 이벤트 함수 ... Line 93
+//            2- 초기화 ........ Line 101
+//            3- 액션 .......... Line 112
+//                1_ 대기(Idle) ............ Line 115
+//                2_ 활성화(Appear) ........ Line 128
+//                3_ 비활성화(Disappear) ... Line 148
+//                4_ 전송(Transport) ....... Line 168
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -262,7 +279,7 @@ public class LauncherController : TransporterBase, ILauncherController
 
     // ******************************************************************************
     // 3-3-4) 메서드 -> 액션 -> 전송(Transport)
-    //    - 플레이어를 지정된 경로에 따라 일정 시간에 걸쳐 이동
+    //    - 플레이어를 지정된 궤적(경로)에 따라 일정 시간에 걸쳐 이동
     //    - 루틴: 준비(Ready) -> 발사(Launch) -> 착지(Land)
     // ******************************************************************************
     public override Coroutine Transport(IPlayerController player)
@@ -283,7 +300,7 @@ public class LauncherController : TransporterBase, ILauncherController
         Idle();
     }
 
-    // Ready
+    // 준비
     protected virtual IEnumerator Ready(IPlayerController player)
     {
         state.sub       = SubState.Start;
@@ -362,7 +379,7 @@ public class LauncherController : TransporterBase, ILauncherController
         character.position = endPosition;
     }
 
-    // Launch
+    // 발사
     protected virtual IEnumerator Launch(IPlayerController player)
     {
         ICameraController camera = scene.camera;
@@ -406,6 +423,7 @@ public class LauncherController : TransporterBase, ILauncherController
         player.resources.model.PlayNext();
     }
 
+    // 실질적으로 이동하는 함수
     protected virtual IEnumerator Move(IPlayerController player, Duration duration)
     {
         float totalDuration  = duration.total;
@@ -434,7 +452,7 @@ public class LauncherController : TransporterBase, ILauncherController
         player.transform.rotation = points.end.transform.rotation;
     }
 
-    // Land
+    // 착지
     protected virtual IEnumerator Land(IPlayerController player)
     {
         ICameraController camera = scene.camera;
