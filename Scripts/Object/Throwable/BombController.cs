@@ -1,3 +1,14 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 필드 ..... Line 
+//        2) 메서드 ... Line 
+//            1- 초기화 ... Line 
+//            2- 액션 ..... Line 
+//                1_ 대기(Idle) ...... Line 
+//                2_ 파괴(Destroy) ... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,11 +18,12 @@ using LifeSpans  = BombController.LifeSpans;
 using Resources  = BombController.Resources;
 using DamageType = IDamageable.Type;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(IThrowableBase 인터페이스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public interface IBombController : IThrowableBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     IBombUIController ui        { get; }
     new Resources     resources { get; }
@@ -23,77 +35,23 @@ public interface IBombController : IThrowableBase
     LifeSpans  lifeSpans { get; }
     GameObject explosion { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
     Coroutine SetTimer();
     void      StopSetTimer();
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스(ThrowableBase 클래스 상속)
+// //////////////////////////////////////////////////////////////////////////////
 public class BombController : ThrowableBase, IBombController
 {
-    #region Definition
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
     public enum TimerState { None, Safety, Medium, Danger }
-
-
-    public new class Resources : ThrowableBase.Resources
-    {
-        #region Definition
-
-        public class Effects
-        {
-            #region Field
-
-            public IBombTimerEffectController timer { get; }
-            public IEffectController          fuse  { get; }
-
-            #endregion
-
-
-            #region Constructor
-
-            public Effects(Transform transform)
-            {
-                timer = transform.GetComponentInChildren<IBombTimerEffectController>(true);
-                fuse  = transform.Find("Fuse").GetComponent<IEffectController>();
-            }
-
-            #endregion
-        }
-
-        #endregion
-
-
-        #region Field
-
-        public GameObject gameObject { get; }
-        public Effects    effects    { get; }
-
-        #endregion
-
-
-        #region Constructor
-
-        public Resources(Transform transform) : base(transform)
-        {
-            gameObject = transform.gameObject;
-            effects    = new Effects(transform.Find("Effects")); 
-        }
-
-        #endregion
-    }
-
 
     [Serializable] public class LifeSpans : SimpleData<TimerState, float>
     {
-        #region Field
-
         public float total
         {
             get
@@ -106,42 +64,39 @@ public class BombController : ThrowableBase, IBombController
             }
         }
 
-        #endregion
-
-
-        #region Constructor
-
         public LifeSpans(List<Element> elements) : base(elements) { }
 
         public LifeSpans(LifeSpans other) : base(other) { }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public IBombUIController ui        { get; protected set; }
     public new Resources     resources { get; protected set; }
     public IPlanetController planet    { get; protected set; }
 
+    // Setting
     [SerializeField] protected LifeSpans  _lifeSpans;
     [SerializeField] protected GameObject _explosion;
 
     public LifeSpans  lifeSpans { get { return _lifeSpans; } }
     public GameObject explosion { get { return _explosion; } }
 
+    // etc.
     protected Coroutine timerAction;
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 부모 클래스의 함수들을 재정의하여 확장
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화
+    //    - 오브젝트 타이머 셋
+    //    - 충돌 시 오브젝트 파
+    // ------------------------------------------------------------------------------
     protected override void Start()
     {
         if (transform.parent.TryGetComponent(out IBobombController enemy))
@@ -167,11 +122,10 @@ public class BombController : ThrowableBase, IBombController
         Destroy();
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected override void SetField()
     {
         base.SetField();
@@ -195,40 +149,10 @@ public class BombController : ThrowableBase, IBombController
             });
     }
 
-    #endregion
-
-
-    #region Throw
-
-    public override void Throw(IPlayerController player)
-    {
-        base.Throw(player);
-        StopSetTimer();
-    }
-
-    #endregion
-
-
-    #region Destroy
-
-    protected override IEnumerator _Destroy(bool useUnscaledTime)
-    {
-        StopSetTimer();
-        resources.gameObject.SetActive(false);
-
-        var explosion = Instantiate(this.explosion, transform.position, transform.rotation, planet.objects)
-            .GetComponent<IExplosionController>();
-
-        yield return explosion.Explode();
-
-        Destroy(gameObject);
-    }
-
-    #endregion
-
-
-    #region Timer
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 타이머
+    //    - 타이머 종료 시 오브젝트 파괴
+    // ------------------------------------------------------------------------------
     public virtual Coroutine SetTimer() { return timerAction = StartCoroutine(_SetTimer()); }
 
     protected virtual IEnumerator _SetTimer()
@@ -260,7 +184,33 @@ public class BombController : ThrowableBase, IBombController
         resources.effects.timer.Stop();
     }
 
-    #endregion
+    // ------------------------------------------------------------------------------
+    // 3-4) 메서드 -> 액션
+    // ------------------------------------------------------------------------------
+    // ******************************************************************************
+    // 3-4-1) 메서드 -> 액션 -> 던지기(Throw)
+    //    - 던짐과 동시에 타이머 정
+    // ******************************************************************************
+    public override void Throw(IPlayerController player)
+    {
+        base.Throw(player);
+        StopSetTimer();
+    }
 
-    #endregion
+    // ******************************************************************************
+    // 3-4-2) 메서드 -> 액션 -> 파괴(Destroy)
+    //    - 오브젝트 파괴와 동시에 폭발(데미지 트리거 오브젝트 생성)
+    // ******************************************************************************
+    protected override IEnumerator _Destroy(bool useUnscaledTime)
+    {
+        StopSetTimer();
+        resources.gameObject.SetActive(false);
+
+        var explosion = Instantiate(this.explosion, transform.position, transform.rotation, planet.objects)
+            .GetComponent<IExplosionController>();
+
+        yield return explosion.Explode();
+
+        Destroy(gameObject);
+    }
 }
