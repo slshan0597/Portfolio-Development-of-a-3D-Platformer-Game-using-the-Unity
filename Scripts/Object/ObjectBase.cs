@@ -1,11 +1,24 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 
+//        1- 중력(Gravityable) ........ Line 
+//        2- 상호작용(Interactable) ... Line 
+//        3- 피격(Damageable) ......... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using UnityEngine;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스(속성)
+// //////////////////////////////////////////////////////////////////////////////
+// ==============================================================================
+// 1-1. 중력(Gravityable)
+//    - 중력의 영향을 받는 오브젝트 속성
+//    - 필드(Planet)에 의해 생성된 중력을 오브젝트에 부여
+// ==============================================================================
 public interface IGravityable
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     Transform transform { get; }
     Rigidbody rigidbody { get; }
@@ -19,11 +32,7 @@ public interface IGravityable
     // State
     public Vector3 gravity { get; set; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
     void TryApplyGravity(IPlanetController planet)
     {
         if (rigidbody.isKinematic || !useGravity) return;
@@ -31,7 +40,6 @@ public interface IGravityable
         gravity = planet.GetGravity(this);
 
         if (GetFallSpeed(gravity) < gravity.magnitude) rigidbody.AddForce(gravity, ForceMode.Acceleration);
-        if (fixRotation)                               FixRotation(gravity);
     }
 
     float GetFallSpeed(Vector3 gravity)
@@ -42,53 +50,37 @@ public interface IGravityable
 
         return Vector3.Project(velocity, gravity).magnitude;
     }
-
-    void FixRotation(Vector3 gravity)
-    {
-        Quaternion amount   = Quaternion.FromToRotation(transform.up, -gravity.normalized);
-        Quaternion rotation = amount * transform.rotation;
-        //Quaternion rotation = target.transform.rotation * amount;
-
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationSpeed * Time.fixedDeltaTime);
-        transform.rotation = (Quaternion.Angle(transform.rotation, rotation) < 0.1f) ? rotation : transform.rotation;
-    }
-
-    #endregion
 }
 
-
+// ==============================================================================
+// 1-2. 상호작용(Interactable)
+//    - 플레이어에 의해 상호작용할 수 있는 오브젝트 속성
+//    - 오브젝트 탐색을 위한 트리거 기능
+// ==============================================================================
 public interface IInteractable
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     GameObject     gameObject { get; }
     Transform      transform  { get; }
     SphereCollider trigger    { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
     Coroutine Interact(IPlayerController player);
     void      StopInteract(IPlayerController player);
-
-    #endregion
 }
 
-
+// ==============================================================================
+// 1-3. 피격(Damageable)
+//    - 캐릭터의 체력 감소나 오브젝트의 파괴를 위한 속성
+//    - 특정 타입에 의해서만 호출되기 위한 마스크 기능
+// ==============================================================================
 public interface IDamageable
 {
-    #region Definition
-
+    // 정
     [Flags] public enum Type { None = 0, Normal = 1, PressDown = 2, Explode = 4, Foot = 8, Head = 16 }
 
-    #endregion
-
-
-    #region Field
-
+    // 프로퍼티
     // Component
     GameObject gameObject { get; }
     Transform  transform  { get; }
@@ -96,12 +88,6 @@ public interface IDamageable
     // Setting
     Type mask { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
     bool TryDamage(Transform attacker, Type type);
-
-    #endregion
 }
