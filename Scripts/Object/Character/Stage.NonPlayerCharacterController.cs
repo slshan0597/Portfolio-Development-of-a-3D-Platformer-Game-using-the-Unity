@@ -2,29 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace Stage
 {
     using SubState = CharacterBase.State.Sub;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(INonPlayerCharacterController 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface INonPlayerCharacterController : global::INonPlayerCharacterController
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         new IPlanetController planet { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(NonPlayerCharacterController 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class NonPlayerCharacterController : global::NonPlayerCharacterController, ITriggerable
     {
-        #region Field
-
+        // ==============================================================================
+        // 1) 필드
+        // ==============================================================================
+        // Component & Reference
         public new IPlanetController planet { get; protected set; }
 
+        // Setting
         [Header("Trigger Setting")]
         [SerializeField] protected bool _useTrigger;
 
@@ -32,15 +35,17 @@ namespace Stage
 
         [SerializeField] protected SimpleData<string, List<string>> scripts;
 
+        // etc.
         protected bool firstMeet = true;
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 2) 메서드
+        //    - 부모 클래스의 함수들을 재정의하여 확장
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 2-1) 메서드 -> 초기화
+        //    - 필드(컴포넌트 등) 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -87,13 +92,14 @@ namespace Stage
                 });
         }
 
-        #endregion
-
-
-        #region Action
-
-        #region Talk
-
+        // ------------------------------------------------------------------------------
+        // 2-2) 메서드 -> 액션
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 2-2-1) 메서드 -> 액션 -> 대화(Talk)
+        //    - 하나의 레벨 내에 다수의 필드(Planet)가 존재
+        //    - 다음 필드로 진행하기 위한 트리거 기능 추가
+        // ******************************************************************************
         protected override IEnumerator _Talk(global::IPlayerController player)
         {
             ISceneDirector                  scene  = planet.level.stage.scene;
@@ -131,6 +137,7 @@ namespace Stage
                         yield return ui.Print(scripts["First Meet"]);
                     }
 
+                    // 조건부 트리거
                     if (planet.CheckClearable())
                     {
                         yield return ui.Print(scripts["Quest Clear"]);
@@ -167,31 +174,6 @@ namespace Stage
             }
 
             Farewell();
-
-            //yield return ui.Print(null);
-
-            //state.sub = SubState.End;
-
-            //if (useTrigger && planet.CheckClearable())
-            //{
-            //    resources.Play(state.main, state.sub);
-
-            //    yield return ui.Display(false);
-            //    yield return new WaitForSecondsRealtime(ui.defaultDuration);
-            //    yield return planet.Clear(false);
-            //}
-            //else
-            //{
-            //    camera.Set(player.cameraTarget, ui.defaultDuration);
-
-            //    yield return ui.Display(false);
-            //}
         }
-
-        #endregion
-
-        #endregion
-
-        #endregion
     }
 }
