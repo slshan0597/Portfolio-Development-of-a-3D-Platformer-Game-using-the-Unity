@@ -69,7 +69,7 @@ namespace Game
         // ==============================================================================
         // 1) 정의
         // ==============================================================================
-        // Input Type(Not a Platform Type)
+        // 입력 타입(플랫폼 타입이 아님)
         public enum State { Keyboard, Joystick, Touch }
 
         // ------------------------------------------------------------------------------
@@ -78,7 +78,6 @@ namespace Game
         // ------------------------------------------------------------------------------
         [Serializable] public class Data
         {
-            // Definition
             // ******************************************************************************
             // 1-1-1) 정의 -> 데이터 -> 카메라
             //    - 카메라 민감도
@@ -104,13 +103,13 @@ namespace Game
                 }
             }
 
-            // System Shortcut Key Type
+            // 시스템 단축키 타입
             public enum SystemType { Pause, Start, Submit, Cancel }
 
             // ******************************************************************************
             // 1-1-2) 정의 -> 데이터 -> 맵핑(Mapping)
-            //    - 플랫폼(PC, Android)과 입력(Keyboard, Joystick)에 대응하는 키들을 저장
-            //    - SimpleData<PlatformType, SimpleData<InputType, Key>>(SimpleData = Dictionary)
+            //    - 플랫폼(PC, Android)과 입력(Keyboard, Joystick)에 대응하는 입력값들을 저장(키-값 쌍)
+            //    - SimpleData<PlatformType, SimpleData<InputType, Key>> 형태(SimpleData = Dictionary)
             // ******************************************************************************
             [Serializable] public class Mappings : SimpleData<RuntimePlatform, Mapping>
             {
@@ -153,12 +152,13 @@ namespace Game
                     => ContainsKey(type) ? this[type].GetKey(subType) : KeyCode.None;
             }
 
-            // Field
+            // 필드
             public Camera                                camera;
             public SimpleData<PlayerMainState, Mappings> character;
             public SimpleData<SystemType,      Mappings> system;
 
-            // Method - Constructor
+            // 메서드
+            // Constructor
             public Data(Camera camera, SimpleData<PlayerMainState, Mappings> character,
                 SimpleData<SystemType, Mappings> system)
             {
@@ -210,7 +210,7 @@ namespace Game
                 system    = new SimpleData<SystemType,      Mappings>(_system);
             }
 
-            // Method - Get
+            // Get
             public KeyCode GetKey(PlayerMainState type, RuntimePlatform secondType, State thirdType)
                 => character.ContainsKey(type) ? character[type].GetKey(secondType, thirdType) : KeyCode.None;
 
@@ -220,11 +220,7 @@ namespace Game
 
         public class ConnectedUI : List<IUIBase>
         {
-            #region Field
-
             public IUIBase current { get; set; }
-
-            #endregion
         }
 
         // ==============================================================================
@@ -245,13 +241,15 @@ namespace Game
         // State
         public State state { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        //    - 부모 클래스의 함수들을 재정의하여 확장
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        //    - 오브젝트 초기화
+        //    - 조이스틱 감지
+        // ------------------------------------------------------------------------------
         protected virtual void Reset() { ResetField(); }
 
         protected override void Start()
@@ -267,11 +265,10 @@ namespace Game
             StartCoroutine(DetectJoystick());
         }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 초기화
+        //    - 필드(컴포넌트 등) 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -533,17 +530,19 @@ namespace Game
                     }));
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 조이스틱 감지
+        //    - 매 순간 입력의 타입(Keyboard or Joystick)을 검색
+        //    - 입력 타입이 현재 입력 상태와 다른 경우, 입력 상태를 변경(연결된 모든 UI의 내용 변경 등)
+        //    - 게임상의 모든 조작은 맵핑(Mapping)에서 현재 입력 상태에 대응하는 키를 검색한 후 사용
+        // ------------------------------------------------------------------------------
         protected virtual IEnumerator DetectJoystick()
         {
             while (!Input.anyKeyDown) yield return null;
 
             IConfirmUIController confirmUI = menu.game.ui.confirm;
 
+            // 설정 창(UI)에서 키 설정 중에 타 입력 방식이 감지될 경우, UI 등의 혼선 방지를 위해 스킵
             if (confirmUI.state == ConfirmUIController.State.WaitingForInput) goto Skip;
 
             State type = state;
@@ -592,6 +591,7 @@ namespace Game
             StartCoroutine(DetectJoystick());
         }
 
+        // 현재 입력 상태와 연결된 모든 UI의 내용을 변경
         protected virtual void SetState(State type)
         {
             IGameDirector game = menu.game;
@@ -609,11 +609,23 @@ namespace Game
             }
         }
 
-        #endregion
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 데이터
+        //    - 데이터를 키-값 쌍의 형태로 저장 및 불러오기
+        //    - 맵핑 변경 등의 데이터 변경(또는 리셋) 시 연결된 UI의 내용 등을 변경
+        // ------------------------------------------------------------------------------
+        public override void Set(bool reset = false)
+        {
+            if (reset) data = new Data(defaultData);
 
+            foreach (var ui in connectedUI) ui.Set();
 
-        #region Data
+            base.Set(reset);
+        }
 
+        // ******************************************************************************
+        // 3-4-1) 메서드 -> 데이터 -> 불러오기(Load)
+        // ******************************************************************************
         public override void Load()
         {
             var camera    = _Load(defaultData.camera);
@@ -693,6 +705,9 @@ namespace Game
             return new Mapping(mapping);
         }
 
+        // ******************************************************************************
+        // 3-4-2) 메서드 -> 데이터 -> 저장(Save)
+        // ******************************************************************************
         public override void Save()
         {
             _Save(data.camera);
@@ -748,23 +763,5 @@ namespace Game
                 PlayerPrefs.SetString(key, element.value.ToString());
             }
         }
-
-        #endregion
-
-
-        #region Set
-
-        public override void Set(bool reset = false)
-        {
-            if (reset) data = new Data(defaultData);
-
-            foreach (var ui in connectedUI) ui.Set();
-
-            base.Set(reset);
-        }
-
-        #endregion
-
-        #endregion
     }
 }
