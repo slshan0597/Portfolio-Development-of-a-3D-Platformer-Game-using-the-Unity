@@ -36,17 +36,17 @@ namespace Game
     // //////////////////////////////////////////////////////////////////////////////
     public class SettingBase : MonoBehaviour, ISettingBase
     {
-        // Definition
+        // 정의
         public enum Type { None, Graphic, Audio, Control }
 
-        // Field
+        // 필드
         // Component & Reference
         public ISettingMenuManager menu { get; protected set; }
 
         // Setting Type
         public Type type { get; protected set; }
 
-        // Method
+        // 메서드
         // Event
         protected virtual void Awake() 
         {
