@@ -1,9 +1,13 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 12
+//    2. 클래스 ....... Line 34
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-
 
 namespace Game
 {
@@ -18,11 +22,12 @@ namespace Game
     using Mapping                = ControlSettingManager.Data.Mappings.Mapping;
     using CursorVisibleEventType = GameDirector.CursorVisibleEventType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(ISettingBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IControlSettingManager : ISettingBase
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         ConnectedUI                     connectedUI          { get; }
         IControlSettingListUIController controlSettingListUI { get; }
@@ -36,11 +41,7 @@ namespace Game
         // Setting
         Data defaultData { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         public KeyCode GetKey(PlayerMainState type)
         {
             switch (state)
@@ -58,40 +59,37 @@ namespace Game
                 default:          return data.GetKey(type, Application.platform, state);
             }
         }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(SettingBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class ControlSettingManager : SettingBase, IControlSettingManager
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 정의
+        // ==============================================================================
+        // Input Type(Not a Platform Type)
         public enum State { Keyboard, Joystick, Touch }
 
-
+        // ------------------------------------------------------------------------------
+        // 1-1) 정의 -> 데이터
+        //    - 컨트롤에 대한 설정값들을 저장
+        // ------------------------------------------------------------------------------
         [Serializable] public class Data
         {
-            #region Definition
-
+            // Definition
+            // ******************************************************************************
+            // 1-1-1) 정의 -> 데이터 -> 카메라
+            //    - 카메라 민감도
+            //    - 카메라 반전(상-하, 좌-우)
+            // ******************************************************************************
             [Serializable] public class Camera
             {
-                #region Definition
-
                 public enum InversionType { Horizontal, Vertical }
-
-                #endregion
-
-
-                #region Field
 
                 [Range(0f, 100f)] public int                             sensitivity;
                                   public SimpleData<InversionType, bool> inversions;
-
-                #endregion
-
-
-                #region Constructor
 
                 public Camera(int sensitivity, SimpleData<InversionType, bool> inversions)
                 {
@@ -104,40 +102,26 @@ namespace Game
                     sensitivity = other.sensitivity;
                     inversions  = new SimpleData<InversionType, bool>(other.inversions);
                 }
-
-                #endregion
             }
 
-
+            // System Shortcut Key Type
             public enum SystemType { Pause, Start, Submit, Cancel }
 
-
+            // ******************************************************************************
+            // 1-1-2) 정의 -> 데이터 -> 맵핑(Mapping)
+            //    - 플랫폼(PC, Android)과 입력(Keyboard, Joystick)에 대응하는 키들을 저장
+            //    - SimpleData<PlatformType, SimpleData<InputType, Key>>(SimpleData = Dictionary)
+            // ******************************************************************************
             [Serializable] public class Mappings : SimpleData<RuntimePlatform, Mapping>
             {
-                #region Definition
-
                 [Serializable] public class Mapping : SimpleData<State, KeyCode>
                 {
-                    #region Constructor
-
                     public Mapping(List<Element> elements) : base(elements) { }
 
                     public Mapping(Mapping other) : base(other) { }
 
-                    #endregion
-
-
-                    #region Method
-
                     public KeyCode GetKey(State type) => ContainsKey(type) ? this[type] : KeyCode.None;
-
-                    #endregion
                 }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Mappings(List<Element> elements)
                 {
@@ -165,31 +149,16 @@ namespace Game
                     }
                 }
 
-                #endregion
-
-
-                #region Method
-
                 public KeyCode GetKey(RuntimePlatform type, State subType)
                     => ContainsKey(type) ? this[type].GetKey(subType) : KeyCode.None;
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // Field
             public Camera                                camera;
             public SimpleData<PlayerMainState, Mappings> character;
             public SimpleData<SystemType,      Mappings> system;
 
-            #endregion
-
-
-            #region Constructor
-
+            // Method - Constructor
             public Data(Camera camera, SimpleData<PlayerMainState, Mappings> character,
                 SimpleData<SystemType, Mappings> system)
             {
@@ -241,20 +210,13 @@ namespace Game
                 system    = new SimpleData<SystemType,      Mappings>(_system);
             }
 
-            #endregion
-
-
-            #region Method
-
+            // Method - Get
             public KeyCode GetKey(PlayerMainState type, RuntimePlatform secondType, State thirdType)
                 => character.ContainsKey(type) ? character[type].GetKey(secondType, thirdType) : KeyCode.None;
 
             public KeyCode GetKey(SystemType type, RuntimePlatform secondType, State thirdType)
                 => system.ContainsKey(type) ? system[type].GetKey(secondType, thirdType) : KeyCode.None;
-
-            #endregion
         }
-
 
         public class ConnectedUI : List<IUIBase>
         {
@@ -265,20 +227,22 @@ namespace Game
             #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public ConnectedUI                     connectedUI          { get; protected set; }
         public IControlSettingListUIController controlSettingListUI { get; protected set; }
 
+        // Data
         public Data data { get; protected set; }
 
+        // Setting
         [SerializeField] protected Data _defaultData;
 
         public Data defaultData { get { return _defaultData; } }
 
+        // State
         public State state { get; protected set; }
 
         #endregion
