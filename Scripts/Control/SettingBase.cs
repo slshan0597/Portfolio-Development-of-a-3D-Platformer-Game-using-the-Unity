@@ -1,17 +1,19 @@
-//using System.Text;
-//using System.Runtime.InteropServices;
+// //////////////////////////////////////////////////////////////////////////////
+// * 목차
+//    1. 인터페이스 ... Line 12
+// //////////////////////////////////////////////////////////////////////////////
 using UnityEngine;
-
 
 namespace Game
 {
     using Type = SettingBase.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스
+    // //////////////////////////////////////////////////////////////////////////////
     public interface ISettingBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         GameObject gameObject { get; }
 
@@ -21,50 +23,34 @@ namespace Game
         // Setting
         Type type { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         void Load();
         void Save();
         void Set(bool reset = false);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스
+    // //////////////////////////////////////////////////////////////////////////////
     public class SettingBase : MonoBehaviour, ISettingBase
     {
-        //[DllImport("Kernel32")]
-        ////[DllImport("__Internal")]
-        //static extern long WritePrivateProfileString(string section, string key, string value, string filePath);
-        //[DllImport("Kernel32")]
-        ////[DllImport("__Internal")]
-        //static extern int GetPrivateProfileString(string section, string key, string defVal, StringBuilder retVal,
-        //    int size, string filePath);
-
-
-        #region Definition
-
+        // Definition
         public enum Type { None, Graphic, Audio, Control }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 1) 필드
+        // ==============================================================================
+        // Component & Reference
         public ISettingMenuManager menu { get; protected set; }
 
+        // Setting Type
         public Type type { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 2) 메서드
+        //    - 클래스 확장을 위한 기반 기능만을 구현
+        // ==============================================================================
+        // Event
         protected virtual void Awake() 
         {
             SetField();
@@ -73,44 +59,13 @@ namespace Game
 
         protected virtual void Start() { Set(); }
 
-        #endregion
-
-
-        #region Initialization
-
+        // Initialization
         protected virtual void SetField() { menu = GetComponentInParent<ISettingMenuManager>(true); }
 
-        #endregion
-
-
-        #region Data
-
+        // Data
         public virtual void Load() { }
 
-        //protected virtual string ReadFile(string section, string key)
-        //{
-        //    int    size = 255;
-        //    var    data = new StringBuilder(size);
-        //    string path = menu.pathSetting.GetPath();
-
-        //    GetPrivateProfileString(section, key, string.Empty, data, size, path);
-
-        //    return data.ToString();
-        //}
-
         public virtual void Save() { }
-
-        //protected virtual void WriteFile(string section, string key, string value)
-        //{
-        //    string path = menu.pathSetting.GetPath();
-
-        //    WritePrivateProfileString(section, key, value, path);
-        //}
-
-        #endregion
-
-
-        #region Set
 
         public virtual void Set(bool reset = false)
         {
@@ -123,9 +78,5 @@ namespace Game
 
             Save();
         }
-
-        #endregion
-
-        #endregion
     }
 }
