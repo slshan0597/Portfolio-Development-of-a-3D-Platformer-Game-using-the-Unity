@@ -1,3 +1,14 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임 상의 모든 UI에 대한 기반 클래스
+//    - 창(Window)이나 메뉴 등 컨테이너 정의
+//    - UI의 표시(Display)와 내용(Content) 수정
+//    - 버튼 등 Selectable 오브젝트의 설정
+//
+// * 목차
+//    1. 인터페이스 ... Line 16
+//    2. 클래스 ....... Line 37
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Linq;
 using System.Collections;
@@ -12,11 +23,12 @@ using InitialSettings = UIBase.MenuBase.InitialSettings;
 using ResolutionType  = Game.GraphicSettingManager.Data.ResolutionType;
 using ControlState    = Game.ControlSettingManager.State;
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 1. 인터페이스
+// //////////////////////////////////////////////////////////////////////////////
 public interface IUIBase
 {
-    #region Property
-
+    // 프로퍼티
     // Component
     GameObject   gameObject  { get; }
     Selectable[] selectables { get; }
@@ -28,48 +40,40 @@ public interface IUIBase
     // Setting
     float defaultDuration { get; }
 
-    #endregion
-
-
-    #region Method
-
+    // 메서드
     void      Set();
     void      SetInteractables(bool interactable);
     void      SelectFirstSelectable();
     Coroutine Display(bool isActive, bool animated = true);
-
-    #endregion
 }
 
-
+// //////////////////////////////////////////////////////////////////////////////
+// 2. 클래스
+//    - 클래스 확장을 위한 기반 기능만을 구현
+// //////////////////////////////////////////////////////////////////////////////
 public class UIBase : MonoBehaviour, IUIBase
 {
-    #region Definition
-
+    // ==============================================================================
+    // 1) 정의
+    // ==============================================================================
     public enum FadeDirection { None, Up, Down, Left, Right }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-1) 정의 -> 메뉴
+    //    - 대부분의 컨테이너의 기반이 되는 클래스
+    //    - 컨테이너의 크기와 그래픽에 대한 정의
+    // ------------------------------------------------------------------------------
     public class MenuBase
     {
-        #region Definition
-
+        // 정의
         public class InitialSettings
         {
-            #region Definition
-
             public class RectTransformSetting
             {
-                #region Field
-
                 public Vector2 anchoredPosition   { get; }
                 public Vector3 anchoredPosition3D { get; }
                 public Vector2 sizeDelta          { get; }
                 public Vector3 localScale         { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public RectTransformSetting(RectTransform rectTransform)
                 {
@@ -78,22 +82,10 @@ public class UIBase : MonoBehaviour, IUIBase
                     sizeDelta          = rectTransform.sizeDelta;
                     localScale         = rectTransform.localScale;
                 }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             public Dictionary<RectTransform, RectTransformSetting> rectTransforms { get; }
             public Dictionary<MaskableGraphic, Color>              graphics       { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public InitialSettings(IEnumerable<RectTransform> rectTransforms, IEnumerable<MaskableGraphic> graphics)
             {
@@ -105,15 +97,9 @@ public class UIBase : MonoBehaviour, IUIBase
                 foreach (var graphic in graphics)
                     this.graphics.Add(graphic, graphic.color);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // 필드
         public Transform         transform     { get; }
         public GameObject        gameObject    { get; }
         public RectTransform     rectTransform { get; }
@@ -123,11 +109,7 @@ public class UIBase : MonoBehaviour, IUIBase
 
         public InitialSettings initialSettings { get; protected set; }
 
-        #endregion
-
-
-        #region Constructor
-
+        // 메서드
         public MenuBase(Transform transform)
         {
             this.transform = transform;
@@ -145,22 +127,19 @@ public class UIBase : MonoBehaviour, IUIBase
 
             initialSettings = new InitialSettings(rectTransforms, graphics);
         }
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-2) 정의 -> 창(Window)
+    //    - 메뉴(컨테이너)에서 확장된 클래스
+    //    - 배경 이미지 추가
+    // ------------------------------------------------------------------------------
     public class WindowBase : MenuBase
     {
-        #region Field
-
+        // 필드
         public Image backGroundImage { get; }
 
-        #endregion
-
-
-        #region Constructor
-
+        // 메서드
         public WindowBase(Transform transform) : base(transform)
         {
             backGroundImage = transform.Find("Back Ground Image").GetComponent<Image>();
@@ -171,63 +150,53 @@ public class UIBase : MonoBehaviour, IUIBase
 
             initialSettings = new InitialSettings(rectTransforms, graphics);
         }
-
-        #endregion
     }
 
-
+    // ------------------------------------------------------------------------------
+    // 1-3) 정의 -> 슬롯(Slot)
+    //    - 메뉴(컨테이너)에서 확장된 클래스
+    //    - 이름 텍스트 추가
+    //    - 게임의 설정(그래픽 등) 항목 등 연속적인 컨테이너가 필요할 때 사용
+    // ------------------------------------------------------------------------------
     public class SlotBase : MenuBase
     {
-        #region Field
-
+        // 필드
         public Text labelText { get; }
 
-        #endregion
-
-
-        #region Constructor
-
+        // 메서드
         public SlotBase(Transform transform) : base(transform)
         {
             labelText = content.Find("Label Text").GetComponent<Text>();
         }
-
-        #endregion
     }
 
-    #endregion
-
-
-    #region Field
-
+    // ==============================================================================
+    // 2) 필드
+    // ==============================================================================
+    // Component & Reference
     public Selectable[] selectables  { get; protected set; }
     public Canvas       canvas       { get; protected set; }
     public CanvasScaler canvasScaler { get; protected set; }
 
+    // Selectables
     protected Selectable[] validSelectables;
     protected Selectable   lastSelectedSelectable;
 
+    // Setting
     [SerializeField] protected float _defaultDuration;
 
     public float defaultDuration { get { return _defaultDuration; } }
 
-    #endregion
-
-
-    #region Method
-
-    #region Event
-
+    // ==============================================================================
+    // 3) 메서드
+    //    - 클래스 확장을 위한 기반 기능만을 구현
+    // ==============================================================================
+    // ------------------------------------------------------------------------------
+    // 3-1) 메서드 -> 이벤트 함수
+    //    - 오브젝트 초기화
+    //    - 한 번이라도 활성화 시 세팅 클래스 내 현재 활성화된 UI 리스트에 연결
+    // ------------------------------------------------------------------------------
     protected virtual void Awake() { SetField(); }
-
-    //protected virtual void OnEnable()
-    //{
-    //    if (GameDirector.instance == null) return;
-
-    //    IControlSettingManager controlSetting = GameDirector.instance.menu.setting.control;
-
-    //    controlSetting.connectedUI.current = this;
-    //}
 
     protected virtual void Reset() { ResetField(); }
 
@@ -241,15 +210,6 @@ public class UIBase : MonoBehaviour, IUIBase
         controlSetting.connectedUI.Add(this);
     }
 
-    //protected virtual void OnDisable()
-    //{
-    //    if (GameDirector.instance == null) return;
-
-    //    IControlSettingManager controlSetting = GameDirector.instance.menu.setting.control;
-
-    //    if (controlSetting.connectedUI.current == (IUIBase)this) controlSetting.connectedUI.current = null;
-    //}
-
     protected virtual void OnDestroy()
     {
         ISettingMenuManager    settingMenu    = GameDirector.instance.menu.setting;
@@ -260,11 +220,10 @@ public class UIBase : MonoBehaviour, IUIBase
         controlSetting.connectedUI.Remove(this);
     }
 
-    #endregion
-
-
-    #region Initialization
-
+    // ------------------------------------------------------------------------------
+    // 3-2) 메서드 -> 초기화
+    //    - 필드(컴포넌트 등) 초기화
+    // ------------------------------------------------------------------------------
     protected virtual void SetField()
     {
         selectables  = Array.FindAll(GetComponentsInChildren<Selectable>(true),
@@ -275,11 +234,12 @@ public class UIBase : MonoBehaviour, IUIBase
 
     protected virtual void ResetField() { _defaultDuration = 0.5f; }
 
-    #endregion
-
-
-    #region Set
-
+    // ------------------------------------------------------------------------------
+    // 3-3) 메서드 -> 셋(Set)
+    //    - 그래픽(해상도)에 따른 컨테이너 크기 조절
+    //    - UI 내 상호작용 가능한 모든 오브젝트 활성화
+    //    - 입력 타입이 Joystick일 경우(포인터가 없는 경우), 활성화 시 첫 Selectable 설정
+    // ------------------------------------------------------------------------------
     public virtual void Set()
     {
         IGraphicSettingManager graphicSetting = GameDirector.instance.menu.setting.graphic;
@@ -319,7 +279,7 @@ public class UIBase : MonoBehaviour, IUIBase
 
         if (interacatable)
         {
-            if (controlSetting.state == ControlState.Joystick) SelectFirstSelectable();
+            if (controlSetting.state == ControlState.Joystick) SelectFirstSelectable();    // 입력 타입이 Joystick일 경우에만 Select 기능 수행
 
             SetCurrent(true);
         }
@@ -348,11 +308,10 @@ public class UIBase : MonoBehaviour, IUIBase
         else if (connectedUI.current == (IUIBase)this) connectedUI.current = null;
     }
 
-    #endregion
-
-
-    #region Display
-
+    // ------------------------------------------------------------------------------
+    // 3-4) 메서드 -> 표시(Display)
+    //    - UI의 활성화 및 비활성화
+    // ------------------------------------------------------------------------------
     public virtual Coroutine Display(bool isActive, bool animated = true)
     {
         if (isActive)
@@ -375,9 +334,10 @@ public class UIBase : MonoBehaviour, IUIBase
         yield break;
     }
 
-
-    #region Base
-
+    // ******************************************************************************
+    // 3-4-1) 메서드 -> 표시 -> 메뉴
+    //    - 메뉴의 모든 오브젝트에 대한 페이드 인-아웃 기능
+    // ******************************************************************************
     protected virtual IEnumerator FadeContent(MenuBase menu, bool isFadeIn, float duration)
     {
         RectTransform[] items = menu.items;
@@ -395,6 +355,7 @@ public class UIBase : MonoBehaviour, IUIBase
         if (!isFadeIn) menu.gameObject.SetActive(false);
     }
 
+    // 투명-불투명 간의 그라데이션 효과
     protected virtual IEnumerator FadeGraphics(MenuBase menu, bool isFadeIn, float duration)
     {
         IAnimationCurvePreset curvePreset = GameDirector.instance.curvePreset;
@@ -431,6 +392,7 @@ public class UIBase : MonoBehaviour, IUIBase
         for (int i = 0; i < graphics.Length; i++) graphics[i].color = endColors[i];
     }
 
+    // 메뉴의 가운데-외곽 사이의 아이템 이동
     protected virtual IEnumerator FadeItem(RectTransform item, InitialSettings initialSettings,
         bool isFadeIn, float duration)
     {
@@ -456,11 +418,11 @@ public class UIBase : MonoBehaviour, IUIBase
         item.anchoredPosition = endPosition;
     }
 
-    #endregion
-
-
-    #region Window
-
+    // ******************************************************************************
+    // 3-4-1) 메서드 -> 표시 -> 창(Window)
+    //    - 창의 모든 오브젝트에 대한 페이드 인-아웃 기능
+    // ******************************************************************************
+    // 배경 이미지의 투명-불투명 그라데이션 효과
     protected virtual IEnumerator FadeBackGroundImage(WindowBase window, bool isFadeIn, float duration)
     {
         Image image = window.backGroundImage;
@@ -484,6 +446,7 @@ public class UIBase : MonoBehaviour, IUIBase
         image.color = endColor;
     }
 
+    // 창의 사이즈에 대한 페이드 인-아웃(
     protected virtual IEnumerator FadeWindow(WindowBase window, bool isFadeIn, float duration)
     {
         IAnimationCurvePreset curvePreset = GameDirector.instance.curvePreset;
