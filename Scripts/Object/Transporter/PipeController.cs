@@ -91,7 +91,7 @@ public class PipeController : TransporterBase, IPipeController
     // ------------------------------------------------------------------------------
     // 3-1) 메서드 -> 이벤트 함수
     //    - 오브젝트 초기화
-    //    - 연결된 다음 지점(Exit)간의 기즈모 생성
+    //    - 연결된 지점(Exit)간의 기즈모 생성
     // ------------------------------------------------------------------------------
     protected virtual void Reset() { ResetField(); }
 
@@ -170,7 +170,7 @@ public class PipeController : TransporterBase, IPipeController
     // 3-3-4) 메서드 -> 액션 -> 전송(Transport)
     //    - 플레이어를 연결된 지점(Exit)으로 바로 이동
     //    - 루틴: 준비(Ready) -> 입장(Enter) -> 대기(Wait) -> 퇴장(Exit)
-    //    - 퇴장 루틴(함수)은 연결된 지점 오브젝트로 넘어가서 호출됨
+    //    - 퇴장 루틴(함수)은 연결된 다른 Pipe 오브젝트로 넘어가서 호출됨
     // ******************************************************************************
     public override Coroutine Transport(IPlayerController player)
     {
@@ -227,7 +227,7 @@ public class PipeController : TransporterBase, IPipeController
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // 3-3-4-4) 메서드 -> 액션 -> 전송(Transport) -> 퇴장(Exit)
-    //    - 출발 지점이 아닌 연결된 지점(Exit)에서 호출됨
+    //    - 연결된 다른 Pipe 오브젝트(Exit)에서 호출됨
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     public virtual Coroutine Exit(IPlayerController player)
     {
