@@ -1,9 +1,12 @@
 // //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 오브젝트의 여러 속성(Gravityable, Interactable, Damageable)에 대한 인터페이스
+//
 // * 목차
-//    1. 인터페이스 ... Line 12
-//        1- 중력(Gravityable) ........ Line 15
-//        2- 상호작용(Interactable) ... Line 56
-//        3- 피격(Damageable) ......... Line 74
+//    1. 인터페이스 ... Line 15
+//        1- 중력(Gravityable) ........ Line 18
+//        2- 상호작용(Interactable) ... Line 59
+//        3- 피격(Damageable) ......... Line 77
 // //////////////////////////////////////////////////////////////////////////////
 using System;
 using UnityEngine;
