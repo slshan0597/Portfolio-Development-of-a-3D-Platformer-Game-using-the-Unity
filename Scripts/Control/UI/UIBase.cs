@@ -337,6 +337,8 @@ public class UIBase : MonoBehaviour, IUIBase
     // ******************************************************************************
     // 3-4-1) 메서드 -> 표시 -> 메뉴
     //    - 메뉴의 모든 오브젝트에 대한 페이드 인-아웃 기능
+    //    - 투명-불투명 간의 그라데이션 효과
+    //    - 메뉴의 가운데-외곽 사이로 아이템을 이동하여 배치
     // ******************************************************************************
     protected virtual IEnumerator FadeContent(MenuBase menu, bool isFadeIn, float duration)
     {
@@ -355,7 +357,6 @@ public class UIBase : MonoBehaviour, IUIBase
         if (!isFadeIn) menu.gameObject.SetActive(false);
     }
 
-    // 투명-불투명 간의 그라데이션 효과
     protected virtual IEnumerator FadeGraphics(MenuBase menu, bool isFadeIn, float duration)
     {
         IAnimationCurvePreset curvePreset = GameDirector.instance.curvePreset;
@@ -391,8 +392,7 @@ public class UIBase : MonoBehaviour, IUIBase
 
         for (int i = 0; i < graphics.Length; i++) graphics[i].color = endColors[i];
     }
-
-    // 메뉴의 가운데-외곽 사이의 아이템 이동
+    
     protected virtual IEnumerator FadeItem(RectTransform item, InitialSettings initialSettings,
         bool isFadeIn, float duration)
     {
@@ -419,10 +419,11 @@ public class UIBase : MonoBehaviour, IUIBase
     }
 
     // ******************************************************************************
-    // 3-4-1) 메서드 -> 표시 -> 창(Window)
+    // 3-4-2) 메서드 -> 표시 -> 창(Window)
     //    - 창의 모든 오브젝트에 대한 페이드 인-아웃 기능
+    //    - 배경 이미지의 투명-불투명 그라데이션 효과
+    //    - 창 사이즈의 높이를 조절하여 배치(두루마리)
     // ******************************************************************************
-    // 배경 이미지의 투명-불투명 그라데이션 효과
     protected virtual IEnumerator FadeBackGroundImage(WindowBase window, bool isFadeIn, float duration)
     {
         Image image = window.backGroundImage;
@@ -446,7 +447,6 @@ public class UIBase : MonoBehaviour, IUIBase
         image.color = endColor;
     }
 
-    // 창의 사이즈에 대한 페이드 인-아웃(
     protected virtual IEnumerator FadeWindow(WindowBase window, bool isFadeIn, float duration)
     {
         IAnimationCurvePreset curvePreset = GameDirector.instance.curvePreset;
@@ -481,11 +481,11 @@ public class UIBase : MonoBehaviour, IUIBase
         else          window.gameObject.SetActive(false);
     }
 
-    #endregion
-
-
-    #region List
-
+    // ******************************************************************************
+    // 3-4-3) 메서드 -> 표시 -> 슬롯(Slot)
+    //    - 슬롯 리스트에 대한 페이드 인-아웃 기능
+    //    - 슬롯마다 간격(인터벌)을 두고 좌-우로 하나씩 이동하여 배치
+    // ******************************************************************************
     protected virtual IEnumerator FadeSlots(IEnumerable<SlotBase> slots, bool isFadeIn, float slotDuration,
         float interval, FadeDirection fadeDirection)
     {
@@ -556,10 +556,4 @@ public class UIBase : MonoBehaviour, IUIBase
             default:                  return Vector2.zero;
         }
     }
-
-    #endregion
-
-    #endregion
-
-    #endregion
 }
