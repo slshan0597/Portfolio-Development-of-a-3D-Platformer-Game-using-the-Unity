@@ -6,7 +6,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 40
 //    2. 클래스 ....... Line 63
-//        1) 정의 ... Line 68
+//        1) 내부 타입 ... Line 68
 //            1- 캐릭터 상태 ... Line 71
 //            2- 캐릭터 설정 ... Line 86
 //        2) 필드 ..... Line 186
@@ -65,10 +65,10 @@ public interface IGoombaController : IEnemyBase
 public class GoombaController : EnemyBase, IGoombaController
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태
+    // 1-1) 내부 타입 -> 캐릭터 상태
     //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
     //    - 캐릭터의 주 상태 저장
     // ------------------------------------------------------------------------------
@@ -83,12 +83,12 @@ public class GoombaController : EnemyBase, IGoombaController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 -> 캐릭터 설정
+    // 1-2) 내부 타입 -> 캐릭터 설정
     //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        // Definition
+        // 내부 타입
         [Serializable] public class Idle
         {
             [SerializeField] protected float _duration;
@@ -158,7 +158,7 @@ public class GoombaController : EnemyBase, IGoombaController
             public Attack(float duration) { _duration = duration; }
         }
 
-        // Field
+        // 필드
         [SerializeField] protected Idle   _idle;
         [SerializeField] protected Walk   _walk;
         [SerializeField] protected Chase  _chase;
@@ -171,7 +171,7 @@ public class GoombaController : EnemyBase, IGoombaController
         public Brake  brake  { get { return _brake; } }
         public Attack attack { get { return _attack; } }
 
-        // Method
+        // 메서드
         public Setting(Idle idle, Walk walk, Chase chase, Brake brake, Attack attack)
         {
             _idle   = idle;
