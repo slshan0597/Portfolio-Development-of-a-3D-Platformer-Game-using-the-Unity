@@ -6,9 +6,9 @@
 // * 목차
 //    1. 인터페이스 ... Line 34
 //    2. 클래스 ....... Line 56
-//        1) 정의 ..... Line 61
-//        2) 필드 ..... Line 71
-//        3) 메서드 ... Line 88
+//        1) 내부 타입 ... Line 61
+//        2) 필드 ........ Line 71
+//        3) 메서드 ...... Line 88
 //            1- 이벤트 함수 ... Line 92
 //            2- 초기화 ........ Line 108
 //            3- 액션 .......... Line 134
@@ -58,7 +58,7 @@ public interface IPipeController : ITransporterBase
 public class PipeController : TransporterBase, IPipeController
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     public new class State : TransporterBase.State
     {
