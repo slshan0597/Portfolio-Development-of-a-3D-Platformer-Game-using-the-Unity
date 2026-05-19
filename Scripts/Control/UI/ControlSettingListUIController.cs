@@ -1,8 +1,24 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 컨트롤 설정(창)에 대한 UI 클래스
+//    - UI 조작 시(이벤트 발생 시) Control Setting Manager 클래스를 호출하여 조작된 값으로 설정을 변경한 후 저장
+//    - Control Setting Manager 클래스에서 다시 호출하여 현재 UI를 변경된 값으로 갱신
+//
+// * 목차
+//    1. 인터페이스 ... Line 30
+//    2. 클래스 ....... Line 50
+//        1) 정의 ..... Line 56
+//        2) 필드 ..... Line 81
+//        3) 메서드 ... Line 100
+//            1- 이벤트 함수 ..... Line 104
+//            2- 초기화 .......... Line 127
+//            3- 셋(Set) ......... Line 146
+//            4- 표시(Display) ... Line 187
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace Game
 {
@@ -12,41 +28,36 @@ namespace Game
     using InversionType   = ControlSettingManager.Data.Camera.InversionType;
     using PlayerMainState = PlayerController.State.Main;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(ISettingListUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IControlSettingListUIController : ISettingListUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         new Root root { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(SettingListUIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class ControlSettingListUIController : SettingListUIBase, IControlSettingListUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 추가 정의
+        //    - UI의 구조에 대한 클래스
+        // ==============================================================================
         public new class Root
         {
-            #region Definition
-
+            // 내부 추가 정의
+            // 카메라 민감도
             public class Sensitivity : SlotBase
             {
-                #region Definition
-
+                // 조작
                 public class Option : MenuBase
                 {
-                    #region Field
-
                     public Text   text   { get; }
                     public Slider slider { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
@@ -54,162 +65,81 @@ namespace Game
                         slider = content.GetComponentInChildren<Slider>(true);
                     }
 
-                    #endregion
-
-
-                    #region Method
-
                     public void SetContent(float sensitivity)
                     {
                         text.text    = sensitivity.ToString();
                         slider.value = sensitivity;
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
                 public Option option { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Sensitivity(Transform transform) : base(transform)
                 {
                     option = new Option(content.Find("Option"));
                 }
-
-                #endregion
             }
 
-
+            // 카메라 반전
             public class Inversion : SlotBase
             {
-                #region Definition
-
+                // 조작
                 public class Option : MenuBase
                 {
-                    #region Field
-
                     public Toggle toggle { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
                         toggle = content.GetComponentInChildren<Toggle>(true);
                     }
 
-                    #endregion
-
-
-                    #region Method
-
                     public void SetContent(bool value) { toggle.isOn = value; }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
                 public Option option { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Inversion(Transform transform) : base(transform)
                 {
                     option = new Option(content.Find("Option"));
                 }
-
-                #endregion
             }
 
-
+            // 키 맵핑
             public class Mapping : SlotBase
             {
-                #region Definition
-
+                // 조작
                 public class Option : MenuBase
                 {
-                    #region Field
-
                     public Button button { get; }
                     public Text   text   { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
                         button = content.GetComponentInChildren<Button>(true);
                         text   = button.GetComponentInChildren<Text>(true);
                     }
-
-                    #endregion
-
-
-                    #region Method
-
+                    
                     public void SetContent(bool interactable, KeyCode value)
                     {
                         button.interactable = interactable;
                         text.text           = (value != KeyCode.None) ? value.ToString() : string.Empty;
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
                 public Option option { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Mapping(Transform transform) : base(transform)
                 {
                     option = new Option(content.Find("Option"));
                 }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드
             public Sensitivity                            sensitivity { get; }
             public Dictionary<InversionType,   Inversion> inversions  { get; }
             public Dictionary<PlayerMainState, Mapping>   mappings    { get; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 메서드 -> 생성자
             public Root(Transform transform)
             {
                 var content = transform.GetComponentInChildren<LayoutGroup>(true).transform;
@@ -235,11 +165,8 @@ namespace Game
                 }
             }
 
-            #endregion
-
-
-            #region Method
-
+            // 메서드 -> 셋(Set)
+            // 설정에서 변경된 값으로 UI 갱신
             public void SetContent(IControlSettingManager controlSetting)
             {
                 var cameraData = controlSetting.data.camera;
@@ -263,24 +190,23 @@ namespace Game
                     key.option.SetContent(interactable, controlSetting.GetKey(type));
                 }
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public new Root root { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        //    - 부모 클래스의 함수들을 재정의하여 확장
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        //    - 필드(컴포넌트 등) 초기화
+        //    - 조작 가능한 UI(Interactable)에 이벤트 연결
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -306,11 +232,10 @@ namespace Game
             }
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        //    - 설정이 변경되면 UI 갱신
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -320,11 +245,10 @@ namespace Game
             root.SetContent(controlSetting);
         }
 
-        #endregion
-
-
-        #region Option
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 이벤트
+        //    - 조작 시 데이터 값을 변경 후 변경된 내용으로 설정 및 저장하기 위해 Control Setting Manager 호출
+        // ------------------------------------------------------------------------------
         protected virtual void OnValueChangedSensitivitySlider()
         {
             if (isDisplaying) return;
@@ -336,7 +260,6 @@ namespace Game
 
             cameraData.sensitivity = (int)sensitivity.option.slider.value;
 
-            //sensitivity.option.SetContent(cameraData.sensitivity);
             controlSetting.Set();
         }
 
@@ -356,68 +279,9 @@ namespace Game
 
         protected virtual void OnClickMappingButton(PlayerMainState type)
         {
-            //StartCoroutine(TryChangeKey(type));
-
             IConfirmUIController confirmUI = ui.menu.game.ui.confirm;
 
             confirmUI.DisplayForControlSetting(type);
         }
-
-        //protected virtual IEnumerator TryChangeKey(PlayerMainState type)
-        //{
-        //    IControlSettingManager controlSetting = ui.menu.control;
-
-        //    var mapping           = root.mappings[type];
-        //    var mappingData       = controlSetting.data.mappings[controlSetting.state];
-        //    var characterKeyDatas = mappingData.characterKeys;
-        //    var menuKeyDatas      = mappingData.menuKeys;
-
-        //    mapping.option.SetContent(false, KeyCode.None);
-
-        //    yield return WaitInput(type, characterKeyDatas, menuKeyDatas);
-
-        //    //key.option.SetContent(true, characterKeyDatas[type]);
-        //    controlSetting.Set();
-        //}
-
-        //protected virtual IEnumerator WaitInput(CharacterKeyType type, SimpleData<CharacterKeyType, KeyCode> characterKeyDatas,
-        //    SimpleData<MenuKeyType, KeyCode> menuKeyDatas)
-        //{
-        //    float delay = 0.1f;
-
-        //    yield return new WaitForSecondsRealtime(delay);
-
-        //    while (!Input.anyKeyDown) yield return null;
-
-        //    foreach (KeyCode value in Enum.GetValues(typeof(KeyCode)))
-        //    {
-        //        if (!Input.GetKeyDown(value)) continue;
-
-        //        yield return new WaitForSecondsRealtime(delay);
-
-        //        KeyCode closeKey = menuKeyDatas[MenuKeyType.Menu];
-        //        KeyCode resetKey = menuKeyDatas[MenuKeyType.Other];
-
-        //        if ((value == closeKey) || (value == resetKey)) break;
-
-        //        foreach (var element in characterKeyDatas)
-        //        {
-        //            CharacterKeyType _type  = element.key;
-        //            KeyCode          _value = element.value;
-
-        //            if (_type  == type)  continue;
-        //            if (_value == value) goto Skip;
-        //        }
-
-        //        characterKeyDatas[type] = value;
-
-        //        Skip:
-        //        break;
-        //    }
-        //}
-
-        #endregion
-
-        #endregion
     }
 }
