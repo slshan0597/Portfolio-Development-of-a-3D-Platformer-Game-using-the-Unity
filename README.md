@@ -4,4 +4,4 @@
 #### 개발 인원 : 개인
 #### 기술 스택 : Unity, Visual Studio
 #### 빌드 플랫폼 : Windows, Android
-#### 참고 : (동영상 링크)
+#### 참고 : https://www.youtube.com/playlist?list=PLhscUuAvcIkuDTdSSWKkFfHjPwHGn0bD_ (동영상 링크)
