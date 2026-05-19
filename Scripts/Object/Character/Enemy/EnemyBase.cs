@@ -7,7 +7,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 35
 //    2. 클래스 ....... Line 61
-//        1) 정의 ... Line 66
+//        1) 내부 타입 ... Line 66
 //            1- 캐릭터 상태 ... Line 69
 //            2- 캐릭터 설정 ... Line 81
 //        2) 필드 ..... Line 119
@@ -63,10 +63,10 @@ public interface IEnemyBase : ICharacterBase
 public class EnemyBase : CharacterBase, IEnemyBase
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태
+    // 1-1) 내부 타입 -> 캐릭터 상태
     //    - 부모 클래스(CharacterBase.State)를 대체하여 새로 정의
     //    - 캐릭터의 주 상태 저장
     // ------------------------------------------------------------------------------
@@ -78,12 +78,12 @@ public class EnemyBase : CharacterBase, IEnemyBase
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 -> 캐릭터 설정
+    // 1-2) 내부 타입 -> 캐릭터 설정
     //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class EnemySetting
     {
-        // Definition
+        // 내부 타입
         [Serializable] public class Find
         {
             [SerializeField] protected float _duration;
@@ -100,14 +100,14 @@ public class EnemyBase : CharacterBase, IEnemyBase
             public GameObject drop { get { return _drop; } }
         }
 
-        // Field
+        // 필드
         [SerializeField] protected Find _find;
         [SerializeField] protected Die  _die;
 
         public Find find { get { return _find; } }
         public Die  die  { get { return _die; } }
 
-        // Method
+        // 메서드
         public EnemySetting(Find find)
         { 
             _find = find;
