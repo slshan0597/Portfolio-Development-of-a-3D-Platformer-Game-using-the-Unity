@@ -5,9 +5,9 @@
 // * 목차
 //    1. 인터페이스 ... Line 29
 //    2. 클래스 ....... Line 57
-//        1) 정의 ..... Line 66
-//        2) 필드 ..... Line 92
-//        3) 메서드 ... Line 128
+//        1) 내부 타입 ... Line 66
+//        2) 필드 ........ Line 92
+//        3) 메서드 ...... Line 128
 //            1- 이벤트 함수 ... Line 132
 //            2- 초기화 ........ Line 155
 //            3- 액션 .......... Line 178
@@ -63,7 +63,7 @@ public interface IThrowableBase
 public class ThrowableBase : MonoBehaviour, IThrowableBase, IGravityable, IInteractable, IDamageable
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     public enum State { None, Idle, Carry, Throw, Destroy }
 
