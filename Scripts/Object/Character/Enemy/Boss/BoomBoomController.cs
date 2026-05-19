@@ -7,7 +7,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 40
 //    2. 클래스 ....... Line 61
-//        1) 정의 ... Line 66
+//        1) 내부 타입 ... Line 66
 //            1- 캐릭터 상태 ... Line 69
 //            2- 캐릭터 설정 ... Line 83
 //        2) 필드 ..... Line 166
@@ -63,10 +63,10 @@ public interface IBoomBoomController : IBossBase
 public class BoomBoomController : BossBase, IBoomBoomController
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태
+    // 1-1) 내부 타입 -> 캐릭터 상태
     //    - 부모 클래스(BossBase.State)를 대체하여 새로 정의
     //    - 캐릭터의 주 상태 저장
     //    - 캐릭터의 형태 저장
@@ -80,12 +80,12 @@ public class BoomBoomController : BossBase, IBoomBoomController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 -> 캐릭터 설정
+    // 1-2) 내부 타입 -> 캐릭터 설정
     //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        // Definition
+        // 내부 타입
         [Serializable] public class Find : SimpleData<ModelType, Find.Value>
         {
             [Serializable] public class Value
@@ -144,7 +144,7 @@ public class BoomBoomController : BossBase, IBoomBoomController
             public Brake(SimpleData<ModelType, Value> _base, MoveSetting move) : base(_base) { _move = move; }
         }
 
-        // Field
+        // 필드
         [SerializeField] protected Find  _find;
         [SerializeField] protected Chase _chase;
         [SerializeField] protected Brake _brake;
@@ -153,7 +153,7 @@ public class BoomBoomController : BossBase, IBoomBoomController
         public Chase chase { get { return _chase; } }
         public Brake brake { get { return _brake; } }
 
-        // Method
+        // 메서드
         public Setting(Find find, Chase chase, Brake brake)
         {
             _find  = find;
