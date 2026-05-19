@@ -6,7 +6,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 70
 //    2. 클래스 ....... Line 118
-//        1) 정의 ... Line 123
+//        1) 내부 타입 ... Line 123
 //            1- 캐릭터 상태 ... Line 126
 //            2- 캐릭터 설정 ... Line 191
 //        2) 필드 ..... Line 443
@@ -120,17 +120,17 @@ public interface IPlayerController : ICharacterBase
 public class PlayerController : CharacterBase, IPlayerController
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태
+    // 1-1) 내부 타입 -> 캐릭터 상태
     //    - 부모 클래스(CharacterBase.State)를 대체하여 새로 정의
     //    - 캐릭터의 주 상태(액션)에 대한 보조 상태 저장
     //    - 주 상태 외에 특수 상태(오버랩) 저장
     // ------------------------------------------------------------------------------
     public new class State : CharacterBase.State
     {
-        // Definition
+        // 내부 타입
         public new enum Main
         {
             None   = 0,  Idle = 1,   Damage  = 2,   Fall   = 4,   Land     = 8,    Run  = 16,   Brake = 32,
@@ -166,7 +166,7 @@ public class PlayerController : CharacterBase, IPlayerController
             }
         }
 
-        // Field
+        // 필드
         public new Main       main;
         public Land           land;
         public Jump           jump;
@@ -179,7 +179,7 @@ public class PlayerController : CharacterBase, IPlayerController
         public IThrowableBase throwable;
         public int            hitPoint;
 
-        // Method
+        // 메서드
         public State(int hitPoint) : base()
         {
             overlap       = new Overlap();
@@ -188,12 +188,12 @@ public class PlayerController : CharacterBase, IPlayerController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 -> 캐릭터 설정
+    // 1-2) 내부 타입 -> 캐릭터 설정
     //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        // Definition
+        // 내부 타입
         [Serializable] public class Fall
         {
             [SerializeField] protected MoveSetting _move;
@@ -394,7 +394,7 @@ public class PlayerController : CharacterBase, IPlayerController
             public Overlap(float duration) { _duration = duration; }
         }
 
-        // Field
+        // 필드
         [SerializeField] protected Fall                              _fall;
         [SerializeField] protected Land                              _land;
         [SerializeField] protected Run                               _run;
@@ -421,7 +421,7 @@ public class PlayerController : CharacterBase, IPlayerController
         public SimpleData<OverlapState, Overlap>  overlap     { get { return _overlap; } }
         public int                                maxHitPoint { get { return _maxHitPoint; } }
 
-        // Method
+        // 메서드
         public Setting(Fall fall, Land land, Run run, Brake brake, Crouch crouch, Jump jump, HipDrop hipDrop,
             Attack attack, Interact interact, Bump bump, SimpleData<OverlapState, Overlap> overlap, int maxHitPoint)
         {
