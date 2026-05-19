@@ -6,7 +6,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 34
 //    2. 클래스 ....... Line 57
-//        1) 정의 ... Line 63
+//        1) 내부 타입 ... Line 63
 //            1- 캐릭터 상태 ... Line 66
 //            2- 캐릭터 설정 ... Line 78
 //        2) 필드 ..... Line 118
@@ -60,10 +60,10 @@ public interface INonPlayerCharacterController : ICharacterBase
 public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterController, IInteractable
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태
+    // 1-1) 내부 타입 -> 캐릭터 상태
     //    - 부모 클래스(CharacterBase.State)를 대체하여 새로 정의
     //    - 캐릭터의 주 상태 저장
     // ------------------------------------------------------------------------------
@@ -75,12 +75,12 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 -> 캐릭터 설정
+    // 1-2) 내부 타입 -> 캐릭터 설정
     //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        // Definition
+        // 내부 타입
         [Serializable] public class Talk
         {
             [SerializeField] protected List<string> _script;
@@ -99,14 +99,14 @@ public class NonPlayerCharacterController : CharacterBase, INonPlayerCharacterCo
             public Farewell(float duration) { _duration = duration; }
         }
 
-        // Field
+        // 필드
         [SerializeField] protected Talk     _talk;
         [SerializeField] protected Farewell _farewell;
 
         public Talk     talk     { get { return _talk; } }
         public Farewell farewell { get { return _farewell; } }
 
-        // Method
+        // 메서드
         public Setting(Talk talk, Farewell farewell)
         {
             _talk     = talk;
