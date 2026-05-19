@@ -6,9 +6,9 @@
 // * 목차
 //    1. 인터페이스 ... Line 31
 //    2. 클래스 ....... Line 59
-//        1) 정의 ..... Line 65
-//        2) 필드 ..... Line 79
-//        3) 메서드 ... Line 91
+//        1) 내부 타입 ... Line 65
+//        2) 필드 ........ Line 79
+//        3) 메서드 ...... Line 91
 //            1- 이벤트 함수 ... Line 95
 //            2- 초기화 ........ Line 103
 //            3- 액션 .......... Line 114
@@ -62,7 +62,7 @@ public interface ITransporterBase
 public class TransporterBase : MonoBehaviour, ITransporterBase, IInteractable
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     public enum Type { None, Launcher, Pipe }
 
