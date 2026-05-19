@@ -6,9 +6,9 @@
 // * 목차
 //    1. 인터페이스 ... Line 29
 //    2. 클래스 ....... Line 51
-//        1) 정의 ..... Line 56
-//        2) 필드 ..... Line 80
-//        3) 메서드 ... Line 98
+//        1) 내부 타입 ... Line 56
+//        2) 필드 ........ Line 80
+//        3) 메서드 ...... Line 98
 //            1- 이벤트 함수 ... Line 102
 //            2- 초기화 ........ Line 133
 //            3- 타이머 ........ Line 160
@@ -53,7 +53,7 @@ public interface IBombController : IThrowableBase
 public class BombController : ThrowableBase, IBombController
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     public enum TimerState { None, Safety, Medium, Danger }
 
