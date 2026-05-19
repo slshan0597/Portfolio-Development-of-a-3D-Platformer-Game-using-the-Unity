@@ -85,7 +85,7 @@ namespace Game
     public class ControlSettingManager : SettingBase, IControlSettingManager
     {
         // ==============================================================================
-        // 1) 정의
+        // 1) 내부 타입
         // ==============================================================================
         // 입력 타입(플랫폼 타입이 아님)
         public enum State { Keyboard, Joystick, Touch }
