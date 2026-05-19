@@ -6,9 +6,9 @@
 // * 목차
 //    1. 인터페이스 ... Line 48
 //    2. 클래스 ....... Line 68
-//        1) 정의 ..... Line 73
-//        2) 필드 ..... Line 133
-//        3) 메서드 ... Line 152
+//        1) 내부 타입 ... Line 73
+//        2) 필드 ........ Line 133
+//        3) 메서드 ...... Line 152
 //            1- 이벤트 함수 ... Line 156
 //            2- 초기화 ........ Line 177
 //            3- 액션 .......... Line 224
@@ -70,7 +70,7 @@ public interface ILauncherController : ITransporterBase
 public class LauncherController : TransporterBase, ILauncherController
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     public class Points
     {
