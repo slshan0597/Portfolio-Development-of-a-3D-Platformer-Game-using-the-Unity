@@ -6,3 +6,8 @@
 #### 기술 스택 : Unity3D, Visual Studio(C#)
 #### 빌드 플랫폼 : Windows, Android
 #### 참고 : <https://www.youtube.com/playlist?list=PLhscUuAvcIkuDTdSSWKkFfHjPwHGn0bD_> (동영상 재생 목록)
+
+### 주요 개발 내용
+  - '오브젝트의 모듈화'를 통한 확장 기능
+  - 지형과 오브젝트에 대한 동적인 '중력 생성 시스템'
+  - 여러 환경에 대응하는 '멀티 플랫폼 지원 및 컨트롤러 전환' 기능
