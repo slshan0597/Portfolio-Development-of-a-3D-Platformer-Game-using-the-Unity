@@ -6,7 +6,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 37
 //    2. 클래스 ....... Line 59
-//        1) 정의 ... Line 64
+//        1) 내부 타입 ... Line 64
 //            1- 캐릭터 상태 ... Line 67
 //            2- 캐릭터 설정 ... Line 79
 //        2) 필드 ..... Line 148
@@ -61,10 +61,10 @@ public interface IHammerBroController : IEnemyBase
 public class HammerBroController : EnemyBase, IHammerBroController
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태
+    // 1-1) 내부 타입 -> 캐릭터 상태
     //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
     //    - 캐릭터의 주 상태 저장
     // ------------------------------------------------------------------------------
@@ -76,12 +76,12 @@ public class HammerBroController : EnemyBase, IHammerBroController
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 -> 캐릭터 설정
+    // 1-2) 내부 타입 -> 캐릭터 설정
     //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class Setting
     {
-        // Definition
+        // 내부 타입
         [Serializable] public class Attack
         {
             [SerializeField] protected SimpleData<SubState, float> _durations;
@@ -126,7 +126,7 @@ public class HammerBroController : EnemyBase, IHammerBroController
             public Land(float duration) { _duration = duration; }
         }
 
-        // Field
+        // 필드
         [SerializeField] protected Attack _attack;
         [SerializeField] protected Jump   _jump;
         [SerializeField] protected Land   _land;
@@ -135,7 +135,7 @@ public class HammerBroController : EnemyBase, IHammerBroController
         public Jump   jump   { get { return _jump; } }
         public Land   land   { get { return _land; } }
 
-        // Method
+        // 메서드
         public Setting(Attack attack, Jump jump, Land land)
         {
             _attack = attack;
