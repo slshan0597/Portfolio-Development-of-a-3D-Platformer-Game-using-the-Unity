@@ -6,7 +6,7 @@
 // * 목차
 //    1. 인터페이스 ... Line 35
 //    2. 클래스 ....... Line 55
-//        1) 정의 ... Line 60
+//        1) 내부 타입 ... Line 60
 //            1- 캐릭터 상태 ... Line 63
 //            2- 캐릭터 설정 ... Line 81
 //        2) 필드 ..... Line 124
@@ -57,10 +57,10 @@ public interface IBossBase : IEnemyBase
 public class BossBase : EnemyBase, IBossBase
 {
     // ==============================================================================
-    // 1) 정의
+    // 1) 내부 타입
     // ==============================================================================
     // ------------------------------------------------------------------------------
-    // 1-1) 정의 -> 캐릭터 상태
+    // 1-1) 내부 타입 -> 캐릭터 상태
     //    - 부모 클래스(EnemyBase.State)를 대체하여 새로 정의
     //    - 캐릭터의 주 상태 저장
     //    - 캐릭터의 체력 저장
@@ -78,12 +78,12 @@ public class BossBase : EnemyBase, IBossBase
     }
 
     // ------------------------------------------------------------------------------
-    // 1-2) 정의 -> 캐릭터 설정
+    // 1-2) 내부 타입 -> 캐릭터 설정
     //    - 캐릭터 상태에 대한 설정 프로퍼티 저장
     // ------------------------------------------------------------------------------
     [Serializable] public class BossSetting
     {
-        // Definition
+        // 내부 타입
         [Serializable] public class Die
         {
             [SerializeField] protected float _duration;
@@ -102,7 +102,7 @@ public class BossBase : EnemyBase, IBossBase
             public Appear(float duration) { _duration = duration; }
         }
 
-        // Field
+        // 필드
         [SerializeField] protected Die    _die;
         [SerializeField] protected Appear _appear;
         [SerializeField] protected int    _maxHitPoint;
@@ -111,7 +111,7 @@ public class BossBase : EnemyBase, IBossBase
         public Appear appear      { get { return _appear; } }
         public int    maxHitPoint { get { return _maxHitPoint; } }
 
-        // Method
+        // 메서드
         public BossSetting(Die die, Appear appear, int maxHitPoint)
         {
             _die         = die;
