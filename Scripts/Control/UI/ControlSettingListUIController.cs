@@ -7,9 +7,9 @@
 // * 목차
 //    1. 인터페이스 ... Line 31
 //    2. 클래스 ....... Line 41
-//        1) 내부 추가 정의 ... Line 46
-//        2) 필드 ............ Line 195
-//        3) 메서드 .......... Line 201
+//        1) 내부 타입 ... Line 46
+//        2) 필드 ........ Line 195
+//        3) 메서드 ...... Line 201
 //            1- 초기화 .... Line 205
 //            2- 셋(Set) ... Line 235
 //            3- 이벤트 .... Line 248
@@ -43,12 +43,12 @@ namespace Game
     public class ControlSettingListUIController : SettingListUIBase, IControlSettingListUIController
     {
         // ==============================================================================
-        // 1) 내부 추가 정의
+        // 1) 내부 타입
         //    - UI의 구조에 대한 클래스
         // ==============================================================================
         public new class Root
         {
-            // 내부 추가 정의
+            // 내부 타입
             // 카메라 민감도
             public class Sensitivity : SlotBase
             {
