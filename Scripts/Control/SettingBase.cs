@@ -39,7 +39,7 @@ namespace Game
     // //////////////////////////////////////////////////////////////////////////////
     public class SettingBase : MonoBehaviour, ISettingBase
     {
-        // 정의
+        // 내부 타입 정의
         public enum Type { None, Graphic, Audio, Control }
 
         // 필드
