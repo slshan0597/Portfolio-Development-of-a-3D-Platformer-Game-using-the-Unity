@@ -13,3 +13,6 @@
   - `오브젝트의 모듈화`를 통한 확장 기능
   - 지형과 오브젝트에 대한 동적인 `중력 생성 시스템`
   - 여러 환경에 대응하는 `멀티 플랫폼 지원 및 컨트롤러 전환` 기능
+
+### 프로그램 구조
+<img width="2190" height="1120" alt="Diagram02" src="https://github.com/user-attachments/assets/5c00f8a1-a2f5-46d2-a666-43372906b54e" />
