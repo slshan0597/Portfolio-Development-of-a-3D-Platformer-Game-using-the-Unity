@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-
 namespace Game
 {
     using CharacterStat        = DataManager.CharacterStat;
@@ -44,11 +43,12 @@ namespace Game
     using ChallengeSave        = SaveMenuManager.Data.Stage.Level.Challenge;
     using MoneySave            = SaveMenuManager.Data.Money;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IDataManager
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         IGameDirector game { get; }
 
@@ -60,36 +60,32 @@ namespace Game
         // Setting
         Setting setting { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Save Get();
         void Set(Save save);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스
+    // //////////////////////////////////////////////////////////////////////////////
     public class DataManager : MonoBehaviour, IDataManager
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        //    - 세이브 데이터(클래스)에서 확장
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 1-1) 내부 타입 -> 캐릭터 스텟
+        // ------------------------------------------------------------------------------
         public class CharacterStat : CharacterStatSave
         {
-            #region Field
-
+            // 필드
             public int   maxCount      { get; protected set; }
             public int   maxPercentage { get; protected set; }
             public int   cost          { get; protected set; }
             public float rate          { get { return (maxPercentage * value / (float)maxCount) * 0.01f; } }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public CharacterStat(CharacterStatSave _base, int maxCount, int maxPercentage, int cost) : base(_base)
             {
                 this.maxCount      = maxCount;
@@ -103,58 +99,41 @@ namespace Game
                 maxPercentage = other.maxPercentage;
                 cost          = other.cost;
             }
-
-            #endregion
         }
 
-
+        // ------------------------------------------------------------------------------
+        // 1-2) 내부 타입 -> 스테이지(레벨)
+        // ------------------------------------------------------------------------------
         public class Base : BaseSave
         {
-            #region Field
-
+            // 필드
             public string name { get; protected set; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Base(BaseSave _base, string name) : base(_base) { this.name = name; }
 
             public Base(Base other) : base(other) { name = other.name; }
-
-            #endregion
         }
-
 
         public class Stages : LinkedList<Stage>
         {
-            #region Definition
-
+            // 내부 타입 - 스테이지 리스트
             public class Stage : Base
             {
-                #region Definition
-
+                // 내부 타입 - 스테이지
                 public class Levels : LinkedList<Level>
                 {
-                    #region Definition
-
+                    // 내부 타입 - 레벨 리스트
                     public class Level : Base
                     {
-                        #region Definition
-
+                        // 내부 타입 - 레벨
                         public class Challenge : ChallengeSave
                         {
-                            #region Field
-
+                            // 필드 - 챌린지
                             public ComparisonSetting comparison { get; protected set; }
                             public int               reward     { get; protected set; }
 
-                            #endregion
-
-
-                            #region Constructor
-
+                            // 생성자 - 챌린지
                             public Challenge(ChallengeSave _base, ComparisonSetting comparison, int reward) : base(_base)
                             {
                                 this.comparison = new ComparisonSetting(comparison);
@@ -166,23 +145,13 @@ namespace Game
                                 comparison = new ComparisonSetting(other.comparison);
                                 reward     = other.reward;
                             }
-
-                            #endregion
                         }
 
-                        #endregion
-
-
-                        #region Field
-
+                        // 필드 - 레벨
                         public int                                  reward     { get; protected set; }
                         public Dictionary<ChallengeType, Challenge> challenges { get; protected set; }
 
-                        #endregion
-
-
-                        #region Constructor
-
+                        // 생성자 - 레벨
                         public Level(Base _base, int reward, Dictionary<ChallengeType, Challenge> challenges) : base(_base)
                         {
                             this.reward     = reward;
@@ -194,24 +163,14 @@ namespace Game
                             reward     = other.reward;
                             challenges = new Dictionary<ChallengeType, Challenge>(other.challenges);
                         }
-
-                        #endregion
                     }
 
-                    #endregion
-
-
-                    #region Constructor
-
+                    // 생성자 - 레벨 리스트
                     public Levels(List<Level> levels) : base(levels) { }
 
                     public Levels(Levels other) : base(other) { }
 
-                    #endregion
-
-
-                    #region Method
-
+                    // 메서드 - 레벨 리스트
                     public Level this[int id] => this.First(element => element.id == id);
 
                     public Level Current => this.First(element => element.selected);
@@ -237,43 +196,23 @@ namespace Game
 
                         return exist;
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드 - 스테이지
                 public Levels levels { get; protected set; }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 스테이지
                 public Stage(Base _base, Levels levels) : base(_base) { this.levels = levels; }
 
                 public Stage(Stage other) : base(other) { levels = other.levels; }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자 - 스테이지 리스트
             public Stages(List<Stage> stages) : base(stages) { }
 
             public Stages(Stages other) : base(other) { }
 
-            #endregion
-
-
-            #region Method
-
+            // 메서드 - 스테이지 리스트
             public Stage this[int id] => this.First(element => element.id == id);
 
             public Stage Current => this.First(element => element.selected);
@@ -299,45 +238,37 @@ namespace Game
 
                 return exist;
             }
-
-            #endregion
         }
 
-
+        // ------------------------------------------------------------------------------
+        // 1-3) 내부 타입 -> 재화(Money)
+        // ------------------------------------------------------------------------------
         public class Money : MoneySave
         {
-            #region Field
-
+            // 필드
             public int rewardOfCoin { get; protected set; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Money(MoneySave _base, int rewardOfCoin) : base(_base) { this.rewardOfCoin = rewardOfCoin; }
 
             public Money(Money other) : base(other) { rewardOfCoin = other.rewardOfCoin; }
-
-            #endregion
         }
 
-
+        // ------------------------------------------------------------------------------
+        // 1-4) 내부 타입 -> 설정
+        //    - 데이터의 식별(이름, 타입 등), 최댓값, 비용 등 설정
+        // ------------------------------------------------------------------------------
         [Serializable] public class Setting
         {
-            #region Definition
-
+            // ******************************************************************************
+            // 1-4-1) 내부 타입 -> 설정 -> 캐릭터 스텟
+            // ******************************************************************************
             [Serializable] public class CharacterStat
             {
-                #region Definition
-
+                // 타입
                 public enum Type { RunSpeed, JumpForce, AttackCoolDown, PowerUpDuration }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드
                 [SerializeField] protected Type _type;
                 [SerializeField] protected int  _maxCount;
                 [SerializeField] protected int  _maxPercentage;
@@ -348,11 +279,7 @@ namespace Game
                 public int  maxPercentage { get { return _maxPercentage; } }
                 public int  cost          { get { return _cost; } }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public CharacterStat(Type type, int maxCount, int maxPercentage, int cost)
                 {
                     _type          = type;
@@ -368,26 +295,21 @@ namespace Game
                     _maxPercentage = other.maxPercentage;
                     _cost          = other.cost;
                 }
-
-                #endregion
             }
 
-
+            // ******************************************************************************
+            // 1-4-2) 내부 타입 -> 설정 -> 스테이지
+            // ******************************************************************************
             [Serializable] public class Base
             {
-                #region Field
-
+                // 필드
                 [SerializeField] protected int    _id;
                 [SerializeField] protected string _name;
 
                 public int    id   { get { return _id; } }
                 public string name { get { return _name; } }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public Base(int id, string name)
                 {
                     _id   = id;
@@ -399,48 +321,32 @@ namespace Game
                     _id   = other.id;
                     _name = other.name;
                 }
-
-                #endregion
             }
-
 
             [Serializable] public class Stage : Base
             {
-                #region Definition
-
+                // 내부 타입 - 스테이지
                 [Serializable] public class Level : Base
                 {
-                    #region Definition
-
+                    // 내부 타입 - 레벨
                     [Serializable] public class Challenge
                     {
-                        #region Definition
-
+                        // 내부 타입 - 챌린지
                         public enum Type { Time, Coin, Hit, Attack }
-
 
                         [Serializable] public class Comparison
                         {
-                            #region Definition
-
+                            // 내부 타입 - 챌린지 비교
                             public enum Type { Greater, Less, GreaterEqual, LessEqual }
 
-                            #endregion
-
-
-                            #region Field
-
+                            // 필드 - 챌린지 비교
                             [SerializeField] protected Type _type;
                             [SerializeField] protected int  _rhs;
 
                             public Type type { get { return _type; } }
                             public int  rhs  { get { return _rhs; } }
 
-                            #endregion
-
-
-                            #region Constructor
-
+                            // 생성자 - 챌린지 비교
                             public Comparison(Type type, int rhs)
                             {
                                 _type = type;
@@ -452,15 +358,9 @@ namespace Game
                                 _type = other.type;
                                 _rhs  = other.rhs;
                             }
-
-                            #endregion
                         }
 
-                        #endregion
-
-
-                        #region Field
-
+                        // 필드 - 챌린지
                         [SerializeField] protected Type       _type;
                         [SerializeField] protected Comparison _comparison;
                         [SerializeField] protected int        _reward;
@@ -469,11 +369,7 @@ namespace Game
                         public Comparison comparison { get { return _comparison; } }
                         public int        reward     { get { return _reward; } }
 
-                        #endregion
-
-
-                        #region Constructor
-
+                        // 생성자 - 챌린지
                         public Challenge(Type type, Comparison comparison, int reward)
                         {
                             _type       = type;
@@ -487,26 +383,16 @@ namespace Game
                             _comparison = other.comparison;
                             _reward     = other.reward;
                         }
-
-                        #endregion
                     }
 
-                    #endregion
-
-
-                    #region Field
-
+                    // 필드 - 레벨
                     [SerializeField] protected int             _reward;
                     [SerializeField] protected List<Challenge> _challenges;
 
                     public int             reward     { get { return _reward; } }
                     public List<Challenge> challenges { get { return _challenges; } }
 
-                    #endregion
-
-
-                    #region Constructor
-
+                    // 생성자 - 레벨
                     public Level(Base _base, int reward, List<Challenge> challenges) : base(_base)
                     {
                         _reward     = reward;
@@ -518,60 +404,39 @@ namespace Game
                         _reward     = other.reward;
                         _challenges = new List<Challenge>(other.challenges);
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드 - 스테이지
                 [SerializeField] protected List<Level> _levels;
 
                 public List<Level> levels { get { return _levels; } }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 스테이지
                 public Stage(Base _base, List<Level> levels) : base(_base)
                 { 
                     _levels = new List<Level>(levels);
                 }
 
                 public Stage(Stage other) : base(other) { _levels = new List<Level>(other.levels); }
-
-                #endregion
             }
 
-
+            // ******************************************************************************
+            // 1-4-3) 내부 타입 -> 설정 -> 재화(Money)
+            // ******************************************************************************
             [Serializable] public class Money
             {
-                #region Field
-
+                // 필드
                 [SerializeField] protected int _rewardOfCoin;
 
                 public int rewardOfCoin { get { return _rewardOfCoin; } }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public Money(int rewardOfCoin) { _rewardOfCoin = rewardOfCoin; }
 
                 public Money(Money other) { _rewardOfCoin = other.rewardOfCoin; }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드
             [SerializeField] protected List<CharacterStat> _characterStats;
             [SerializeField] protected List<Stage>         _stages;
             [SerializeField] protected Money               _money;
@@ -580,11 +445,7 @@ namespace Game
             public List<Stage>         stages         { get { return _stages; } }
             public Money               money          { get { return _money; } }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Setting(List<CharacterStat> characterStats, List<Stage> stages, Money money)
             {
                 _characterStats = new List<CharacterStat>(characterStats);
@@ -598,41 +459,37 @@ namespace Game
                 _stages         = new List<Stage>(other.stages);
                 _money          = new Money(other.money);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public IGameDirector game { get; protected set; }
 
+        // Data
         public Dictionary<CharacterStatType, CharacterStat> characterStats { get; protected set; }
         public Stages                                       stages         { get; protected set; }
         public Money                                        money          { get; protected set; }
 
+        // Setting
         [SerializeField] protected Setting _setting;
 
         public Setting setting { get { return _setting; } }
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        // ------------------------------------------------------------------------------
         protected virtual void Awake() { SetField(); }
 
         protected virtual void Reset() { ResetField(); }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected virtual void SetField() { game = GetComponentInParent<IGameDirector>(true); }
 
         protected virtual void ResetField()
@@ -687,13 +544,10 @@ namespace Game
                 new MoneySetting(10));
         }
 
-        #endregion
-
-
-        #region Method
-
-        #region Get
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 겟(Get)
+        //    - 데이터를 추출하여 세이브(데이터) 타입으로 가공
+        // ------------------------------------------------------------------------------
         public virtual Save Get()
         {
             var characterStats = Extract(this.characterStats);
@@ -703,6 +557,9 @@ namespace Game
             return new Save(characterStats, stages, money);
         }
 
+        // ******************************************************************************
+        // 3-3-1) 메서드 -> 겟(Get) -> 캐릭터 스텟
+        // ******************************************************************************
         protected virtual List<CharacterStatSave> Extract(Dictionary<CharacterStatType, CharacterStat> datas)
         {
             var saves = new List<CharacterStatSave>();
@@ -717,6 +574,9 @@ namespace Game
             return saves;
         }
 
+        // ******************************************************************************
+        // 3-3-2) 메서드 -> 겟(Get) -> 스테이지(레벨)
+        // ******************************************************************************
         protected virtual List<StageSave> Extract(Stages datas)
         {
             var saves = new List<StageSave>();
@@ -773,11 +633,10 @@ namespace Game
             return saves;
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 셋(Set)
+        //    - 세이브(데이터)를 가져와 설정(데이터)와 병합
+        // ------------------------------------------------------------------------------
         public virtual void Set(Save save)
         {
             characterStats = Combine(setting.characterStats, save?.characterStats);
@@ -785,6 +644,9 @@ namespace Game
             money          = Combine(setting.money,          save?.money);
         }
 
+        // ******************************************************************************
+        // 3-4-1) 메서드 -> 셋(Set) -> 캐릭터 스텟
+        // ******************************************************************************
         protected virtual Dictionary<CharacterStatType, CharacterStat> Combine(List<CharacterStatSetting> settings,
             List<CharacterStatSave> saves)
         {
@@ -803,6 +665,9 @@ namespace Game
             return datas;
         }
 
+        // ******************************************************************************
+        // 3-4-2) 메서드 -> 셋(Set) -> 스테이지(레벨)
+        // ******************************************************************************
         protected virtual Stages Combine(List<StageSetting> settings, List<StageSave> saves)
         {
             var   datas    = new List<Stage>();
@@ -887,11 +752,5 @@ namespace Game
 
             return new Money(_base, setting.rewardOfCoin);
         }
-
-        #endregion
-
-        #endregion
-
-        #endregion
     }
 }
