@@ -1,10 +1,18 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 메인 메뉴의 UI 클래스
+//    - 세이브, 설정 메뉴의 연결 통로
+//    - 씬의 이동 역할
+//
+// * 목차
+//    1. 인터페이스 ... Line 12
+//    2. 클래스 ....... Line 22
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
-
 
 namespace Game
 {
@@ -14,70 +22,45 @@ namespace Game
     using SceneType         = SceneBase.Type;
     using SystemControlType = ControlSettingManager.Data.SystemType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IMainMenuUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
         // Reference
         IMainMenuManager menu { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class MainMenuUIController : UIBase, IMainMenuUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        //    - UI의 구조에 대한 클래스
+        // ==============================================================================
         public class Root : WindowBase
         {
-            #region Definition
-
             public class Main : MenuBase
             {
-                #region Definition
-
                 public class Slot : SlotBase
                 {
-                    #region Definition
-
                     public enum Type { Setting, Scene, Exit }
 
-                    #endregion
-
-
-                    #region Field
-
                     public SoundButton button { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Slot(Transform transform) : base(transform)
                     {
                         button = content.GetComponentInChildren<SoundButton>(true);
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
                 public Dictionary<SlotType, Slot> slots { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Main(Transform transform) : base(transform)
                 {
@@ -91,11 +74,6 @@ namespace Game
                     }
                 }
 
-                #endregion
-
-
-                #region Method
-
                 public void SetContent(SceneType sceneType)
                 {
                     var label = slots[SlotType.Scene].labelText;
@@ -107,22 +85,10 @@ namespace Game
                         default:                                    label.text = string.Empty; break;
                     }
                 }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             public Main      main        { get; }
             public KeyButton closeButton { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Root(Transform transform) : base(transform)
             {
@@ -130,35 +96,26 @@ namespace Game
                 closeButton = content.GetComponentInChildren<KeyButton>(true);
             }
 
-            #endregion
-
-
-            #region Method
-
             public void SetContent(SceneType sceneType, IControlSettingManager controlSetting)
             {
                 main.SetContent(sceneType);
                 closeButton.SetContent(controlSetting.GetKey(SystemControlType.Cancel));
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root             root { get; protected set; }
         public IMainMenuManager menu { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -179,11 +136,10 @@ namespace Game
 
         protected override void ResetField() { _defaultDuration = 1f; }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        //    - 설정이 변경되면 UI 갱신
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -196,11 +152,9 @@ namespace Game
             root.SetContent(sceneType, controlSetting);
         }
 
-        #endregion
-
-
-        #region Display
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
         protected override IEnumerator _Display(bool isActive, float duration)
         {
             root.closeButton.gameObject.SetActive(false);
@@ -221,11 +175,11 @@ namespace Game
             else          gameObject.SetActive(false);
         }
 
-        #endregion
-
-
-        #region Option
-
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 이벤트
+        //    - 현재 씬에 따라 세이브 또는 세팅 메뉴 호출
+        //    - 씬 이동(Exit)
+        // ------------------------------------------------------------------------------
         protected virtual void OnClickSlotButton(SlotType type)
         {
             IGameDirector game  = menu.game;
@@ -292,9 +246,5 @@ namespace Game
         }
 
         protected virtual void OnClickCloseButton() { menu.Open(false); }
-
-        #endregion
-
-        #endregion
     }
 }
