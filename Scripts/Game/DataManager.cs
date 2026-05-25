@@ -1,0 +1,897 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 데이터 처리 클래스
+//    - 캐릭터 스ㅌ
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 내부 타입 ... Line 
+//        2) 필드 ..... Line 
+//        3) 메서드 ... Line 
+// //////////////////////////////////////////////////////////////////////////////
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+
+namespace Game
+{
+    using CharacterStat        = DataManager.CharacterStat;
+    using Stages               = DataManager.Stages;
+    using Stage                = DataManager.Stages.Stage;
+    using Levels               = DataManager.Stages.Stage.Levels;
+    using Level                = DataManager.Stages.Stage.Levels.Level;
+    using Challenge            = DataManager.Stages.Stage.Levels.Level.Challenge;
+    using Money                = DataManager.Money;
+    using Setting              = DataManager.Setting;
+    using BaseSetting          = DataManager.Setting.Base;
+    using CharacterStatSetting = DataManager.Setting.CharacterStat;
+    using CharacterStatType    = DataManager.Setting.CharacterStat.Type;
+    using StageSetting         = DataManager.Setting.Stage;
+    using LevelSetting         = DataManager.Setting.Stage.Level;
+    using ChallengeSetting     = DataManager.Setting.Stage.Level.Challenge;
+    using ChallengeType        = DataManager.Setting.Stage.Level.Challenge.Type;
+    using ComparisonSetting    = DataManager.Setting.Stage.Level.Challenge.Comparison;
+    using ComparisonType       = DataManager.Setting.Stage.Level.Challenge.Comparison.Type;
+    using MoneySetting         = DataManager.Setting.Money;
+    using Save                 = SaveMenuManager.Data;
+    using CharacterStatSave    = SaveMenuManager.Data.CharacterStat;
+    using BaseSave             = SaveMenuManager.Data.Base;
+    using StageSave            = SaveMenuManager.Data.Stage;
+    using LevelSave            = SaveMenuManager.Data.Stage.Level;
+    using ChallengeSave        = SaveMenuManager.Data.Stage.Level.Challenge;
+    using MoneySave            = SaveMenuManager.Data.Money;
+
+
+    public interface IDataManager
+    {
+        #region Property
+
+        // Reference
+        IGameDirector game { get; }
+
+        // Data
+        public Dictionary<CharacterStatType, CharacterStat> characterStats { get; }
+        public Stages                                       stages         { get; }
+        public Money                                        money          { get; }
+
+        // Setting
+        Setting setting { get; }
+
+        #endregion
+
+
+        #region Method
+
+        Save Get();
+        void Set(Save save);
+
+        #endregion
+    }
+
+
+    public class DataManager : MonoBehaviour, IDataManager
+    {
+        #region Definition
+
+        public class CharacterStat : CharacterStatSave
+        {
+            #region Field
+
+            public int   maxCount      { get; protected set; }
+            public int   maxPercentage { get; protected set; }
+            public int   cost          { get; protected set; }
+            public float rate          { get { return (maxPercentage * value / (float)maxCount) * 0.01f; } }
+
+            #endregion
+
+
+            #region Constructor
+
+            public CharacterStat(CharacterStatSave _base, int maxCount, int maxPercentage, int cost) : base(_base)
+            {
+                this.maxCount      = maxCount;
+                this.maxPercentage = maxPercentage;
+                this.cost          = cost;
+            }
+
+            public CharacterStat(CharacterStat other) : base(other)
+            {
+                maxCount      = other.maxCount;
+                maxPercentage = other.maxPercentage;
+                cost          = other.cost;
+            }
+
+            #endregion
+        }
+
+
+        public class Base : BaseSave
+        {
+            #region Field
+
+            public string name { get; protected set; }
+
+            #endregion
+
+
+            #region Constructor
+
+            public Base(BaseSave _base, string name) : base(_base) { this.name = name; }
+
+            public Base(Base other) : base(other) { name = other.name; }
+
+            #endregion
+        }
+
+
+        public class Stages : LinkedList<Stage>
+        {
+            #region Definition
+
+            public class Stage : Base
+            {
+                #region Definition
+
+                public class Levels : LinkedList<Level>
+                {
+                    #region Definition
+
+                    public class Level : Base
+                    {
+                        #region Definition
+
+                        public class Challenge : ChallengeSave
+                        {
+                            #region Field
+
+                            public ComparisonSetting comparison { get; protected set; }
+                            public int               reward     { get; protected set; }
+
+                            #endregion
+
+
+                            #region Constructor
+
+                            public Challenge(ChallengeSave _base, ComparisonSetting comparison, int reward) : base(_base)
+                            {
+                                this.comparison = new ComparisonSetting(comparison);
+                                this.reward     = reward;
+                            }
+
+                            public Challenge(Challenge other) : base(other)
+                            {
+                                comparison = new ComparisonSetting(other.comparison);
+                                reward     = other.reward;
+                            }
+
+                            #endregion
+                        }
+
+                        #endregion
+
+
+                        #region Field
+
+                        public int                                  reward     { get; protected set; }
+                        public Dictionary<ChallengeType, Challenge> challenges { get; protected set; }
+
+                        #endregion
+
+
+                        #region Constructor
+
+                        public Level(Base _base, int reward, Dictionary<ChallengeType, Challenge> challenges) : base(_base)
+                        {
+                            this.reward     = reward;
+                            this.challenges = new Dictionary<ChallengeType, Challenge>(challenges);
+                        }
+
+                        public Level(Level other) : base(other)
+                        {
+                            reward     = other.reward;
+                            challenges = new Dictionary<ChallengeType, Challenge>(other.challenges);
+                        }
+
+                        #endregion
+                    }
+
+                    #endregion
+
+
+                    #region Constructor
+
+                    public Levels(List<Level> levels) : base(levels) { }
+
+                    public Levels(Levels other) : base(other) { }
+
+                    #endregion
+
+
+                    #region Method
+
+                    public Level this[int id] => this.First(element => element.id == id);
+
+                    public Level Current => this.First(element => element.selected);
+
+                    public bool TryGetNext(out Level nextData)
+                    {
+                        var  node  = Find(Current);
+                        var  next  = node.Next;
+                        bool exist = next != null;
+
+                        nextData = exist ? next.Value : null;
+
+                        return exist;
+                    }
+
+                    public bool TryGetPrevious(out Level prevData)
+                    {
+                        var  node  = Find(Current);
+                        var  prev  = node.Previous;
+                        bool exist = prev != null;
+
+                        prevData = exist ? prev.Value : null;
+
+                        return exist;
+                    }
+
+                    #endregion
+                }
+
+                #endregion
+
+
+                #region Field
+
+                public Levels levels { get; protected set; }
+
+                #endregion
+
+
+                #region Constructor
+
+                public Stage(Base _base, Levels levels) : base(_base) { this.levels = levels; }
+
+                public Stage(Stage other) : base(other) { levels = other.levels; }
+
+                #endregion
+            }
+
+            #endregion
+
+
+            #region Constructor
+
+            public Stages(List<Stage> stages) : base(stages) { }
+
+            public Stages(Stages other) : base(other) { }
+
+            #endregion
+
+
+            #region Method
+
+            public Stage this[int id] => this.First(element => element.id == id);
+
+            public Stage Current => this.First(element => element.selected);
+
+            public bool TryGetNext(out Stage nextData)
+            {
+                var  node  = Find(Current);
+                var  next  = node.Next;
+                bool exist = next != null;
+
+                nextData = exist ? next.Value : null;
+
+                return exist;
+            }
+
+            public bool TryGetPrevious(out Stage prevData)
+            {
+                var  node  = Find(Current);
+                var  prev  = node.Previous;
+                bool exist = prev != null;
+
+                prevData = exist ? prev.Value : null;
+
+                return exist;
+            }
+
+            #endregion
+        }
+
+
+        public class Money : MoneySave
+        {
+            #region Field
+
+            public int rewardOfCoin { get; protected set; }
+
+            #endregion
+
+
+            #region Constructor
+
+            public Money(MoneySave _base, int rewardOfCoin) : base(_base) { this.rewardOfCoin = rewardOfCoin; }
+
+            public Money(Money other) : base(other) { rewardOfCoin = other.rewardOfCoin; }
+
+            #endregion
+        }
+
+
+        [Serializable] public class Setting
+        {
+            #region Definition
+
+            [Serializable] public class CharacterStat
+            {
+                #region Definition
+
+                public enum Type { RunSpeed, JumpForce, AttackCoolDown, PowerUpDuration }
+
+                #endregion
+
+
+                #region Field
+
+                [SerializeField] protected Type _type;
+                [SerializeField] protected int  _maxCount;
+                [SerializeField] protected int  _maxPercentage;
+                [SerializeField] protected int  _cost;
+
+                public Type type          { get { return _type; } }
+                public int  maxCount      { get { return _maxCount; } }
+                public int  maxPercentage { get { return _maxPercentage; } }
+                public int  cost          { get { return _cost; } }
+
+                #endregion
+
+
+                #region Constructor
+
+                public CharacterStat(Type type, int maxCount, int maxPercentage, int cost)
+                {
+                    _type          = type;
+                    _maxCount      = maxCount;
+                    _maxPercentage = maxPercentage;
+                    _cost          = cost;
+                }
+
+                public CharacterStat(CharacterStat other)
+                {
+                    _type          = other.type;
+                    _maxCount      = other.maxCount;
+                    _maxPercentage = other.maxPercentage;
+                    _cost          = other.cost;
+                }
+
+                #endregion
+            }
+
+
+            [Serializable] public class Base
+            {
+                #region Field
+
+                [SerializeField] protected int    _id;
+                [SerializeField] protected string _name;
+
+                public int    id   { get { return _id; } }
+                public string name { get { return _name; } }
+
+                #endregion
+
+
+                #region Constructor
+
+                public Base(int id, string name)
+                {
+                    _id   = id;
+                    _name = name;
+                }
+
+                public Base(Base other)
+                {
+                    _id   = other.id;
+                    _name = other.name;
+                }
+
+                #endregion
+            }
+
+
+            [Serializable] public class Stage : Base
+            {
+                #region Definition
+
+                [Serializable] public class Level : Base
+                {
+                    #region Definition
+
+                    [Serializable] public class Challenge
+                    {
+                        #region Definition
+
+                        public enum Type { Time, Coin, Hit, Attack }
+
+
+                        [Serializable] public class Comparison
+                        {
+                            #region Definition
+
+                            public enum Type { Greater, Less, GreaterEqual, LessEqual }
+
+                            #endregion
+
+
+                            #region Field
+
+                            [SerializeField] protected Type _type;
+                            [SerializeField] protected int  _rhs;
+
+                            public Type type { get { return _type; } }
+                            public int  rhs  { get { return _rhs; } }
+
+                            #endregion
+
+
+                            #region Constructor
+
+                            public Comparison(Type type, int rhs)
+                            {
+                                _type = type;
+                                _rhs  = rhs;
+                            }
+
+                            public Comparison(Comparison other)
+                            {
+                                _type = other.type;
+                                _rhs  = other.rhs;
+                            }
+
+                            #endregion
+                        }
+
+                        #endregion
+
+
+                        #region Field
+
+                        [SerializeField] protected Type       _type;
+                        [SerializeField] protected Comparison _comparison;
+                        [SerializeField] protected int        _reward;
+
+                        public Type       type       { get { return _type; } }
+                        public Comparison comparison { get { return _comparison; } }
+                        public int        reward     { get { return _reward; } }
+
+                        #endregion
+
+
+                        #region Constructor
+
+                        public Challenge(Type type, Comparison comparison, int reward)
+                        {
+                            _type       = type;
+                            _comparison = comparison;
+                            _reward     = reward;
+                        }
+
+                        public Challenge(Challenge other)
+                        {
+                            _type       = other.type;
+                            _comparison = other.comparison;
+                            _reward     = other.reward;
+                        }
+
+                        #endregion
+                    }
+
+                    #endregion
+
+
+                    #region Field
+
+                    [SerializeField] protected int             _reward;
+                    [SerializeField] protected List<Challenge> _challenges;
+
+                    public int             reward     { get { return _reward; } }
+                    public List<Challenge> challenges { get { return _challenges; } }
+
+                    #endregion
+
+
+                    #region Constructor
+
+                    public Level(Base _base, int reward, List<Challenge> challenges) : base(_base)
+                    {
+                        _reward     = reward;
+                        _challenges = new List<Challenge>(challenges);
+                    }
+
+                    public Level(Level other) : base(other)
+                    {
+                        _reward     = other.reward;
+                        _challenges = new List<Challenge>(other.challenges);
+                    }
+
+                    #endregion
+                }
+
+                #endregion
+
+
+                #region Field
+
+                [SerializeField] protected List<Level> _levels;
+
+                public List<Level> levels { get { return _levels; } }
+
+                #endregion
+
+
+                #region Constructor
+
+                public Stage(Base _base, List<Level> levels) : base(_base)
+                { 
+                    _levels = new List<Level>(levels);
+                }
+
+                public Stage(Stage other) : base(other) { _levels = new List<Level>(other.levels); }
+
+                #endregion
+            }
+
+
+            [Serializable] public class Money
+            {
+                #region Field
+
+                [SerializeField] protected int _rewardOfCoin;
+
+                public int rewardOfCoin { get { return _rewardOfCoin; } }
+
+                #endregion
+
+
+                #region Constructor
+
+                public Money(int rewardOfCoin) { _rewardOfCoin = rewardOfCoin; }
+
+                public Money(Money other) { _rewardOfCoin = other.rewardOfCoin; }
+
+                #endregion
+            }
+
+            #endregion
+
+
+            #region Field
+
+            [SerializeField] protected List<CharacterStat> _characterStats;
+            [SerializeField] protected List<Stage>         _stages;
+            [SerializeField] protected Money               _money;
+
+            public List<CharacterStat> characterStats { get { return _characterStats; } }
+            public List<Stage>         stages         { get { return _stages; } }
+            public Money               money          { get { return _money; } }
+
+            #endregion
+
+
+            #region Constructor
+
+            public Setting(List<CharacterStat> characterStats, List<Stage> stages, Money money)
+            {
+                _characterStats = new List<CharacterStat>(characterStats);
+                _stages         = new List<Stage>(stages);
+                _money          = new Money(money);
+            }
+
+            public Setting(Setting other)
+            {
+                _characterStats = new List<CharacterStat>(other.characterStats);
+                _stages         = new List<Stage>(other.stages);
+                _money          = new Money(other.money);
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+
+        #region Field
+
+        public IGameDirector game { get; protected set; }
+
+        public Dictionary<CharacterStatType, CharacterStat> characterStats { get; protected set; }
+        public Stages                                       stages         { get; protected set; }
+        public Money                                        money          { get; protected set; }
+
+        [SerializeField] protected Setting _setting;
+
+        public Setting setting { get { return _setting; } }
+
+        #endregion
+
+
+        #region Method
+
+        #region Event
+
+        protected virtual void Awake() { SetField(); }
+
+        protected virtual void Reset() { ResetField(); }
+
+        #endregion
+
+
+        #region Initialization
+
+        protected virtual void SetField() { game = GetComponentInParent<IGameDirector>(true); }
+
+        protected virtual void ResetField()
+        {
+            _setting = new Setting(
+                new List<CharacterStatSetting>()
+                {
+                    new CharacterStatSetting(CharacterStatType.RunSpeed,        5, 20, 500),
+                    new CharacterStatSetting(CharacterStatType.JumpForce,       5, 10, 500),
+                    new CharacterStatSetting(CharacterStatType.AttackCoolDown,  5, 50, 500),
+                    new CharacterStatSetting(CharacterStatType.PowerUpDuration, 5, 20, 500)
+                },
+                new List<StageSetting>()
+                {
+                    new StageSetting(
+                        new BaseSetting(1, "Stage 01"), new List<LevelSetting>()
+                        {
+                            new LevelSetting(
+                                new BaseSetting(1, "Level 01"), 1000, new List<ChallengeSetting>()
+                                {
+                                    new ChallengeSetting(ChallengeType.Time, new ComparisonSetting(ComparisonType.Less,         10), 100),
+                                    new ChallengeSetting(ChallengeType.Coin, new ComparisonSetting(ComparisonType.GreaterEqual, 10), 100),
+                                    new ChallengeSetting(ChallengeType.Hit,  new ComparisonSetting(ComparisonType.LessEqual,    5),  100)
+                                }),
+                            new LevelSetting(
+                                new BaseSetting(2, "Level 02"), 1200, new List<ChallengeSetting>()
+                                {
+                                    new ChallengeSetting(ChallengeType.Time,   new ComparisonSetting(ComparisonType.Less,      9), 200),
+                                    new ChallengeSetting(ChallengeType.Hit,    new ComparisonSetting(ComparisonType.Less,      5), 200),
+                                    new ChallengeSetting(ChallengeType.Attack, new ComparisonSetting(ComparisonType.LessEqual, 5), 200)
+                                })
+                        }),
+                    new StageSetting(
+                        new BaseSetting(2, "Stage 02"), new List<LevelSetting>()
+                        {
+                            new LevelSetting(
+                                new BaseSetting(1, "Level 01"), 1400, new List<ChallengeSetting>()
+                                {
+                                    new ChallengeSetting(ChallengeType.Time, new ComparisonSetting(ComparisonType.Less,         8),  300),
+                                    new ChallengeSetting(ChallengeType.Coin, new ComparisonSetting(ComparisonType.GreaterEqual, 10), 300),
+                                    new ChallengeSetting(ChallengeType.Hit,  new ComparisonSetting(ComparisonType.LessEqual,    4),  300)
+                                }),
+                            new LevelSetting(
+                                new BaseSetting(2, "Level 02"), 1600, new List<ChallengeSetting>()
+                                {
+                                    new ChallengeSetting(ChallengeType.Time,   new ComparisonSetting(ComparisonType.Less, 7), 400),
+                                    new ChallengeSetting(ChallengeType.Hit,    new ComparisonSetting(ComparisonType.Less, 4), 400),
+                                    new ChallengeSetting(ChallengeType.Attack, new ComparisonSetting(ComparisonType.Less, 5), 400)
+                                })
+                        })
+                },
+                new MoneySetting(10));
+        }
+
+        #endregion
+
+
+        #region Method
+
+        #region Get
+
+        public virtual Save Get()
+        {
+            var characterStats = Extract(this.characterStats);
+            var stages         = Extract(this.stages);
+            var money          = new MoneySave(this.money);
+
+            return new Save(characterStats, stages, money);
+        }
+
+        protected virtual List<CharacterStatSave> Extract(Dictionary<CharacterStatType, CharacterStat> datas)
+        {
+            var saves = new List<CharacterStatSave>();
+
+            foreach (var data in datas.Values)
+            {
+                var save = new CharacterStatSave(data);
+
+                saves.Add(new CharacterStatSave(save));
+            }
+
+            return saves;
+        }
+
+        protected virtual List<StageSave> Extract(Stages datas)
+        {
+            var saves = new List<StageSave>();
+
+            foreach (var data in datas)
+            {
+                var save = _Extract(data);
+
+                saves.Add(new StageSave(save));
+            }
+
+            return saves;
+        }
+
+        protected virtual StageSave _Extract(Stage data)
+        {
+            var levels = __Extract(data.levels);
+
+            return new StageSave(data, levels);
+        }
+
+        protected virtual List<LevelSave> __Extract(Levels datas)
+        {
+            var saves = new List<LevelSave>();
+
+            foreach (var data in datas)
+            {
+                var save = ___Extract(data);
+
+                saves.Add(new LevelSave(save));
+            }
+
+            return saves;
+        }
+
+        protected virtual LevelSave ___Extract(Level data)
+        {
+            var challenges = ____Extract(data.challenges);
+
+            return new LevelSave(data, challenges);
+        }
+
+        protected virtual List<ChallengeSave> ____Extract(Dictionary<ChallengeType, Challenge> datas)
+        {
+            var saves = new List<ChallengeSave>();
+
+            foreach (var data in datas.Values)
+            {
+                var save = new ChallengeSave(data);
+
+                saves.Add(new ChallengeSave(save));
+            }
+
+            return saves;
+        }
+
+        #endregion
+
+
+        #region Set
+
+        public virtual void Set(Save save)
+        {
+            characterStats = Combine(setting.characterStats, save?.characterStats);
+            stages         = Combine(setting.stages,         save?.stages);
+            money          = Combine(setting.money,          save?.money);
+        }
+
+        protected virtual Dictionary<CharacterStatType, CharacterStat> Combine(List<CharacterStatSetting> settings,
+            List<CharacterStatSave> saves)
+        {
+            var datas = new Dictionary<CharacterStatType, CharacterStat>();
+
+            foreach (var setting in settings)
+            {
+                CharacterStatType type = setting.type;
+                var               save = ((saves != null) && saves.Exists(save => save.type == type))
+                                       ? saves.Find(save => save.type == type) : new CharacterStatSave(type, 0);
+                var               data = new CharacterStat(save, setting.maxCount, setting.maxPercentage, setting.cost);
+
+                datas.Add(type, data);
+            }
+
+            return datas;
+        }
+
+        protected virtual Stages Combine(List<StageSetting> settings, List<StageSave> saves)
+        {
+            var   datas    = new List<Stage>();
+            Stage prevData = null;
+
+            foreach (var setting in settings)
+            {
+                int id       = setting.id;
+                var save     = saves?.Find(save => save.id == id);
+                var data     = _Combine(setting, save, prevData);
+                    prevData = data;
+
+                datas.Add(data);
+            }
+
+            return new Stages(datas);
+        }
+
+        protected virtual Stage _Combine(StageSetting setting, StageSave save, Stage prevData)
+        {
+            int id       = setting.id;
+            var baseSave = (save != null) ? save
+                                          : ((prevData != null) ? new BaseSave(id, prevData.cleared, false, false) 
+                                                                : new BaseSave(id, true,             true,  false));
+            var _base    = new Base(baseSave, setting.name);
+            var levels   = __Combine(setting.levels, save?.levels);
+
+            return new Stage(_base, levels);
+        }
+
+        protected virtual Levels __Combine(List<LevelSetting> settings, List<LevelSave> saves)
+        {
+            var   datas    = new List<Level>();
+            Level prevData = null;
+
+            foreach (var setting in settings)
+            {
+                int id       = setting.id;
+                var save     = saves?.Find(save =>save.id == id);
+                var data     = ___Combine(setting, save, prevData);
+                    prevData = data;
+
+                datas.Add(data);
+            }
+
+            return new Levels(datas);
+        }
+
+        protected virtual Level ___Combine(LevelSetting setting, LevelSave save, Level prevData)
+        {
+            int id         = setting.id;
+            var baseSave   = (save != null) ? save
+                                            : ((prevData != null) ? new BaseSave(id, prevData.cleared, false, false)
+                                                                  : new BaseSave(id, true,             true,  false));
+            var _base      = new Base(baseSave, setting.name);
+            var challenges = ____Combine(setting.challenges, save?.challenges);
+
+            return new Level(_base, setting.reward, challenges);
+        }
+
+        protected virtual Dictionary<ChallengeType, Challenge> ____Combine(List<ChallengeSetting> settings,
+            List<ChallengeSave> saves)
+        {
+            var datas = new Dictionary<ChallengeType, Challenge>();
+
+            foreach (var setting in settings)
+            {
+                ChallengeType type = setting.type;
+                var           save = ((saves != null) && saves.Exists(save => save.type == type))
+                                   ? saves.Find(save => save.type == type) : new ChallengeSave(type, false);
+                var           data = new Challenge(save, setting.comparison, setting.reward);
+
+                datas.Add(type, data);
+            }
+
+            return datas;
+        }
+
+        protected virtual Money Combine(MoneySetting setting, MoneySave save)
+        {
+            var _base = (save != null) ? save : new MoneySave(0);
+
+            return new Money(_base, setting.rewardOfCoin);
+        }
+
+        #endregion
+
+        #endregion
+
+        #endregion
+    }
+}
