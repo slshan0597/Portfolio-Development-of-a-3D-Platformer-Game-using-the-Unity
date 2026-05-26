@@ -1,94 +1,87 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 타이틀 씬의 UI 클래스
+//    - 타이틀 표시 및 메인 메뉴 호출
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 내부 타입 ... Line 
+//        1) 필드 ........ Line 
+//        2) 메서드 ...... Line 
+//            1- 이벤트 함수 ....... Line 
+//            2- 초기화 ............ Line 
+//            3- 들어오기(Enter) ... Line 
+//            4- 나가기(Exit) ...... Line 
+//            5- 일시정지(Pause) ... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 using Game;
 
-
 namespace Title
 {
     using Root         = UIController.Root;
     using ControlState = ControlSettingManager.State;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         public Root root { get; }
 
         // Reference
         ISceneDirector scene { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class UIController : UIBase, IUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public class Root : MenuBase
         {
-            #region Definition
-
             public class Window : MenuBase
             {
-                #region Field
-
                 public Text text { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Window(Transform transform) : base(transform)
                 {
                     text = content.GetComponentInChildren<Text>(true);
                 }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
-
+            
             public Window label { get; }
             public Window input { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Root(Transform transform) : base(transform)
             {
                 label = new Window(content.Find("Label"));
                 input = new Window(content.Find("Input"));
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root           root  { get; protected set; }
         public ISceneDirector scene { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -99,11 +92,9 @@ namespace Title
 
         protected override void ResetField() { _defaultDuration = 1f; }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -117,11 +108,9 @@ namespace Title
             }
         }
 
-        #endregion
-
-
-        #region Display
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
         protected override IEnumerator _Display(bool isActive, float duration)
         {
             if (!isActive) gameObject.SetActive(false);
@@ -159,9 +148,5 @@ namespace Title
 
             gameObject.SetActive(false);
         }
-
-        #endregion
-
-        #endregion
     }
 }
