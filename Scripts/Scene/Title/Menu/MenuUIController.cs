@@ -1,10 +1,25 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 타이틀 씬의 메뉴의 UI 클래스
+//    - 시작 버튼 클릭 시 튜토리얼 씬으로 전환
+//    - 로드 버튼 클릭 시 로드 메뉴 오픈
+//    - 세팅 버튼 클릭 시 세팅 메뉴 오픈
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 필드 ..... Line 
+//        2) 메서드 ... Line 
+//            1- 이벤트 함수 ... Line 
+//            2- 초기화 ........ Line 
+//            3- 열기(Open) .... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 using Game;
-
 
 namespace Title
 {
@@ -13,42 +28,32 @@ namespace Title
     using ConfirmUIState = ConfirmUIController.State;
     using SceneType      = SceneBase.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IMenuUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
         // Reference
         IMenuManager menu { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class MenuUIController : UIBase, IMenuUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public class Root : MenuBase
         {
-            #region Definition
-
             public enum Type { Start, Load, Setting, Exit }
 
-            #endregion
-
-
-            #region Field
-
             public Dictionary<Type, SoundButton> buttons { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Root(Transform transform) : base(transform)
             {
@@ -61,25 +66,21 @@ namespace Title
                     if (Enum.TryParse(name, out Type type)) buttons.Add(type, button);
                 }
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root         root { get; protected set; }
         public IMenuManager menu { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -96,11 +97,10 @@ namespace Title
             }
         }
 
-        #endregion
-
-
-        #region Option
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 이벤트
+        //    - 버튼 타입에 따라 기능 호출
+        // ------------------------------------------------------------------------------
         protected virtual void OnClickButton(Type type)
         {
             IGameDirector       game        = GameDirector.instance;
@@ -127,9 +127,5 @@ namespace Title
 
             scene.Exit(SceneType.None);
         }
-
-        #endregion
-
-        #endregion
     }
 }
