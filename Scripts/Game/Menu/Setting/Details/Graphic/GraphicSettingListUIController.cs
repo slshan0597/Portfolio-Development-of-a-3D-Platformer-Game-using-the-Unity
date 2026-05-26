@@ -1,8 +1,21 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 그래픽 설정(창)에 대한 UI 클래스
+//
+// * 목차
+//    1. 인터페이스 ... Line 31
+//    2. 클래스 ....... Line 41
+//        1) 내부 타입 ... Line 46
+//        2) 필드 ........ Line 195
+//        3) 메서드 ...... Line 201
+//            1- 초기화 .... Line 205
+//            2- 셋(Set) ... Line 235
+//            3- 이벤트 .... Line 248
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace Game
 {
@@ -13,88 +26,50 @@ namespace Game
     using PresetsData = GraphicSettingManager.Presets;
     using PresetType  = GraphicSettingManager.Presets.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(ISettingListUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IGraphicSettingListUIController : ISettingListUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         new Root root { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(SettingListUIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class GraphicSettingListUIController : SettingListUIBase, IGraphicSettingListUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public new class Root
         {
-            #region Definition
-
             public class Slot : SlotBase
             {
-                #region Definition
-
                 public class Option : MenuBase
                 {
-                    #region Field
-
                     public Dropdown dropdown { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
                         dropdown = content.GetComponentInChildren<Dropdown>(true);
                     }
 
-                    #endregion
-
-
-                    #region Method
-
                     public void SetContent(int value) { dropdown.value = value; }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
                 public Option option { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Slot(Transform transform) : base(transform)
                 {
                     option = new Option(content.Find("Option"));
                 }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             public Dictionary<GraphicType, Slot> graphics;
             public Slot                          preset;
-
-            #endregion
-
-
-            #region Constructor
 
             public Root(Transform transform)
             {
@@ -111,12 +86,7 @@ namespace Game
                     else if (name == "Preset")                          preset = new Slot(slot);
                 }
             }
-
-            #endregion
-
-
-            #region Method
-
+            
             public void SetContent(Data data, PresetsData presetsData)
             {
                 foreach (var element in graphics)
@@ -129,24 +99,20 @@ namespace Game
 
                 preset.option.SetContent((int)presetsData.GetType(data.quality));
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public new Root root { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -165,11 +131,10 @@ namespace Game
             root.preset.option.dropdown.onValueChanged.AddListener(delegate { OnValueChangedPresetDropdown(); });
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        //    - 설정이 변경되면 UI 갱신
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -179,11 +144,10 @@ namespace Game
             root.SetContent(graphicSetting.data, graphicSetting.presets);
         }
 
-        #endregion
-
-
-        #region Option
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 이벤트
+        //    - 조작 시 데이터 값을 변경 후 변경된 내용으로 설정 및 저장하기 위해 Graphic Setting Manager 호출
+        // ------------------------------------------------------------------------------
         protected virtual void OnValueChangedGraphicDropdown(GraphicType type) 
         {
             if (isDisplaying) return;
@@ -222,9 +186,5 @@ namespace Game
                 graphic.option.dropdown.value = data[type];
             }
         }
-
-        #endregion
-
-        #endregion
     }
 }
