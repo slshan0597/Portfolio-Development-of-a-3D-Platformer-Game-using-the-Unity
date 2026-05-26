@@ -1,9 +1,16 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 세이브 데이터의 저장 및 불러오기
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
-
 
 namespace Game
 {
@@ -13,11 +20,12 @@ namespace Game
     using ChallengeType     = DataManager.Setting.Stage.Level.Challenge.Type;
     using SceneType         = SceneBase.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IMenuBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface ISaveMenuManager : IMenuBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         new ISaveMenuUIController ui { get; }
 
@@ -27,38 +35,35 @@ namespace Game
         // Setting
         PathSetting pathSetting { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         void Load(int index);
         void Save(int index);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(MenuBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class SaveMenuManager : MenuBase, ISaveMenuManager
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 1-1) 내부 타입 -> 데이터
+        //    - 파일 형식으로 저장
+        // ------------------------------------------------------------------------------
         [Serializable] public class Data
         {
-            #region Definition
-
+            // ******************************************************************************
+            // 1-1-1) 내부 타입 -> 데이터 -> 캐릭터 스텟
+            // ******************************************************************************
             [Serializable] public class CharacterStat
             {
-                #region Field
-
+                // 필드
                 public CharacterStatType type;
                 public int               value;
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public CharacterStat(CharacterStatType type, int value)
                 {
                     this.type  = type;
@@ -70,25 +75,20 @@ namespace Game
                     type  = other.type;
                     value = other.value;
                 }
-
-                #endregion
             }
 
-
+            // ******************************************************************************
+            // 1-1-2) 내부 타입 -> 데이터 -> 스테이지(레벨)
+            // ******************************************************************************
             [Serializable] public class Base
             {
-                #region Field
-
+                // 필드
                 public int  id;
                 public bool playable;
                 public bool selected;
                 public bool cleared;
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public Base(int id, bool playable, bool selected, bool cleared)
                 {
                     this.id       = id;
@@ -104,31 +104,21 @@ namespace Game
                     selected = other.selected;
                     cleared  = other.cleared;
                 }
-
-                #endregion
             }
-
 
             [Serializable] public class Stage : Base
             {
-                #region Definition
-
+                // 내부 타입 - 스테이지
                 [Serializable] public class Level : Base
                 {
-                    #region Definition
-
+                    // 내부 타입 - 레벨
                     [Serializable] public class Challenge
                     {
-                        #region Field
-
+                        // 필드 - 챌린지
                         public ChallengeType type;
                         public bool          cleared;
 
-                        #endregion
-
-
-                        #region Constructor
-
+                        // 생성자 - 챌린지
                         public Challenge(ChallengeType type, bool cleared)
                         { 
                             this.type    = type;
@@ -140,22 +130,12 @@ namespace Game
                             type    = other.type;
                             cleared = other.cleared;
                         }
-
-                        #endregion
                     }
 
-                    #endregion
-
-
-                    #region Field
-
+                    // 필드 - 레벨
                     public List<Challenge> challenges;
 
-                    #endregion
-
-
-                    #region Constructor
-
+                    // 생성자 - 레벨
                     public Level(Base _base, List<Challenge> challenges) : base(_base)
                     {
                         this.challenges = new List<Challenge>(challenges);
@@ -165,61 +145,42 @@ namespace Game
                     {
                         challenges = new List<Challenge>(other.challenges);
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드 - 스테이지
                 public List<Level> levels;
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 스테이지
                 public Stage(Base _base, List<Level> levels) : base(_base) { this.levels = new List<Level>(levels); }
 
                 public Stage(Stage other) : base(other) { levels = new List<Level>(other.levels); }
-
-                #endregion
             }
 
-
+            // ******************************************************************************
+            // 1-1-3) 내부 타입 -> 데이터 -> 재화(Money)
+            // ******************************************************************************
             [Serializable] public class Money
             {
-                #region Field
-
+                // 필드
                 public int value;
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public Money(int value) { this.value = value; }
 
                 public Money(Money other) { value = other.value; }
-
-                #endregion
             }
 
-
+            // ******************************************************************************
+            // 1-1-4) 내부 타입 -> 데이터 -> 기록(Record)
+            //    - 시간에 대한 기록
+            // ******************************************************************************
             [Serializable] public class Record
             {
-                #region Field
-
+                // 필드
                 public string dateSaved;
                 public string runTime;
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public Record()
                 {
                     dateSaved = DateTime.Now.ToString();
@@ -237,25 +198,15 @@ namespace Game
                     dateSaved = other.dateSaved;
                     runTime   = other.runTime;
                 }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드 - 데이터
             public List<CharacterStat> characterStats;
             public List<Stage>         stages;
             public Money               money;
             public Record              record;
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자 - 데이터
             public Data(List<CharacterStat> characterStats, List<Stage> stages, Money money)
             {
                 this.characterStats = new List<CharacterStat>(characterStats);
@@ -279,67 +230,57 @@ namespace Game
                 money          = new Money(other.money);
                 record         = new Record(other.record);
             }
-
-            #endregion
         }
 
-
+        // ------------------------------------------------------------------------------
+        // 1-2) 내부 타입 -> 저장 경로
+        // ------------------------------------------------------------------------------
         [Serializable] public struct PathSetting
         {
-            #region Field
-
+            // 필드
             [SerializeField] private string _directoryName;
             [SerializeField] private string _fileName;
 
             public string directoryName { get { return _directoryName; } }
             public string fileName      { get { return _fileName; } }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public PathSetting(string directoryName, string fileName)
             {
                 _directoryName = directoryName;
                 _fileName      = fileName;
             }
 
-            #endregion
-
-
-            #region Method
-
+            // 메서드
             public string GetDirectory() => Path.Combine(Application.persistentDataPath, directoryName);
 
             public string GetPath(int index) => Path.Combine(GetDirectory(), $"{fileName}{index.ToString("00")}");
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public new ISaveMenuUIController ui { get; protected set; }
 
+        // Data
         public Dictionary<int, Data> datas { get; protected set; }
 
+        // Setting
         [SerializeField] protected PathSetting _pathSetting;
 
         public PathSetting pathSetting { get { return _pathSetting; } }
 
+        // etc.
         protected DateTime dateUpdated, dateUpdatedAuto;
         protected TimeSpan elapsedTime, elapsedTimeAuto;
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        // ------------------------------------------------------------------------------
         protected override void Awake()
         {
             base.Awake();
@@ -349,11 +290,9 @@ namespace Game
 
         protected virtual void Reset() { ResetField(); }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -364,13 +303,14 @@ namespace Game
 
         protected virtual void ResetField() { _pathSetting = new PathSetting("Save", "Data"); }
 
-        #endregion
-
-
-        #region Data
-
-        #region Load
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 데이터
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-3-1) 메서드 -> 데이터 -> 불러오기(Load)
+        //    - 지정된 경로에서 Json 형식의 파일들을 불러와 데이터 리스트에 적재
+        //    - Load 메뉴에서 해당 데이터를 불러옴과 동시에 시간 기록 시작
+        // ******************************************************************************
         protected virtual Dictionary<int, Data> ReadFiles()
         {
             var datas = new Dictionary<int, Data>();
@@ -411,11 +351,11 @@ namespace Game
                 : TimeSpan.Zero;
         }
 
-        #endregion
-
-
-        #region Save
-
+        // ******************************************************************************
+        // 3-3-2) 메서드 -> 데이터 -> 저장하기(Save)
+        //    - 해당 데이터를 지정된 경로에 Json 형식의 파일로 저장
+        //    - 저장 전 기록한 시간도 추가
+        // ******************************************************************************
         public virtual void Save(int index)
         {
             IDataManager        data     = game.data;
@@ -464,11 +404,5 @@ namespace Game
                 fs.Write(dataBytes, 0, dataBytes.Length);
             }
         }
-
-        #endregion
-
-        #endregion
-
-        #endregion
     }
 }
