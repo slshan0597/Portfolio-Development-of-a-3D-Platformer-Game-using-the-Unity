@@ -1,66 +1,70 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 튜토리얼 씬의 메인 UI 클래스
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 내부 타입 ... Line 
+//        2) 필드 ........ Line 
+//        3) 메서드 ...... Line 
+//            1- 초기화 .... Line 
+//            2- 셋(Set) ... Line 
+//            3- 이벤트 .... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using UnityEngine;
 
 using Game;
-
 
 namespace Tutorial
 {
     using Root              = MainUIController.Root;
     using SystemControlType = ControlSettingManager.Data.SystemType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IMainUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
         // Reference
         ISceneDirector scene { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class MainUIController : UIBase, IMainUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public class Root : MenuBase
         {
-            #region Field
-
             public KeyButton menuButton { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Root(Transform transform) : base(transform)
             {
                 menuButton = content.GetComponentInChildren<KeyButton>(true);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root           root  { get; protected set; }
         public ISceneDirector scene { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -71,11 +75,9 @@ namespace Tutorial
             root.menuButton.onClick.AddListener(OnClickButton);
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -89,16 +91,14 @@ namespace Tutorial
 
         protected override void SetCurrent(bool isActive) { }
 
-        #endregion
-
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 이벤트
+        // ------------------------------------------------------------------------------
         protected virtual void OnClickButton()
         {
             IMainMenuManager gameMenu = GameDirector.instance.menu.main;
 
             gameMenu.Open(true);
         }
-
-        #endregion
     }
 }
