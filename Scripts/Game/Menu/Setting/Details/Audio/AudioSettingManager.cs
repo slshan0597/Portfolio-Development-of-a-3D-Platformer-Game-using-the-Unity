@@ -1,18 +1,35 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 오디오 크기 조절
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 내부 타입 ... Line 
+//        2) 필드 ..... Line 
+//        3) 메서드 ... Line 
+//            1- 이벤트 함수 ... Line 
+//            2- 초기화 ........ Line 
+//            3- 셋(Set) ....... Line 
+//            4- 데이터 ........ Line 
+//                1_ 불러오기(Load) ... Line 
+//                2_ 저장하기(Save) ... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
 
 namespace Game
 {
     using Data      = AudioSettingManager.Data;
     using AudioType = AudioBase.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(ISettingBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IAudioSettingManager : ISettingBase
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         List<IAudioBase> connectedAudios { get; }
 
@@ -21,27 +38,24 @@ namespace Game
 
         // Setting
         Data defaultData { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(SettingBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class AudioSettingManager : SettingBase, IAudioSettingManager
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        //    - 오디오에 대한 데이터 타입
+        // ==============================================================================
         [Serializable] public class Data
         {
-            #region Field
-
+            // 필드
             public int                        master;
             public SimpleData<AudioType, int> details;
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Data(int master, SimpleData<AudioType, int> details)
             {
                 this.master  = master;
@@ -53,37 +67,32 @@ namespace Game
                 master  = other.master;
                 details = new SimpleData<AudioType, int>(other.details);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public List<IAudioBase> connectedAudios { get; protected set; }
 
+        // Data
         public Data data { get; protected set; }
 
         [SerializeField] protected Data _defaultData;
 
         public Data defaultData { get { return _defaultData; } }
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        // ------------------------------------------------------------------------------
         protected virtual void Reset() { ResetField(); }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -106,11 +115,25 @@ namespace Game
                     }));
         }
 
-        #endregion
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
+        public override void Set(bool reset = false)
+        {
+            if (reset) data = new Data(defaultData);
 
+            foreach (var audio in connectedAudios) audio.Set(data);
 
-        #region Data
-
+            base.Set(reset);
+        }
+        
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 데이터
+        //    - 데이터 저장 및 불러오기
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-4-1) 메서드 -> 데이터 -> 불러오기(Load)
+        // ******************************************************************************
         public override void Load()
         {
             int master = __Load("Master", defaultData.master);
@@ -141,6 +164,9 @@ namespace Game
             return PlayerPrefs.GetInt(key, defaultValue);
         }
 
+        // ******************************************************************************
+        // 3-4-2) 메서드 -> 데이터 -> 저장하기(Save)
+        // ******************************************************************************
         public override void Save()
         {
             __Save("Master", data.master);
@@ -163,23 +189,5 @@ namespace Game
 
             PlayerPrefs.SetInt(key, value);
         }
-
-        #endregion
-
-
-        #region Set
-
-        public override void Set(bool reset = false)
-        {
-            if (reset) data = new Data(defaultData);
-
-            foreach (var audio in connectedAudios) audio.Set(data);
-
-            base.Set(reset);
-        }
-
-        #endregion
-
-        #endregion
     }
 }
