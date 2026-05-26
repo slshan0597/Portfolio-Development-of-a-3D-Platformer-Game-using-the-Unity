@@ -1,8 +1,21 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 오디오 설정(창)에 대한 UI 클래스
+//
+// * 목차
+//    1. 인터페이스 ... Line 30
+//    2. 클래스 ....... Line 40
+//        1) 내부 타입 ... Line 45
+//        2) 필드 ........ Line 105
+//        3) 메서드 ...... Line 111
+//            1- 초기화 .... Line 114
+//            2- 셋(Set) ... Line 135
+//            3- 이벤트 .... Line 148
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace Game
 {
@@ -11,41 +24,32 @@ namespace Game
     using Data        = AudioSettingManager.Data;
     using AudioType   = AudioBase.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(ISettingListUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IAudioSettingListUIController : ISettingListUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         new Root root { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(SettingListUIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class AudioSettingListUIController : SettingListUIBase, IAudioSettingListUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public new class Root
         {
-            #region Definition
-
             public class Slot : SlotBase
             {
-                #region Definition
-
                 public class Option : MenuBase
                 {
-                    #region Field
-
                     public Text   text   { get; }
                     public Slider slider { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
@@ -53,49 +57,20 @@ namespace Game
                         slider = content.GetComponentInChildren<Slider>(true);
                     }
 
-                    #endregion
-
-
-                    #region Method
-
                     public void SetContent(int value)
                     {
                         text.text    = value.ToString();
                         slider.value = value;
                     }
-
-                    #endregion
                 }
-
-                #endregion
-
-
-                #region Field
 
                 public Option option { get; }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Slot(Transform transform) : base(transform) { option = new Option(content.Find("Option")); }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             public Slot                        master  { get; }
             public Dictionary<AudioType, Slot> details { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Root(Transform transform)
             {
@@ -113,11 +88,6 @@ namespace Game
                 }
             }
 
-            #endregion
-
-
-            #region Method
-
             public void SetContent(Data data)
             {
                 master.option.SetContent(data.master);
@@ -130,24 +100,20 @@ namespace Game
                     volume.option.SetContent(data.details[type]);
                 }
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public new Root root { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -166,11 +132,10 @@ namespace Game
             }
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        //    - 설정이 변경되면 UI 갱신
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -180,11 +145,10 @@ namespace Game
             root.SetContent(audioSetting.data);
         }
 
-        #endregion
-
-
-        #region Option
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 이벤트
+        //    - 조작 시 데이터 값을 변경 후 변경된 내용으로 설정 및 저장하기 위해 Audio Setting Manager 호출
+        // ------------------------------------------------------------------------------
         protected virtual void OnValueChangedSlider(AudioType? type)
         {
             if (isDisplaying) return;
@@ -201,25 +165,5 @@ namespace Game
             slot.option.SetContent(value);
             audioSetting.Set();
         }
-
-        //protected virtual void OnValueChangedToggle(AudioType? type)
-        //{
-        //    if (isDisplaying) return;
-
-        //    IAudioSettingManager audioSetting = ui.menu.audio;
-
-        //    var data       = audioSetting.data;
-        //    var volumeData = (type != null) ? data.details[(AudioType)type] : data.full;
-        //    var volume     = (type != null) ? root.details[(AudioType)type] : root.full;
-
-        //    volumeData.mute = volume.option.toggle.isOn;
-
-        //    //volume.option.SetContent(volumeData);
-        //    audioSetting.Set();
-        //}
-
-        #endregion
-
-        #endregion
     }
 }
