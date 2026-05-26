@@ -1,7 +1,15 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 세이브 메뉴의 UI 클래스
+//    - 세이브 메뉴의 일반 기능(Open 등)
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace Game
 {
@@ -10,95 +18,72 @@ namespace Game
     using SceneType         = SceneBase.Type;
     using SystemControlType = ControlSettingManager.Data.SystemType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface ISaveMenuUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root                  root { get; }
-        ISaveListUIController list { get; }
+        ISaveListUIController list { get; }    // 세이브 파일 목록
 
         // Reference
         ISaveMenuManager menu { get; }
 
         // State
         State state { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class SaveMenuUIController : UIBase, ISaveMenuUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public enum State { None, Load, Save }
-
 
         public class Root : WindowBase
         {
-            #region Definition
-
             public class Main : WindowBase
             {
-                #region Field
-
                 public ScrollRect scroll { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Main(Transform transform) : base(transform)
                 {
                     scroll = content.GetComponentInChildren<ScrollRect>(true);
                 }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
-
+            
             public Main      main        { get; }
             public KeyButton closeButton { get; }
-
-            #endregion
-
-
-            #region Constructor
-
+            
             public Root(Transform transform) : base(transform)
             {
                 main        = new Main(content.Find("Main"));
                 closeButton = content.GetComponentInChildren<KeyButton>(true);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root                  root { get; protected set; }
         public ISaveListUIController list { get; protected set; }
         public ISaveMenuManager      menu { get; protected set; }
 
+        // State
         public State state { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -111,11 +96,10 @@ namespace Game
 
         protected override void ResetField() { _defaultDuration = 0.5f; }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        //    - 설정이 변경되면 UI 갱신
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -129,11 +113,9 @@ namespace Game
 
         protected override void SetCurrent(bool isActive) { }
 
-        #endregion
-
-
-        #region Display
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
         public override Coroutine Display(bool isActive, bool animated = true)
         {
             if (isActive)
@@ -171,11 +153,9 @@ namespace Game
             else gameObject.SetActive(false);
         }
 
-        #endregion
-
-
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 이벤트
+        // ------------------------------------------------------------------------------
         protected virtual void OnClickCloseButton() { menu.Open(false); }
-
-        #endregion
     }
 }
