@@ -1,8 +1,19 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 창과 해상도 크기 조절
+//    - 게임의 품질(프레임, 택스처 등) 설정
+//    - 품질 프리셋 설정
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        2) 필드 ..... Line 
+//        3) 메서드 ... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
-
 
 namespace Game
 {
@@ -19,11 +30,12 @@ namespace Game
     using Presets          = GraphicSettingManager.Presets;
     using PresetType       = GraphicSettingManager.Presets.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(ISettingBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IGraphicSettingManager : ISettingBase
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         List<IUIBase> connectedUI { get; }
 
@@ -33,50 +45,46 @@ namespace Game
         // Setting
         Data    defaultData { get; }
         Presets presets     { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(SettingBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class GraphicSettingManager : SettingBase, IGraphicSettingManager
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 1-1) 내부 타입 -> 데이터
+        //    - 그래픽에 대한 설정값들을 저장
+        // ------------------------------------------------------------------------------
         [Serializable] public class Data
         {
-            #region Definition
-
             public enum Type           { ScreenMode, Resolution, FrameRate, Texture, Shadow, AntiAliasing, VSync }
             public enum ScreenModeType { FullScreen, Window }
             public enum ResolutionType { _1080p, _900p, _720p, _768p, _480p }
 
-
+            // ******************************************************************************
+            // 1-1-1) 내부 타입 -> 데이터 -> 품질(Quality)
+            // ******************************************************************************
             [Serializable] public class Quality
             {
-                #region Definition
-
+                // 내부 타입
                 public enum FrameRateType    { _60, _30 }
                 public enum TextureType      { High, Medium, Low }
                 public enum ShadowType       { High, Medium, Low }
                 public enum AntiAliasingType { _4x, _2x, Disabled }
                 public enum VSyncType        { On, Off }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드
                 public FrameRateType    frameRate;
                 public TextureType      texture;
                 public ShadowType       shadow;
                 public AntiAliasingType antiAliasing;
                 public VSyncType        vSync;
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자
                 public Quality(FrameRateType frameRate, TextureType texture, ShadowType shadow, 
                     AntiAliasingType antiAliasing, VSyncType vSync)
                 {
@@ -96,11 +104,8 @@ namespace Game
                     vSync        = other.vSync;
                 }
 
-                #endregion
-
-
-                #region indexing
-
+                // 메서드
+                // Indexing
                 public int this[Type type]
                 {
                     get
@@ -128,11 +133,7 @@ namespace Game
                     }
                 }
 
-                #endregion
-
-
-                #region Operator
-
+                // Operator
                 public static bool operator ==(Quality lhs, Quality rhs)
                 {
                     return (lhs.frameRate    == rhs.frameRate)
@@ -147,24 +148,14 @@ namespace Game
                 public override bool Equals(object obj) { return base.Equals(obj); }
 
                 public override int GetHashCode() { return base.GetHashCode(); }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드 - 데이터
             public ScreenModeType screenMode;
             public ResolutionType resolution;
             public Quality        quality;
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자 - 데이터
             public Data(ScreenModeType screenMode, ResolutionType resolution, Quality quality)
             {
                 this.screenMode = screenMode;
@@ -179,11 +170,8 @@ namespace Game
                 quality    = new Quality(other.quality);
             }
 
-            #endregion
-
-
-            #region indexing
-
+            // 메서드 - 데이터
+            // Indexing
             public int this[Type type]
             {
                 get
@@ -205,30 +193,19 @@ namespace Game
                     }
                 }
             }
-
-            #endregion
         }
 
-
+        // ------------------------------------------------------------------------------
+        // 1-2) 내부 타입 -> 프리셋(Preset)
+        //    - 그래픽 품질에 대한 기본 설정값
+        // ------------------------------------------------------------------------------
         [Serializable] public class Presets : SimpleData<PresetType, Quality>
         {
-            #region Definition
-
             public enum Type { High, Medium, Low, Custom }
-
-            #endregion
-
-
-            #region Constructor
 
             public Presets(List<Element> elements) : base(elements) { }
 
             public Presets(Presets other) : base(other) { }
-
-            #endregion
-
-
-            #region Method
 
             public Type GetType(Quality quality)
             {
@@ -236,17 +213,15 @@ namespace Game
 
                 return (element != null) ? element.key : PresetType.Custom;
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public List<IUIBase> connectedUI { get; protected set; }
 
+        // Data
         public Data data { get; protected set; }
 
         [SerializeField] protected Data    _defaultData;
@@ -255,20 +230,17 @@ namespace Game
         public Data    defaultData { get { return _defaultData; } }
         public Presets presets     { get { return _presets; } }
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        // ------------------------------------------------------------------------------
         protected virtual void Reset() { ResetField(); }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -299,67 +271,9 @@ namespace Game
                 });
         }
 
-        #endregion
-
-
-        #region Data
-
-        public override void Load()
-        {
-            ScreenModeType screenMode = __Load(GraphicType.ScreenMode, defaultData.screenMode);
-            ResolutionType resolution = __Load(GraphicType.Resolution, defaultData.resolution);
-            var            quality    = _Load(defaultData.quality);
-
-            data = new Data(screenMode, resolution, quality);
-        }
-
-        protected virtual Quality _Load(Quality defaultData)
-        {
-            FrameRateType    frameRate    = __Load(GraphicType.FrameRate,    defaultData.frameRate);
-            TextureType      texture      = __Load(GraphicType.Texture,      defaultData.texture);
-            ShadowType       shadow       = __Load(GraphicType.Shadow,       defaultData.shadow);
-            AntiAliasingType antiAliasing = __Load(GraphicType.AntiAliasing, defaultData.antiAliasing);
-            VSyncType        vSync        = __Load(GraphicType.VSync,        defaultData.vSync);
-
-            return new Quality(frameRate, texture, shadow, antiAliasing, vSync);
-        }
-
-        protected virtual TEnum __Load<TEnum>(GraphicType graphicType, TEnum defaultValue) 
-            where TEnum : struct, Enum
-        {
-            string key = $"{type}_{graphicType}";
-
-            return Enum.TryParse(PlayerPrefs.GetString(key), out TEnum value) ? value : defaultValue;
-        }
-
-        public override void Save()
-        {
-            __Save(GraphicType.ScreenMode, data.screenMode);
-            __Save(GraphicType.Resolution, data.resolution);
-            _Save(data.quality);
-        }
-
-        protected virtual void _Save(Quality data)
-        {
-            __Save(GraphicType.FrameRate,    data.frameRate);
-            __Save(GraphicType.Texture,      data.texture);
-            __Save(GraphicType.Shadow,       data.shadow);
-            __Save(GraphicType.AntiAliasing, data.antiAliasing);
-            __Save(GraphicType.VSync,        data.vSync);
-        }
-
-        protected virtual void __Save<TEnum>(GraphicType graphicType, TEnum value) where TEnum : struct, Enum
-        {
-            string key = $"{type}_{graphicType}";
-
-            PlayerPrefs.SetString(key, value.ToString());
-        }
-
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
         public override void Set(bool reset = false)
         {
             if (reset) data = new Data(defaultData);
@@ -492,8 +406,65 @@ namespace Game
             }
         }
 
-        #endregion
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 데이터
+        //    - 데이터 저장 및 불러오기
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-4-1) 메서드 -> 데이터 -> 불러오기(Load)
+        // ******************************************************************************
+        public override void Load()
+        {
+            ScreenModeType screenMode = __Load(GraphicType.ScreenMode, defaultData.screenMode);
+            ResolutionType resolution = __Load(GraphicType.Resolution, defaultData.resolution);
+            var            quality    = _Load(defaultData.quality);
 
-        #endregion
+            data = new Data(screenMode, resolution, quality);
+        }
+
+        protected virtual Quality _Load(Quality defaultData)
+        {
+            FrameRateType    frameRate    = __Load(GraphicType.FrameRate,    defaultData.frameRate);
+            TextureType      texture      = __Load(GraphicType.Texture,      defaultData.texture);
+            ShadowType       shadow       = __Load(GraphicType.Shadow,       defaultData.shadow);
+            AntiAliasingType antiAliasing = __Load(GraphicType.AntiAliasing, defaultData.antiAliasing);
+            VSyncType        vSync        = __Load(GraphicType.VSync,        defaultData.vSync);
+
+            return new Quality(frameRate, texture, shadow, antiAliasing, vSync);
+        }
+
+        protected virtual TEnum __Load<TEnum>(GraphicType graphicType, TEnum defaultValue) 
+            where TEnum : struct, Enum
+        {
+            string key = $"{type}_{graphicType}";
+
+            return Enum.TryParse(PlayerPrefs.GetString(key), out TEnum value) ? value : defaultValue;
+        }
+
+        // ******************************************************************************
+        // 3-4-2) 메서드 -> 데이터 -> 저장하기(Save)
+        // ******************************************************************************
+        public override void Save()
+        {
+            __Save(GraphicType.ScreenMode, data.screenMode);
+            __Save(GraphicType.Resolution, data.resolution);
+            _Save(data.quality);
+        }
+
+        protected virtual void _Save(Quality data)
+        {
+            __Save(GraphicType.FrameRate,    data.frameRate);
+            __Save(GraphicType.Texture,      data.texture);
+            __Save(GraphicType.Shadow,       data.shadow);
+            __Save(GraphicType.AntiAliasing, data.antiAliasing);
+            __Save(GraphicType.VSync,        data.vSync);
+        }
+
+        protected virtual void __Save<TEnum>(GraphicType graphicType, TEnum value) where TEnum : struct, Enum
+        {
+            string key = $"{type}_{graphicType}";
+
+            PlayerPrefs.SetString(key, value.ToString());
+        }
     }
 }
