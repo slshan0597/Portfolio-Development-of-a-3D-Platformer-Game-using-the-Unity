@@ -1,8 +1,22 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 튜토리얼 씬의 가이드 UI 클래스
+//    - 현재 상황에 따른 컨트롤 가이드 표시
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 내부 타입 ... Line 
+//        2) 필드 ........ Line 
+//        3) 메서드 ...... Line 
+//            1- 초기화 .... Line 
+//            2- 셋(Set) ... Line 
+//            3- 이벤트 .... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using UnityEngine;
 using UnityEngine.UI;
 
 using Game;
-
 
 namespace Tutorial
 {
@@ -10,11 +24,12 @@ namespace Tutorial
     using ControlState    = ControlSettingManager.State;
     using PlayerMainState = PlayerController.State.Main;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IGuideUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
@@ -24,46 +39,29 @@ namespace Tutorial
         // State
         GuideType state { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Coroutine Display(GuideType type);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class GuideUIController : UIBase, IGuideUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public class Root : MenuBase
         {
-            #region Definition
-
             public class Main : WindowBase
             {
-                #region Field
-
                 public Text contentText { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Main(Transform transform) : base(transform)
                 {
                     contentText = content.GetComponentInChildren<Text>(true);
                 }
-
-                #endregion
-
-
-                #region Method
-
+                
                 public void SetContent(GuideType type, IControlSettingManager controlSetting)
                 {
                     ControlState state       = controlSetting.state;
@@ -118,46 +116,32 @@ namespace Tutorial
                             break;
                     }
                 }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             public Main main { get; }
 
-            #endregion
-
-
-            #region Constructor
-
             public Root(Transform transform) : base(transform) { main = new Main(content.Find("Main")); }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root           root  { get; protected set; }
         public ISceneDirector scene { get; protected set; }
 
+        // State
         public GuideType state { get; protected set; }
 
+        // etc.
         protected Coroutine displayAction;
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -168,11 +152,9 @@ namespace Tutorial
 
         protected override void ResetField() { _defaultDuration = 0.5f; }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -182,11 +164,9 @@ namespace Tutorial
             root.main.SetContent(state, controlSetting);
         }
 
-        #endregion
-
-
-        #region Display
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
         public override Coroutine Display(bool isActive, bool animated = true)
         {
             if (displayAction != null)
@@ -222,9 +202,5 @@ namespace Tutorial
 
             return displayAction = StartCoroutine(FadeWindow(root.main, true, defaultDuration));
         }
-
-        #endregion
-
-        #endregion
     }
 }
