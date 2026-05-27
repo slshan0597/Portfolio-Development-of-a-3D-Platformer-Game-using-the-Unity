@@ -6,11 +6,11 @@
 // * 목차
 //    1. 인터페이스 ... Line 24
 //    2. 클래스 ....... Line 34
-//        1) 필드 ..... Line 39
-//        2) 메서드 ... Line 56
-//            1- 초기화 ... Line 60
-//            2- 액션 ..... Line 110
-//                1_ 대화(Talk) ... Line 113
+//        1) 필드 ..... Line 40
+//        2) 메서드 ... Line 57
+//            1- 초기화 ... Line 61
+//            2- 액션 ..... Line 111
+//                1_ 대화(Talk) ... Line 114
 // //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ namespace Stage
     using SubState = CharacterBase.State.Sub;
 
     // //////////////////////////////////////////////////////////////////////////////
-    // 1. 인터페이스(INonPlayerCharacterController 인터페이스 상속)
+    // 1. 인터페이스(global::INonPlayerCharacterController 인터페이스 상속)
     // //////////////////////////////////////////////////////////////////////////////
     public interface INonPlayerCharacterController : global::INonPlayerCharacterController
     {
@@ -31,7 +31,8 @@ namespace Stage
     }
 
     // //////////////////////////////////////////////////////////////////////////////
-    // 2. 클래스(NonPlayerCharacterController 클래스 상속)
+    // 2. 클래스(global::NonPlayerCharacterController 클래스 상속)
+    //    - Triggerable : 필드(플래닛) 클리어에 대한 조건 속성
     // //////////////////////////////////////////////////////////////////////////////
     public class NonPlayerCharacterController : global::NonPlayerCharacterController, ITriggerable
     {
