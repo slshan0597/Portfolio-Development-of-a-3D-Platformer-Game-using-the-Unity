@@ -1,3 +1,19 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 로비의 메인 메뉴의 UI 클래스
+//    - 캐릭터, 스테이지 메뉴 진입 통로
+//
+// * 목차
+//    1. 인터페이스 ... Line 33
+//    2. 클래스 ....... Line 46
+//        1) 내부 타입 ... Line 51
+//        2) 필드 ........ Line 114
+//        3) 메서드 ...... Line 121
+//            1- 초기화 .......... Line 124
+//            2- 셋(Set) ......... Line 147
+//            3- 표시(Display) ... Line 163
+//            4- 이벤트 .......... Line 186
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +22,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 using Game;
-
 
 namespace Lobby
 {
@@ -17,54 +32,38 @@ namespace Lobby
     using PlayerEmoteType   = PlayerModelController.EmoteType;
     using SystemControlType = ControlSettingManager.Data.SystemType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IMainMenuUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
         // Reference
         IMainMenuManager menu { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Coroutine DisplayMain(bool isActive);
         Coroutine DisplayHide(bool isActive);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class MainMenuUIController : UIBase, IMainMenuUIController, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입 - 구조
+        // ==============================================================================
         public class Root : WindowBase
         {
-            #region Definition
-
             public class General : MenuBase
             {
-                #region Definition
-
                 public enum Type { Menu, Hide, Close }
 
-                #endregion
-
-
-                #region Field
-
                 public Dictionary<Type, KeyButton> buttons { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public General(Transform transform) : base(transform)
                 {
@@ -77,12 +76,7 @@ namespace Lobby
                         if (Enum.TryParse(name, out Type type)) buttons.Add(type, button);
                     }
                 }
-
-                #endregion
-
-
-                #region Method
-
+                
                 public void SetContent(IControlSettingManager controlSetting)
                 {
                     foreach (var element in buttons)
@@ -98,25 +92,13 @@ namespace Lobby
                         }
                     }
                 }
-
-                #endregion
             }
-
 
             public class Main : MenuBase
             {
-                #region Definition
-
                 public class Option : MenuBase
                 {
-                    #region Field
-
                     public Dictionary<Type, MarkButton> buttons { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
@@ -129,12 +111,7 @@ namespace Lobby
                             if (Enum.TryParse(name, out Type type)) buttons.Add(type, button);
                         }
                     }
-
-                    #endregion
-
-
-                    #region Method
-
+                    
                     public void SetContent(IDataManager data)
                     {
                         foreach (var element in buttons)
@@ -171,22 +148,10 @@ namespace Lobby
                             }
                         }
                     }
-
-                    #endregion
                 }
-
-                #endregion
-
-
-                #region Field
 
                 public Option  option  { get; }
                 public General general { get; }
-
-                #endregion
-
-
-                #region Constructor
 
                 public Main(Transform transform) : base(transform)
                 {
@@ -194,97 +159,54 @@ namespace Lobby
                     general = new General(content.Find("General"));
                 }
 
-                #endregion
-
-
-                #region Method
-
                 public void SetContent(IDataManager data, IControlSettingManager controlSetting)
                 {
                     option.SetContent(data);
                     general.SetContent(controlSetting);
                 }
-
-                #endregion
             }
-
 
             public class Hide : MenuBase
             {
-                #region Field
-
                 public General general { get; }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Hide(Transform transform) : base(transform) { general = new General(content.Find("General")); }
-
-                #endregion
             }
-
-            #endregion
-
-
-            #region Field
 
             public Main main { get; }
             public Hide hide { get; }
-
-            #endregion
-
-
-            #region Cunstructor
-
+            
             public Root(Transform transform) : base(transform)
             {
                 main = new Main(content.Find("Main"));
                 hide = new Hide(content.Find("Hide"));
             }
-
-            #endregion
-
-
-            #region Method
-
+            
             public void SetContent(IDataManager data, IControlSettingManager controlSetting)
             {
                 main.SetContent(data, controlSetting);
                 hide.general.SetContent(controlSetting);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root             root { get; protected set; }
         public IMainMenuManager menu { get; protected set; }
 
+        // etc.
         protected bool isDisplaying = false;
 
         protected Coroutine timerAction;
 
-        #endregion
-
-
-        #region Method
-
-        protected void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Z)) Cursor.lockState = CursorLockMode.Locked;
-            if (Input.GetKeyDown(KeyCode.X)) Cursor.lockState = CursorLockMode.None;
-            if (Input.GetKeyDown(KeyCode.C)) Cursor.visible = true;
-            if (Input.GetKeyDown(KeyCode.V)) Cursor.visible = false;
-        }
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -302,11 +224,91 @@ namespace Lobby
                 element.Value.onClick.AddListener(delegate { OnClickGeneralButton(element.Key); });
         }
 
-        #endregion
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
+        public override void Set()
+        {
+            base.Set();
 
+            IGameDirector          game           = GameDirector.instance;
+            IDataManager           data           = game.data;
+            IControlSettingManager controlSetting = game.menu.setting.control;
 
-        #region Drag
+            root.SetContent(data, controlSetting);
+        }
 
+        protected virtual IEnumerator SetTimer()
+        {
+            IPlayerController player = menu.scene.player;
+
+            yield return new WaitForSeconds(10f);
+
+            player.resources.model.Play(PlayerEmoteType.Tired);
+
+            timerAction = null;
+        }
+
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
+        protected override IEnumerator _Display(bool isActive, float duration)
+        {
+            if (timerAction != null) StopCoroutine(timerAction);
+
+            isDisplaying = true;
+
+            root.hide.gameObject.SetActive(false);
+
+            yield return _Display(root.main, isActive, duration);
+
+            isDisplaying = false;
+
+            if (isActive) timerAction = StartCoroutine(SetTimer());
+            else          gameObject.SetActive(false);
+        }
+
+        // ******************************************************************************
+        // 3-3-1) 메서드 -> 표시 -> 메인
+        //    - 메인 메뉴의 표시
+        // ******************************************************************************
+        public virtual Coroutine DisplayMain(bool isActive)
+        {
+            SetInteractables(false);
+
+            return StartCoroutine(_Display(root.main, isActive, defaultDuration)); 
+        }
+
+        protected virtual IEnumerator _Display(MenuBase menu, bool isActive, float duration)
+        {
+            yield return FadeContent(menu, isActive, duration);
+
+            SetInteractables(true);
+        }
+
+        // ******************************************************************************
+        // 3-3-2) 메서드 -> 표시 -> 숨기기(Hide)
+        //    - 메인 메뉴의 숨기기
+        //    - 숨김 메뉴의 표시
+        // ******************************************************************************
+        public virtual Coroutine DisplayHide(bool isActive)
+        {
+            var menu = root.hide;
+
+            menu.gameObject.SetActive(true);
+            Set();
+            SetInteractables(false);
+
+            return StartCoroutine(_Display(root.hide, isActive, defaultDuration));
+        }
+
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 이벤트
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-4-1) 메서드 -> 이벤트 -> 드래그
+        //    - 화면을 드래그 시 일정 각도 내에 카메라 회전
+        // ******************************************************************************
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
             if (isDisplaying) return;
@@ -330,109 +332,16 @@ namespace Lobby
             camera.Return();
         }
 
-        #endregion
-
-
-        #region Set
-
-        public override void Set()
-        {
-            base.Set();
-
-            IGameDirector          game           = GameDirector.instance;
-            IDataManager           data           = game.data;
-            IControlSettingManager controlSetting = game.menu.setting.control;
-
-            root.SetContent(data, controlSetting);
-        }
-
-        #endregion
-
-
-        #region Main
-
-        #region Display
-
-        protected override IEnumerator _Display(bool isActive, float duration)
-        {
-            if (timerAction != null) StopCoroutine(timerAction);
-
-            isDisplaying = true;
-
-            root.hide.gameObject.SetActive(false);
-
-            yield return _Display(root.main, isActive, duration);
-
-            isDisplaying = false;
-
-            if (isActive) timerAction = StartCoroutine(SetTimer());
-            else          gameObject.SetActive(false);
-        }
-
-        public virtual Coroutine DisplayMain(bool isActive)
-        {
-            SetInteractables(false);
-
-            return StartCoroutine(_Display(root.main, isActive, defaultDuration)); 
-        }
-
-        #endregion
-
-
-        protected virtual IEnumerator SetTimer()
-        {
-            IPlayerController player = menu.scene.player;
-
-            yield return new WaitForSeconds(10f);
-
-            player.resources.model.Play(PlayerEmoteType.Tired);
-
-            timerAction = null;
-        }
-
+        // ******************************************************************************
+        // 3-4-2) 메서드 -> 이벤트 -> 클릭(버튼)
+        //    - 버튼 클릭 시 메뉴 전환
+        // ******************************************************************************
         protected virtual void OnClickMenuButton(Type type)
         {
             IMenuBase menu = this.menu.scene.menu[type];
 
             menu.Open(true, this.menu);
         }
-
-        #endregion
-
-
-        #region Hide
-
-        #region Display
-
-        public virtual Coroutine DisplayHide(bool isActive)
-        {
-            var menu = root.hide;
-
-            menu.gameObject.SetActive(true);
-            Set();
-            SetInteractables(false);
-
-            return StartCoroutine(_Display(root.hide, isActive, defaultDuration));
-        }
-
-        #endregion
-
-        #endregion
-
-
-        #region General
-
-        #region Display
-
-        protected virtual IEnumerator _Display(MenuBase menu, bool isActive, float duration)
-        {
-            yield return FadeContent(menu, isActive, duration);
-
-            SetInteractables(true);
-        }
-
-        #endregion
-
 
         protected virtual void OnClickGeneralButton(GeneralType type)
         {
@@ -450,9 +359,5 @@ namespace Lobby
                 case GeneralType.Close: menu.HideMainMenu(false); break;
             }
         }
-
-        #endregion
-
-        #endregion
     }
 }
