@@ -1,0 +1,60 @@
+using System.Collections;
+using UnityEngine;
+
+
+namespace Lobby
+{
+    public interface IMainMenuManager : IMenuBase
+    {
+        #region Property
+
+        // Component
+        new IMainMenuUIController ui { get; }
+
+        #endregion
+
+
+        #region Method
+
+        Coroutine HideMainMenu(bool isActive);
+
+        #endregion
+    }
+
+
+    public class MainMenuManager : MenuBase, IMainMenuManager
+    {
+        #region Field
+
+        public new IMainMenuUIController ui { get; protected set; }
+
+        #endregion
+
+
+        #region Method
+
+        #region Initialization
+
+        protected override void SetField()
+        {
+            base.SetField();
+
+            ui = GetComponentInChildren<IMainMenuUIController>(true);
+
+            type = Type.Main;
+        }
+
+        #endregion
+
+
+        public virtual Coroutine HideMainMenu(bool isActive) { return StartCoroutine(_HideMainMenu(isActive)); }
+
+        protected virtual IEnumerator _HideMainMenu(bool isActive)
+        {
+            yield return isActive ? ui.DisplayMain(false) : ui.DisplayHide(false);
+            yield return isActive ? ui.DisplayHide(true)  : ui.DisplayMain(true);
+        }
+
+        #endregion
+    }
+}
