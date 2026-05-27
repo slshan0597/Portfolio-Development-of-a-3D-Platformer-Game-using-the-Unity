@@ -1,3 +1,22 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 스테이지 씬의 메인 UI 클래스
+//    - 경과시간, 도전과제 등의 스코어(진행도) 정보 표시
+//    - 플레이어 체력 정보 표시
+//
+// * 목차
+//    1. 인터페이스 ... Line 39
+//    2. 클래스 ....... Line 65
+//        1) 필드 ..... Line 72
+//        2) 메서드 ... Line 88
+//            1- 이벤트 함수 ... Line 91
+//            2- 초기화 ........ Line 103
+//            3- 셋(Set) ....... Line 122
+//            4- 데이터 ........ Line 147
+//                1_ 불러오기(Load) .... Line 150
+//                2_ 저장하기(Save) .... Line 171
+//                3_ 기록하기(Write) ... Line 192
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,7 +24,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Game;
-
 
 namespace Stage
 {
@@ -16,70 +34,57 @@ namespace Stage
     using ComparisonType    = Game.DataManager.Setting.Stage.Level.Challenge.Comparison.Type;
     using SystemControlType = ControlSettingManager.Data.SystemType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IMainUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
         // Reference
         ISceneDirector scene { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Coroutine SetContent(CountType type, int count, int amount);
         void      SetContent(ChallengeType type, int score);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class MainUIController : UIBase, IMainUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입 - 구조
+        // ==============================================================================
         public class Root : MenuBase
         {
-            #region Definition
-
+            // ------------------------------------------------------------------------------
+            // 1-1) 내부 타입 - 구조 -> 메인
+            // ------------------------------------------------------------------------------
             public class Main : MenuBase
             {
-                #region Definition
-
+                // ******************************************************************************
+                // 1-1-1) 내부 타입 - 구조 -> 메인 -> 카운트(Count)
+                //    - 플레이어의 체력, 얻은 코인 수 표시
+                // ******************************************************************************
                 public class Count : MenuBase
                 {
-                    #region Definition
-
+                    // 내부 타입 - 카운트
                     public enum Type { HP, Coin }
-
 
                     public class Slot : MenuBase
                     {
-                        #region Field
-
                         public Text     contentText { get; }
                         public SlotBase amount      { get; }
-
-                        #endregion
-
-
-                        #region Constructor
 
                         public Slot(Transform transform) : base(transform)
                         {
                             contentText = content.Find("Content Text").GetComponent<Text>();
                             amount      = new SlotBase(content.Find("Amount"));
                         }
-
-                        #endregion
-
-
-                        #region Method
 
                         public void SetContent(Type type, int count, int amount)
                         {
@@ -89,22 +94,12 @@ namespace Stage
                             contentText.text           = $"{type}\t: {count}";
                             this.amount.labelText.text = $"{sign}{_amount}";
                         }
-
-                        #endregion
                     }
 
-                    #endregion
-
-
-                    #region Field
-
+                    // 필드 - 카운트
                     public Dictionary<Type, Slot> slots { get; }
 
-                    #endregion
-
-
-                    #region Constructor
-
+                    // 생성자 - 카운트
                     public Count(Transform transform) : base(transform)
                     {
                         slots = new Dictionary<CountType, Slot>();
@@ -118,37 +113,26 @@ namespace Stage
                         }
                     }
 
-                    #endregion
-
-
-                    #region Method
-
+                    // 메서드 - 카운트
                     public void SetContent(int hitPoint, int coin)
                     {
                         slots[Type.HP].SetContent(Type.HP, hitPoint, 0);
                         slots[Type.Coin].SetContent(Type.Coin, coin, 0);
                     }
-
-                    #endregion
                 }
 
-
+                // ******************************************************************************
+                // 1-1-2) 내부 타입 - 구조 -> 메인 -> 도전과제(Challenge)
+                //    - 현재 스코어(진행도)에 따른 도전과제 정보 표시
+                // ******************************************************************************
                 public class Challenge : WindowBase
                 {
-                    #region Definition
-
+                    // 내부 타입 - 도전과제
                     public class Slot : MenuBase
                     {
-                        #region Field
-
                         public Toggle toggle         { get; }
                         public Text   contentText    { get; }
                         public Image  strikeoutImage { get; }
-
-                        #endregion
-
-
-                        #region Constructor
 
                         public Slot(Transform transform) : base(transform)
                         {
@@ -156,11 +140,6 @@ namespace Stage
                             contentText    = content.GetComponentInChildren<Text>(true);
                             strikeoutImage = content.Find("Strikeout Image").GetComponent<Image>();
                         }
-
-                        #endregion
-
-
-                        #region Method
 
                         public void SetContent(ChallengeType type, int score, ChallengeData challengeData)
                         {
@@ -184,22 +163,12 @@ namespace Stage
 
                             strikeoutImage.gameObject.SetActive(preCleared);
                         }
-
-                        #endregion
                     }
 
-                    #endregion
-
-
-                    #region Field
-
+                    // 필드 - 도전과제
                     public Dictionary<ChallengeType, Slot> slots { get; }
 
-                    #endregion
-
-
-                    #region Constructor
-
+                    // 생성자 - 도전과제
                     public Challenge(Transform transform, Dictionary<ChallengeType, ChallengeData> challengeDatas)
                         : base(transform)
                     {
@@ -213,11 +182,7 @@ namespace Stage
                         slot.gameObject.SetActive(false);
                     }
 
-                    #endregion
-
-
-                    #region Method
-
+                    // 메서드 - 도전과제
                     public void SetContent(Dictionary<ChallengeType, int> score,
                         Dictionary<ChallengeType, ChallengeData> challengeDatas)
                     {
@@ -229,25 +194,15 @@ namespace Stage
                             slot.SetContent(type, score[type], challengeDatas[type]);
                         }
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드 - 메인
                 public Text      timeText   { get; }
                 public Count     count      { get; }
                 public Challenge challenge  { get; }
                 public KeyButton menuButton { get; }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 메인
                 public Main(Transform transform, Dictionary<ChallengeType, ChallengeData> challengeDatas) : base(transform)
                 {
                     timeText   = content.Find("Time Text").GetComponent<Text>();
@@ -256,11 +211,7 @@ namespace Stage
                     menuButton = content.GetComponentInChildren<KeyButton>(true);
                 }
 
-                #endregion
-
-
-                #region Method
-
+                // 메서드 - 메인
                 public void SetContent(int hitPoint, IScoreManager score,
                     Dictionary<ChallengeType, ChallengeData> challengeDatas, IControlSettingManager controlSetting)
                 {
@@ -271,47 +222,35 @@ namespace Stage
                 }
 
                 public void SetContent(TimeSpan elapsedTime) { timeText.text = elapsedTime.ToString(@"mm\:ss\:ff"); }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드 - 구조
             public Main main { get; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자 - 구조
             public Root(Transform transform, Dictionary<ChallengeType, ChallengeData> challengeDatas) : base(transform)
             { 
                 main = new Main(content.Find("Main"), challengeDatas);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root           root  { get; protected set; }
         public ISceneDirector scene { get; protected set; }
 
+        // etc.
         protected Dictionary<CountType, Coroutine> actions;
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        //    - 경과 시간을 실시간으로 갱
+        // ------------------------------------------------------------------------------
         protected virtual void Update()
         {
             IScoreManager score = scene.score;
@@ -319,11 +258,9 @@ namespace Stage
             root.main.SetContent(score.elapsedTime);
         }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -346,11 +283,10 @@ namespace Stage
 
         protected override void ResetField() { _defaultDuration = 0.25f; }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 셋(Set)
+        //    - 스코어 갱신 시 호출됨
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -390,11 +326,9 @@ namespace Stage
 
         protected override void SetCurrent(bool isActive) { }
 
-        #endregion
-
-
-        #region Display
-
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
         public override Coroutine Display(bool isActive, bool animated = true)
         {
             gameObject.SetActive(true);
@@ -414,16 +348,15 @@ namespace Stage
             if (!isActive) gameObject.SetActive(false);
         }
 
-        #endregion
-
-
+        // ------------------------------------------------------------------------------
+        // 3-5) 메서드 -> 이벤트
+        //    - 게임 일시 정지 후 게임 메뉴 호출
+        // ------------------------------------------------------------------------------
         protected virtual void OnClickMenuButton()
         {
             IMainMenuManager gameMenu = GameDirector.instance.menu.main;
 
             gameMenu.Open(true);
         }
-
-        #endregion
     }
 }
