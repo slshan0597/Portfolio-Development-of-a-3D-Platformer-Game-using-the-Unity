@@ -1,26 +1,43 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 스테이지 씬 전용 오브젝트의 속성에 대한 인터페이스
+//
+// * 목차
+//    1. 인터페이스 ... Line 16
+//        1) 트리거(Triggerable) ......... Line 19
+//        2) 보상(Rewardable) ............ Line 34
+//        3) 체크포인트(CheckPointable) ... Line 53
+// //////////////////////////////////////////////////////////////////////////////
 using UnityEngine;
-
 
 namespace Stage
 {
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(속성)
+    // //////////////////////////////////////////////////////////////////////////////
+    // ==============================================================================
+    // 1-1. 트리거(Triggerable)
+    //    - 필드(플래닛)의 클리어 조건에 대한 오브젝트 속성
+    //    - 트리거 발동 시 필드 클리어 호출
+    // ==============================================================================
     public interface ITriggerable
     {
-        #region Property
-
+        // 프로퍼티
         // Reference
         IPlanetController planet { get; }
 
         // Setting
         bool useTrigger { get; }
-
-        #endregion
     }
 
-
+    // ==============================================================================
+    // 1-2. 보상(Rewardable)
+    //    - 필드(플래닛)의 클리어에 대한 보상 속성
+    //    - 필드 클리어 시 활성화
+    // ==============================================================================
     public interface IRewardable
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         GameObject gameObject { get; }
         Transform  transform  { get; }
@@ -28,21 +45,18 @@ namespace Stage
         // Reference
         IPlanetController planet { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Coroutine Appear();
-
-        #endregion
     }
 
-
+    // ==============================================================================
+    // 1-3. 체크포인트(CheckPointable)
+    //    - 물리적인 체크포인트가 아닌, 이벤트 형식으로 여러 오브젝트에 속성을 부여
+    //    - 해당 오브젝트를 재정의하여 체크포인트 기능 활성화
+    // ==============================================================================
     public interface ICheckPointable
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         ICharacterTargetController characterTarget { get; }
 
@@ -51,7 +65,5 @@ namespace Stage
 
         // Setting
         bool useCheckPoint { get; }
-
-        #endregion
     }
 }
