@@ -6,6 +6,12 @@
 // * 목차
 //    1. 인터페이스 ... Line 15
 //    2. 클래스 ....... Line 28
+//        1) 필드 ..... Line 
+//        2) 메서드 ... Line 
+//            1- 초기화 ............... Line 
+//            2- 뷰(View) 모드 열기 ... Line 
+//            3- 캐릭터 강화 .......... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
