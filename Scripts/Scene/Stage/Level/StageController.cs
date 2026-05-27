@@ -1,8 +1,19 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 스테이지 정보 클래스
+//    - 하나의 스테이지 내에 다수의 레벨 정보 저장
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 내부 타입 ... Line 
+//        2) 필드 ........ Line 
+//        3) 메서드 ...... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections.Generic;
 using UnityEngine;
 
 using Game;
-
 
 namespace Stage
 {
@@ -10,11 +21,12 @@ namespace Stage
     using StageData = Game.DataManager.Stages.Stage;
     using LevelData = Game.DataManager.Stages.Stage.Levels.Level;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IStageController
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         GameObject gameObject { get; }
         Transform  transform  { get; }
@@ -28,31 +40,21 @@ namespace Stage
         Material  skybox { get; }
         AudioClip bgm    { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         void Initialize(StageData stageData);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스
+    // //////////////////////////////////////////////////////////////////////////////
     public class StageController : MonoBehaviour, IStageController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        // ==============================================================================
         public class Levels : Dictionary<int, ILevelController>
         {
-            #region Field
-
             public ILevelController current { get; protected set; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Levels(Transform transform) : base()
             {
@@ -64,11 +66,6 @@ namespace Stage
                 }
             }
 
-            #endregion
-
-
-            #region Method
-
             public void Initialize(LevelData levelData)
             {
                 current = this[levelData.id];
@@ -79,37 +76,26 @@ namespace Stage
                     else                  level.gameObject.SetActive(false);
                 }
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Levels         levels { get; protected set; }
         public ISceneDirector scene  { get; protected set; }
 
+        // Setting
         [SerializeField] protected Material  _skybox;
         [SerializeField] protected AudioClip _bgm;
 
         public Material  skybox { get { return _skybox; } }
         public AudioClip bgm    { get { return _bgm; } }
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
         protected virtual void Awake() { SetField(); }
-
-        #endregion
-
-
-        #region Initialization
 
         protected virtual void SetField()
         {
@@ -125,9 +111,5 @@ namespace Stage
 
             levels.Initialize(stageData.levels.Current);
         }
-
-        #endregion
-
-        #endregion
     }
 }
