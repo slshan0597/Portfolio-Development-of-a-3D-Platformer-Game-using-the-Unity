@@ -1,3 +1,17 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 스코어(Score) 정보 저장 클래스
+//    - 경과 시간, 도전과제(Challenge)와 그에 따른 보상(Reward) 정보 저장 및 갱신
+//
+// * 목차
+//    1. 인터페이스 ... Line 23
+//    2. 클래스 ....... Line 44
+//        1) 내부 타입 ... Line 49
+//        2) 필드 ........ Line 59
+//        3) 메서드 ...... Line 68
+//            1- 초기화 ........... Line 73
+//            2- 체크포인트 저장 ... Line 99
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -5,7 +19,6 @@ using System.Linq;
 using UnityEngine;
 
 using Game;
-
 
 namespace Stage
 {
@@ -18,11 +31,12 @@ namespace Stage
     using MoneyData           = SaveMenuManager.Data.Money;
     using MainUICountType     = MainUIController.Root.Main.Count.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IScoreManager
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Stopwatch stopwatch { get; }
 
@@ -35,49 +49,43 @@ namespace Stage
         Dictionary<ChallengeType, int>       challenges  { get; }
         Dictionary<RewardConditionType, int> rewards     { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         void IncreaseCoin(int amount = 1);
         void TryIncrease(ChallengeType type, int amount = 1);
         void Load();
         void Save();
         void Write();
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스
+    // //////////////////////////////////////////////////////////////////////////////
     public class ScoreManager : MonoBehaviour, IScoreManager
     {
-        #region Definition
-
         public enum RewardConditionType { FirstClear, Challenge, Coin }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 1) 필드
+        // ==============================================================================
+        // Component & Reference
         public Stopwatch      stopwatch { get; protected set; }
         public ISceneDirector scene     { get; protected set; }
 
+        // Data
         public TimeSpan                             elapsedTime { get { return savedTime + stopwatch.Elapsed; } }
         public int                                  coin        { get; protected set; }
         public Dictionary<ChallengeType, int>       challenges  { get; protected set; }
         public Dictionary<RewardConditionType, int> rewards     { get; protected set; }
 
+        // etc.
         protected TimeSpan savedTime, prevElapsedTime;
 
-        #endregion
-
-
-        #region Method
-
-        #region Event
-
+        // ==============================================================================
+        // 2) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 2-1) 메서드 -> 이벤트 함수
+        // ------------------------------------------------------------------------------
         protected virtual void Awake() { SetField(); }
 
         protected virtual void Update()
@@ -87,11 +95,9 @@ namespace Stage
             prevElapsedTime = elapsedTime;
         }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 2-2) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected virtual void SetField()
         {
             Game.IDataManager data = GameDirector.instance.data;
@@ -108,9 +114,10 @@ namespace Stage
             foreach (RewardConditionType type in Enum.GetValues(typeof(RewardConditionType))) rewards.Add(type, 0);
         }
 
-        #endregion
-
-
+        // ------------------------------------------------------------------------------
+        // 2-3) 메서드 -> 셋(Set)
+        //    - 이벤트에 따른 스코어 정보 갱신
+        // ------------------------------------------------------------------------------
         public virtual void IncreaseCoin(int amount = 1)
         {
             IMainUIController ui = scene.ui.main;
@@ -132,9 +139,13 @@ namespace Stage
             ui.SetContent(type, challenges[type]);
         }
 
-
-        #region Data
-
+        // ------------------------------------------------------------------------------
+        // 2-4) 메서드 -> 데이터
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 2-4-1) 메서드 -> 데이터 -> 불러오기(Load)
+        //    - 스테이지 실패 후 스테이지 씬 재진입 시 임시로 저장된 스코어 정보를 불러옴
+        // ******************************************************************************
         public virtual void Load()
         {
             IDataManager data = scene.data;
@@ -152,6 +163,10 @@ namespace Stage
             }
         }
 
+        // ******************************************************************************
+        // 2-4-2) 메서드 -> 데이터 -> 저장하기(Load)
+        //    - 체크포인트 도달 시 현재 스코어 정보를 임시로 저장
+        // ******************************************************************************
         public virtual void Save()
         {
             IDataManager data = scene.data;
@@ -169,6 +184,10 @@ namespace Stage
             }
         }
 
+        // ******************************************************************************
+        // 2-4-3) 메서드 -> 데이터 -> 기록하기(Write)
+        //    - 게임 클리어 시 스코어 정보를 게임의 현재 데이터에 기록
+        // ******************************************************************************
         public virtual void Write()
         {
             IGameDirector     game     = GameDirector.instance;
@@ -239,9 +258,5 @@ namespace Stage
 
             if (challengeData.cleared) rewards[RewardConditionType.Challenge] += challengeData.reward;
         }
-
-        #endregion
-
-        #endregion
     }
 }
