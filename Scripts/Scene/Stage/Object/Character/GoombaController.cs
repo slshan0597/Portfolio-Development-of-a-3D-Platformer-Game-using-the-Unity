@@ -6,11 +6,11 @@
 // * 목차
 //    1. 인터페이스 ... Line 21
 //    2. 클래스 ....... Line 31
-//        1) 필드 ..... Line 36
-//        2) 메서드 ... Line 48
-//            1- 초기화 ... Line 52
-//            2- 액션 ..... Line 63
-//                1_ 죽기(Die) ... Line 66
+//        1) 필드 ..... Line 37
+//        2) 메서드 ... Line 49
+//            1- 초기화 ... Line 53
+//            2- 액션 ..... Line 64
+//                1_ 죽기(Die) ... Line 67
 // //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using UnityEngine;
@@ -18,7 +18,7 @@ using UnityEngine;
 namespace Stage
 {
     // //////////////////////////////////////////////////////////////////////////////
-    // 1. 인터페이스(IGoombaController 인터페이스 상속)
+    // 1. 인터페이스(global::IGoombaController 인터페이스 상속)
     // //////////////////////////////////////////////////////////////////////////////
     public interface IGoombaController : global::IGoombaController
     {
@@ -28,7 +28,8 @@ namespace Stage
     }
 
     // //////////////////////////////////////////////////////////////////////////////
-    // 2. 클래스(GoombaController 클래스 상속)
+    // 2. 클래스(global::GoombaController 클래스 상속)
+    //    - Triggerable : 필드(플래닛) 클리어에 대한 조건 속성
     // //////////////////////////////////////////////////////////////////////////////
     public class GoombaController : global::GoombaController, ITriggerable
     {
