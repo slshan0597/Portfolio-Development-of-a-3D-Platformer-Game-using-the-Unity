@@ -1,3 +1,24 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 로비의 캐릭터 메뉴의 UI 클래스
+//    - 재화 및 캐릭터 강화 리스트 표시(기능은 리스트 UI에서 구현)
+//    - 뷰(View) 모드에서의 캐릭터 둘러보기 기능
+//
+// * 목차
+//    1. 인터페이스 ... Line 40
+//    2. 클래스 ....... Line 57
+//        1) 내부 타입 ... Line 62
+//        2) 필드 ........ Line 197
+//        3) 메서드 ...... Line 209
+//            1- 초기화 .......... Line 212
+//            2- 셋(Set) ......... Line 232
+//            3- 표시(Display) ... Line 257
+//                1_ 메인 ........... Line 276
+//                2_ 숨기기(Hide) ... Line 294
+//            4- 이벤트 ... Line 310
+//                1_ 드래그(화면) ... Line 313
+//                2_ 클릭(버튼) ..... Line 340
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +28,6 @@ using UnityEngine.EventSystems;
 
 using Game;
 
-
 namespace Lobby
 {
     using Root              = CharacterMenuUIController.Root;
@@ -15,11 +35,12 @@ namespace Lobby
     using MoneyData         = DataManager.Money;
     using SystemControlType = ControlSettingManager.Data.SystemType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface ICharacterMenuUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root                           root { get; }
         ICharacterMenuListUIController list { get; }
@@ -27,44 +48,34 @@ namespace Lobby
         // Reference
         ICharacterMenuManager menu { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Coroutine DisplayMain(bool isActive);
         Coroutine DisplayView(bool isActive);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class CharacterMenuUIController : UIBase, ICharacterMenuUIController, IDragHandler
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입 - 구조
+        // ==============================================================================
         public class Root : WindowBase
         {
-            #region Definition
-
+            // ------------------------------------------------------------------------------
+            // 1-1) 내부 타입 - 구조 -> 공통(General)
+            //    - 공통으로 사용되는 UI 구조
+            // ------------------------------------------------------------------------------
             public class General : MenuBase
             {
-                #region Definition
-
+                // 내부 타입 - 공통
                 public enum Type { Close, View, Reset }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드 - 공통
                 public Dictionary<Type, KeyButton> buttons { get; }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 공통
                 public General(Transform transform) : base(transform)
                 {
                     buttons = new Dictionary<Type, KeyButton>();
@@ -77,11 +88,7 @@ namespace Lobby
                     }
                 }
 
-                #endregion
-
-
-                #region Method
-
+                // 메서드 - 공통
                 public void SetContent(IControlSettingManager controlSetting)
                 {
                     foreach (var element in buttons)
@@ -97,59 +104,35 @@ namespace Lobby
                         }
                     }
                 }
-
-                #endregion
             }
 
-
+            // ------------------------------------------------------------------------------
+            // 1-2) 내부 타입 - 구조 -> 메인
+            //    - 캐릭터 강화 리스트 표시에 대한 UI 구조
+            // ------------------------------------------------------------------------------
             public class Main : MenuBase
             {
-                #region Definition
-
+                // 내부 타입 - 메인
                 public class Stat : WindowBase
                 {
-                    #region Field
-
                     public ScrollRect list { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Stat(Transform transform) : base(transform)
                     {
                         list = content.GetComponentInChildren<ScrollRect>(true);
                     }
-
-                    #endregion
                 }
-
 
                 public class Option : MenuBase
                 {
-                    #region Definition
-
                     public class Money : WindowBase
                     {
-                        #region Field
-
                         public Text contentText { get; }
-
-                        #endregion
-
-
-                        #region Constructor
 
                         public Money(Transform transform) : base(transform)
                         {
                             contentText = content.GetComponentInChildren<Text>(true);
                         }
-
-                        #endregion
-
-
-                        #region Method
 
                         public void SetContent(MoneyData moneyData)
                         {
@@ -157,22 +140,10 @@ namespace Lobby
 
                             contentText.text = $"Money\t: {money.ToString("#,##0")}";
                         }
-
-                        #endregion
                     }
-
-                    #endregion
-
-
-                    #region Field
 
                     public Money   money   { get; }
                     public General general { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
@@ -180,108 +151,71 @@ namespace Lobby
                         general = new General(content.Find("General"));
                     }
 
-                    #endregion
-
-
-                    #region Method
-
                     public void SetContent(MoneyData moneyData, IControlSettingManager controlSetting)
                     {
                         money.SetContent(moneyData);
                         general.SetContent(controlSetting);
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드 - 메인
                 public Stat   stat   { get; }
                 public Option option { get; }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 메인
                 public Main(Transform transform) : base(transform)
                 {
                     stat   = new Stat(content.Find("Stat"));
                     option = new Option(content.Find("Option"));
                 }
-
-                #endregion
             }
 
-
+            // ------------------------------------------------------------------------------
+            // 1-3) 내부 타입 - 구조 -> 뷰(View)
+            //    - 뷰 모드에 대한 UI 구조
+            // ------------------------------------------------------------------------------
             public class View : MenuBase
             {
-                #region Field
-
+                // 필드 - 뷰
                 public General general { get; }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 뷰
                 public View(Transform transform) : base(transform) { general = new General(content.Find("General")); }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드
             public Main main { get; }
             public View view { get; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Root(Transform transform)  : base(transform)
             {
                 main = new Main(content.Find("Main"));
                 view = new View(content.Find("View"));
             }
 
-            #endregion
-
-
-            #region Method
-
+            // 메서
             public void SetContent(MoneyData moneyData, IControlSettingManager controlSetting)
             {
                 main.option.SetContent(moneyData, controlSetting);
                 view.general.SetContent(controlSetting);
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root                           root { get; protected set; }
         public ICharacterMenuListUIController list { get; protected set; }
         public ICharacterMenuManager          menu { get; protected set; }
 
-        #endregion
-
-
-        #region Function
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -297,11 +231,9 @@ namespace Lobby
                 element.Value.onClick.AddListener(delegate { OnClickGeneralButton(element.Key, true); });
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -317,13 +249,9 @@ namespace Lobby
 
         protected override void SetCurrent(bool isActive) { }
 
-        #endregion
-
-
-        #region Main
-
-        #region Display
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
         protected override IEnumerator _Display(bool isActive, float duration)
         {
             root.view.gameObject.SetActive(false);
@@ -335,6 +263,10 @@ namespace Lobby
             if (!isActive) gameObject.SetActive(false);
         }
 
+        // ******************************************************************************
+        // 3-3-1) 메서드 -> 표시 -> 메인
+        //    - 메인(캐릭터 강화) 메뉴의 표시
+        // ******************************************************************************
         public virtual Coroutine DisplayMain(bool isActive)
         {
             SetInteractables(false);
@@ -360,15 +292,10 @@ namespace Lobby
             else          main.gameObject.SetActive(false);
         }
 
-        #endregion
-
-        #endregion
-
-
-        #region View
-
-        #region Display
-
+        // ******************************************************************************
+        // 3-3-2) 메서드 -> 표시 -> 뷰(View)
+        //    - 뷰 모드 메뉴의 표시
+        // ******************************************************************************
         public virtual Coroutine DisplayView(bool isActive)
         {
             root.view.gameObject.SetActive(true);
@@ -385,11 +312,13 @@ namespace Lobby
             SetInteractables(true);
         }
 
-        #endregion
-
-
-        #region Drag
-
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 이벤트
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-4-1) 메서드 -> 이벤트 -> 드래그(화면)
+        //    - 화면을 드래그 시 카메라를 회전하여 캐릭터 둘러보
+        // ******************************************************************************
         public virtual void OnDrag(PointerEventData eventData)
         {
             ICharacterViewCameraController camera = menu.scene.cameras.characterView;
@@ -397,13 +326,10 @@ namespace Lobby
             if (camera.gameObject.activeInHierarchy) camera.Rotate(eventData.delta);
         }
 
-        #endregion
-
-        #endregion
-
-
-        #region General
-
+        // ******************************************************************************
+        // 3-4-2) 메서드 -> 이벤트 -> 클릭(버튼)
+        //    - 공통 버튼의 기능 수행
+        // ******************************************************************************
         protected virtual void OnClickGeneralButton(GeneralType type, bool isViewMode)
         {
             switch (type)
@@ -430,9 +356,5 @@ namespace Lobby
                     break;
             }
         }
-
-        #endregion
-
-        #endregion
     }
 }
