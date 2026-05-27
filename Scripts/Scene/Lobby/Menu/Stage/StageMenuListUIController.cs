@@ -1,3 +1,18 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 로비의 스테이지(레벨) 메뉴의 스테이지 리스트 UI 클래스
+//    - 각 스테이지의 정보를 리스트로 표시
+//
+// * 목차
+//    1. 인터페이스 ... Line 32
+//    2. 클래스 ....... Line 45
+//        1) 내부 타입 ... Line 50
+//        2) 필드 ........ Line 125
+//        3) 메서드 ...... Line 132
+//            1- 초기화 .... Line 135
+//            2- 셋(Set) ... Line 156
+//            3- 이벤트 .... Line 168
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +22,6 @@ using UnityEngine.EventSystems;
 
 using Game;
 
-
 namespace Lobby
 {
     using Root         = StageMenuListUIController.Root;
@@ -16,46 +30,35 @@ namespace Lobby
     using MarkType     = MarkButton.MarkType;
     using ControlState = ControlSettingManager.State;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IStageMenuListUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
         // Reference
         IStageMenuUIController ui { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class StageMenuListUIController : UIBase, IStageMenuListUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입 - 구조
+        // ==============================================================================
         public class Root
         {
-            #region Definition
-
+            // 내부 타입
             public class Slot : SlotBase
             {
-                #region Field
-
                 public MarkButton button { get; }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Slot(Transform transform) : base(transform) { button = content.GetComponentInChildren<MarkButton>(true); }
-
-                #endregion
-
-
-                #region Method
 
                 public void SetContent(StageData stageData)
                 {
@@ -70,26 +73,16 @@ namespace Lobby
 
                     button.SetContent(mark);
                 }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드
             public RectTransform         rectTransform         { get; }
             public ScrollRect            scrollRect            { get; }
             public HorizontalLayoutGroup horizontalLayoutGroup { get; }
             public RectTransform         content               { get; }
             public Dictionary<int, Slot> slots                 { get; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Root(Transform transform, StageDatas stageDatas)
             {
                 rectTransform         = transform as RectTransform;
@@ -111,11 +104,7 @@ namespace Lobby
                 DestroyImmediate(slot.gameObject);
             }
 
-            #endregion
-
-
-            #region Method
-
+            // 메서드
             public void SetContent(StageDatas stageDatas)
             {
                 foreach (var element in slots)
@@ -127,27 +116,28 @@ namespace Lobby
                     slot.SetContent(stageData);
                 }
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root                   root { get; protected set; }
         public IStageMenuUIController ui   { get; protected set; }
 
+        // etc.
         protected GameObject selectedObject;
 
         #endregion
 
 
-        #region Function
-
-        #region Event
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 이벤트 함수
+        //    - 입력 타입이 Joystick일 경우 리스트의 스크롤 조작
+        // ------------------------------------------------------------------------------
         protected virtual void Update()
         {
             IControlSettingManager controlSetting = GameDirector.instance.menu.setting.control;
@@ -166,11 +156,9 @@ namespace Lobby
             EventSystem.current.SetSelectedGameObject(null);
         }
 
-        #endregion
-
-
-        #region Initialization
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             IDataManager data = GameDirector.instance.data;
@@ -189,11 +177,11 @@ namespace Lobby
             }
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 셋(Set)
+        //    - 현재 스테이지의 항목을 먼저 선택(Select)
+        //    - 다른 스테이지 선택 시 스테이지 슬롯이 화면 가운데에 오도록 스크롤 바 이동
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -228,11 +216,10 @@ namespace Lobby
             content.anchoredPosition = Vector2.right * (slotWidth * slotIndex * -1f);
         }
 
-        #endregion
-
-
-        #region Display
-
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 표시(Display)
+        //    - 리스트 표시와 동시에 현재 선택된 스테이지로 스크롤 바 이
+        // ------------------------------------------------------------------------------
         protected override IEnumerator _Display(bool isActive, float duration)
         {
             float interval = duration * 0.5f;
@@ -248,11 +235,10 @@ namespace Lobby
             if (!isActive) gameObject.SetActive(false);
         }
 
-        #endregion
-
-
-        #region Option
-
+        // ------------------------------------------------------------------------------
+        // 3-5) 메서드 -> 이벤트
+        //    - 스테이지 선택 및 확인 창 표시
+        // ------------------------------------------------------------------------------
         protected virtual void OnClickButton(int index) 
         {
             IGameDirector       game     = GameDirector.instance;
@@ -287,9 +273,5 @@ namespace Lobby
             return $"Name\t\t: {stageData.name}\n" + 
                    $"Cleared\t: {stageData.cleared}";
         }
-
-        #endregion
-
-        #endregion
     }
 }
