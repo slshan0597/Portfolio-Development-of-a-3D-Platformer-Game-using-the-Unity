@@ -1,3 +1,19 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 로비의 스테이지(레벨) 메뉴 클래스
+//    - 스테이지-레벨의 2차원 배열 구조
+//    - 스테이지 및 레벨의 선택, 변경 기능
+//    - 레벨 선택 시 스테이지 씬 진입
+//
+// * 목차
+//    1. 인터페이스 ... Line 29
+//    2. 클래스 ....... Line 44
+//        1) 필드 ..... Line 52
+//        2) 메서드 ... Line 59
+//            1- 초기화 ............... Line 62
+//            2- 뷰(View) 모드 열기 ... Line 82
+//            3- 캐릭터 강화 .......... Line 108
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,47 +21,44 @@ using UnityEngine;
 
 using Game;
 
-
 namespace Lobby
 {
     using LevelData = DataManager.Stages.Stage.Levels.Level;
     using SceneType = SceneBase.Type;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IMenuBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IStageMenuManager : IMenuBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         new IStageMenuUIController ui { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Coroutine ChangeLevel(bool isNext);
         void      StartLevel();
         void      Select(int index);
         void      OpenSelectMenu(bool isActive);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(MenuBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class StageMenuManager : MenuBase, IStageMenuManager
     {
-        #region Field
-
+        // ==============================================================================
+        // 1) 필드
+        // ==============================================================================
+        // Component & Reference
         public new IStageMenuUIController ui { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 2) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 2-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -55,9 +68,9 @@ namespace Lobby
             type = Type.Stage;
         }
 
-        #endregion
-
-
+        // ------------------------------------------------------------------------------
+        // 2-2) 메서드 -> 열기(Open)
+        // ------------------------------------------------------------------------------
         public override Coroutine Open(bool isActive, IMenuBase prev = null)
         {
             IStageController         stage    = scene.stages.current;
@@ -71,9 +84,11 @@ namespace Lobby
             return base.Open(isActive, prev);
         }
 
-
-        #region Level
-
+        // ------------------------------------------------------------------------------
+        // 2-3) 메서드 -> 레벨
+        //    - 좌 또는 우로 현재의 레벨을 변경
+        //    - 레벨 시작 시 스테이지 씬 진입
+        // ------------------------------------------------------------------------------
         public virtual Coroutine ChangeLevel(bool isNext) { return StartCoroutine(_ChangeLevel(isNext)); }
 
         protected virtual IEnumerator _ChangeLevel(bool isNext)
@@ -107,14 +122,25 @@ namespace Lobby
 
             ui.Display(false);
             audio.PlayGameStart();
-            launcher.Transport(player);
+            launcher.Transport(player);    // 해당 클래스에서 일정 시간 뒤 스테이지 디렉터를 통해 스테이지 씬 진입 호출
         }
 
-        #endregion
+        // ------------------------------------------------------------------------------
+        // 2-3) 메서드 -> 스테이지
+        //    - 스테이지 리스트의 UI 표시
+        //    - 스테이지 선택 시 현재 스테이지 정보를 갱신 후 로비 씬 재진입
+        // ------------------------------------------------------------------------------
+        public virtual void OpenSelectMenu(bool isActive)
+        {
+            var root = ui.root;
 
+            root.main.gameObject.SetActive(!isActive);
+            root.select.gameObject.SetActive(isActive);
+            ui.Set();
 
-        #region Stage
-
+            if (isActive) ui.list.Display(true);
+        }
+        
         public virtual void Select(int index)
         {
             IDataManager data = GameDirector.instance.data;
@@ -130,21 +156,5 @@ namespace Lobby
             ui.list.SetInteractables(false);
             scene.Exit(SceneType.Lobby);
         }
-
-        #endregion
-
-
-        public virtual void OpenSelectMenu(bool isActive)
-        {
-            var root = ui.root;
-
-            root.main.gameObject.SetActive(!isActive);
-            root.select.gameObject.SetActive(isActive);
-            ui.Set();
-
-            if (isActive) ui.list.Display(true);
-        }
-
-        #endregion
     }
 }
