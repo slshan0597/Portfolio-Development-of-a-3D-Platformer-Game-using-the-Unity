@@ -1,3 +1,27 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 로비의 스테이지(레벨) 메뉴의 UI 클래스
+//    - 현재 선택된 레벨의 정보 표시
+//    - 레벨의 변경 기능 및 스테이지 변경 메뉴 호출 기능
+//
+// * 목차
+//    1. 인터페이스 ... Line 42
+//    2. 클래스 ....... Line 60
+//        1) 내부 타입 ... Line 65
+//            1- 공통(General) ... Line 70
+//            2- 메인 ............ Line 113
+//            3- 뷰(View) ........ Line 177
+//        2) 필드 ..... Line 209
+//        3) 메서드 ... Line 217
+//            1- 초기화 .......... Line 220
+//            2- 셋(Set) ......... Line 238
+//            3- 표시(Display) ... Line 256
+//                1_ 메인 ....... Line 270
+//                2_ 뷰(View) ... Line 299
+//            4- 이벤트 ... Line 319
+//                1_ 드래그(화면) ... Line 322
+//                2_ 클릭(버튼) ..... Line 333
+// //////////////////////////////////////////////////////////////////////////////
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +33,6 @@ using UnityEngine.EventSystems;
 
 using Game;
 
-
 namespace Lobby
 {
     using Root              = StageMenuUIController.Root;
@@ -20,57 +43,47 @@ namespace Lobby
     using ControlState      = ControlSettingManager.State;
     using SystemControlType = ControlSettingManager.Data.SystemType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface IStageMenuUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root                       root { get; }
         IStageMenuListUIController list { get; }
 
         // Reference
         IStageMenuManager menu { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class StageMenuUIController : UIBase, IStageMenuUIController, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입 - 구조
+        // ==============================================================================
         public class Root : WindowBase
         {
-            #region Definition
-
+            // ------------------------------------------------------------------------------
+            // 1-1) 내부 타입 - 구조 -> 메인(레벨)
+            //    - 레벨에 대한 UI 구조
+            // ------------------------------------------------------------------------------
             public class Main : MenuBase
             {
-                #region Definition
-
+                // 내부 타입 - 메인
                 public enum ButtonType { Previous, Next, Start, Select, Close }
-
 
                 public class Level : WindowBase
                 {
-                    #region Field
-
                     public Text contentText { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Level(Transform transform) : base(transform)
                     {
                         contentText = content.Find("Content Text").GetComponent<Text>();
                     }
-
-                    #endregion
-
-
-                    #region Method
 
                     public void SetContent(LevelData levelData)
                     {
@@ -84,24 +97,14 @@ namespace Lobby
 
                         contentText.text = $"Name\t: {levelData.name}\n{_challenge}";
                     }
-
-                    #endregion
                 }
 
-                #endregion
-
-
-                #region Field
-
+                // 필드 - 메인
                 public Text                                  labelText { get; }
                 public Level                                 level     { get; }
                 public Dictionary<MainButtonType, KeyButton> buttons   { get; }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 메인
                 public Main(Transform transform) : base(transform)
                 {
                     labelText = content.Find("Label Text").GetComponent<Text>();
@@ -116,11 +119,7 @@ namespace Lobby
                     }
                 }
 
-                #endregion
-
-
-                #region Method
-
+                // 메서드 - 메인
                 public void SetContent(StageDatas stageDatas, IControlSettingManager controlSetting)
                 {
                     var stageData = stageDatas.Current;
@@ -190,83 +189,62 @@ namespace Lobby
                         }
                     }
                 }
-
-                #endregion
             }
 
-
+            // ------------------------------------------------------------------------------
+            // 1-2) 내부 타입 - 구조 -> 셀렉트(스테이지)
+            //    - 스테이지 리스트에 대한 UI 구조
+            // ------------------------------------------------------------------------------
             public class Select : WindowBase
             {
-                #region Field
-
+                // 필드 - 셀렉트
                 public ScrollRect list        { get; }
                 public KeyButton  closeButton { get; }
 
-                #endregion
-
-
-                #region Constructor
-
+                // 생성자 - 셀렉트
                 public Select(Transform transform) : base(transform)
                 {
                     list        = content.GetComponentInChildren<ScrollRect>(true);
                     closeButton = content.GetComponentInChildren<KeyButton>(true);
                 }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드
             public Main   main   { get; }
             public Select select { get; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Root(Transform transform) : base(transform)
             {
                 main   = new Main(content.Find("Main"));
                 select = new Select(content.Find("Select"));
             }
 
-            #endregion
-
-
-            #region Method
-
+            // 메서드
             public void SetContent(StageDatas stageDatas, IControlSettingManager controlSetting)
             {
                 main.SetContent(stageDatas, controlSetting);
                 select.closeButton.SetContent(controlSetting.GetKey(SystemControlType.Cancel));
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root                       root { get; protected set; }
         public IStageMenuListUIController list { get; protected set; }
         public IStageMenuManager          menu { get; protected set; }
 
+        // etc.
         protected bool isDisplaying = false;
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -281,11 +259,51 @@ namespace Lobby
             root.select.closeButton.onClick.AddListener(delegate { OnClickSelectCloseButton(); });
         }
 
-        #endregion
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
+        public override void Set()
+        {
+            base.Set();
 
+            IGameDirector          game           = GameDirector.instance;
+            IDataManager           data           = game.data;
+            IControlSettingManager controlSetting = game.menu.setting.control;
 
-        #region Drag
+            var stageDatas = data.stages;
 
+            root.SetContent(stageDatas, controlSetting);
+        }
+
+        public override void SelectFirstSelectable() { }
+
+        protected override void SetCurrent(bool isActive) { }
+
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 표시(Display)
+        // ------------------------------------------------------------------------------
+        protected override IEnumerator _Display(bool isActive, float duration)
+        {
+            isDisplaying = true;
+
+            root.select.gameObject.SetActive(false);
+
+            yield return FadeContent(root.main, isActive, duration);
+
+            SetInteractables(true);
+
+            isDisplaying = false;
+
+            if (!isActive) gameObject.SetActive(false);
+        }
+
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 이벤트
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-4-1) 메서드 -> 이벤트 -> 드래그(화면)
+        //    - 화면을 드래그 시 일정 각도 내에 카메라 회전
+        // ******************************************************************************
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
             if (isDisplaying) return;
@@ -309,53 +327,11 @@ namespace Lobby
             camera.Return();
         }
 
-        #endregion
-
-
-        #region Set
-
-        public override void Set()
-        {
-            base.Set();
-
-            IGameDirector          game           = GameDirector.instance;
-            IDataManager           data           = game.data;
-            IControlSettingManager controlSetting = game.menu.setting.control;
-
-            var stageDatas = data.stages;
-
-            root.SetContent(stageDatas, controlSetting);
-        }
-
-        public override void SelectFirstSelectable() { }
-
-        protected override void SetCurrent(bool isActive) { }
-
-        #endregion
-
-
-        #region Main
-
-        #region Display
-
-        protected override IEnumerator _Display(bool isActive, float duration)
-        {
-            isDisplaying = true;
-
-            root.select.gameObject.SetActive(false);
-
-            yield return FadeContent(root.main, isActive, duration);
-
-            SetInteractables(true);
-
-            isDisplaying = false;
-
-            if (!isActive) gameObject.SetActive(false);
-        }
-
-        #endregion
-
-
+        // ******************************************************************************
+        // 3-4-2) 메서드 -> 이벤트 -> 클릭(버튼)
+        //    - 레벨 전환 및 시작
+        //    - 스테이지 메뉴 오픈
+        // ******************************************************************************
         protected virtual void OnClickMainButton(MainButtonType type)
         {
             switch (type)
@@ -374,15 +350,6 @@ namespace Lobby
             }
         }
 
-        #endregion
-
-
-        #region Select
-
         protected virtual void OnClickSelectCloseButton() { menu.OpenSelectMenu(false); }
-
-        #endregion
-
-        #endregion
     }
 }
