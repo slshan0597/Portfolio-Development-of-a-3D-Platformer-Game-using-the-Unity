@@ -1,3 +1,26 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 게임의 로비의 캐릭터 메뉴의 캐릭터 강화 리스트 UI 클래스
+//    - 캐릭터 항목마다 강화 수치와 요구 강화 재료 표시
+//
+// * 목차
+//    1. 인터페이스 ... Line 42
+//    2. 클래스 ....... Line 60
+//        1) 내부 타입 ... Line 65
+//            1- 공통(General) ... Line 70
+//            2- 메인 ............ Line 113
+//            3- 뷰(View) ........ Line 177
+//        2) 필드 ..... Line 209
+//        3) 메서드 ... Line 217
+//            1- 초기화 .......... Line 220
+//            2- 셋(Set) ......... Line 238
+//            3- 표시(Display) ... Line 256
+//                1_ 메인 ....... Line 270
+//                2_ 뷰(View) ... Line 299
+//            4- 이벤트 ... Line 319
+//                1_ 드래그(화면) ... Line 322
+//                2_ 클릭(버튼) ..... Line 333
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +29,6 @@ using UnityEngine.UI;
 
 using Game;
 
-
 namespace Lobby
 {
     using Root              = CharacterMenuListUIController.Root;
@@ -14,45 +36,37 @@ namespace Lobby
     using CharacterStatType = DataManager.Setting.CharacterStat.Type;
     using MoneyData         = SaveMenuManager.Data.Money;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(IUIBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface ICharacterMenuListUIController : IUIBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         Root root { get; }
 
         // Reference
         ICharacterMenuUIController ui { get; }
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(UIBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class CharacterMenuListUIController : UIBase, ICharacterMenuListUIController
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입 - 구조
+        // ==============================================================================
         public class Root
         {
-            #region Definition
-
+            // 내부 타입
             public class Slot : SlotBase
             {
-                #region Definition
-
                 public class Option : WindowBase
                 {
-                    #region Field
-
                     public Text   text       { get; }
                     public Button button     { get; }
                     public Text   buttonText { get; }
-
-                    #endregion
-
-
-                    #region Constructor
 
                     public Option(Transform transform) : base(transform)
                     {
@@ -60,11 +74,6 @@ namespace Lobby
                         button     = content.GetComponentInChildren<Button>(true);
                         buttonText = button.GetComponentInChildren<Text>(true);
                     }
-
-                    #endregion
-
-
-                    #region Method
 
                     public void SetContent(CharacterStatData characterStatData, MoneyData moneyData)
                     {
@@ -77,28 +86,11 @@ namespace Lobby
                         button.interactable = (count < maxCount) && (money >= cost);
                         buttonText.text     = (count < maxCount) ? $"Cost :\n{cost}" : "Max";
                     }
-
-                    #endregion
                 }
-
-                #endregion
-
-
-                #region Field
 
                 public Option option { get; }
 
-                #endregion
-
-
-                #region Constructor
-
                 public Slot(Transform transform) : base(transform) { option = new Option(content.Find("Option")); }
-
-                #endregion
-
-
-                #region Method
 
                 public void SetContent(CharacterStatType type, CharacterStatData characterStatData, MoneyData moneyData)
                 {
@@ -106,22 +98,12 @@ namespace Lobby
 
                     option.SetContent(characterStatData, moneyData);
                 }
-
-                #endregion
             }
 
-            #endregion
-
-
-            #region Field
-
+            // 필드
             public Dictionary<CharacterStatType, Slot> slots { get; }
 
-            #endregion
-
-
-            #region Constructor
-
+            // 생성자
             public Root(Transform transform, Dictionary<CharacterStatType, CharacterStatData> characterStatDatas)
             {
                 var content = transform.GetComponentInChildren<LayoutGroup>(true).transform;
@@ -134,11 +116,7 @@ namespace Lobby
                 DestroyImmediate(slot.gameObject);
             }
 
-            #endregion
-
-
-            #region Method
-
+            // 메서드
             public void SetContent(Dictionary<CharacterStatType, CharacterStatData> characterStatDatas, MoneyData moneyData)
             {
                 foreach (var element in slots)
@@ -149,25 +127,21 @@ namespace Lobby
                     slot.SetContent(type, characterStatDatas[type], moneyData);
                 }
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public Root                       root { get; protected set; }
         public ICharacterMenuUIController ui   { get; protected set; }
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             IDataManager data = GameDirector.instance.data;
@@ -186,11 +160,9 @@ namespace Lobby
             }
         }
 
-        #endregion
-
-
-        #region Set
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 셋(Set)
+        // ------------------------------------------------------------------------------
         public override void Set()
         {
             base.Set();
@@ -200,11 +172,10 @@ namespace Lobby
             root.SetContent(data.characterStats, data.money);
         }
 
-        #endregion
-
-
-        #region Option
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 이벤트
+        //    - 강화 시도 및 강화 확인 창 표시
+        // ------------------------------------------------------------------------------
         protected virtual void OnClickButton(CharacterStatType type)
         {
             IAudioController audio = GameDirector.instance.audio;
@@ -244,9 +215,5 @@ namespace Lobby
 
             return str.ToString();
         }
-
-        #endregion
-
-        #endregion
     }
 }
