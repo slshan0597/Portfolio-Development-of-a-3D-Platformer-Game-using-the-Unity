@@ -1,9 +1,26 @@
+// //////////////////////////////////////////////////////////////////////////////
+// * 요약
+//    - 스테이지 씬 디렉터 클래스
+//    - 레벨 시작, 성공, 실패, 체크포인트(진행도 등) 저장 기능
+//
+// * 목차
+//    1. 인터페이스 ... Line 
+//    2. 클래스 ....... Line 
+//        1) 내부 타입 ... Line 
+//            1- 메뉴 리스트 ................ Line 
+//            2- 카메라 리스트 .............. Line 
+//            3- 스테이지(오브젝트) 리스트 ... Line 
+//        2) 필드 ..... Line 
+//        3) 메서드 ... Line 
+//            1- 초기화 ............ Line 
+//            2- 들어오기(Enter) ... Line 
+//            3- 일시정지(Pause) ... Line 
+// //////////////////////////////////////////////////////////////////////////////
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 using Game;
-
 
 namespace Stage
 {
@@ -18,11 +35,12 @@ namespace Stage
     using LetterboxUIState       = LetterboxUIController.State;
     using CursorVisibleEventType = GameDirector.CursorVisibleEventType;
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 1. 인터페이스(ISceneBase 인터페이스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public interface ISceneDirector : ISceneBase
     {
-        #region Property
-
+        // 프로퍼티
         // Component
         UI            ui     { get; }
         Audios        audios { get; }
@@ -35,38 +53,29 @@ namespace Stage
         Stages            stages  { get; }
         IDataManager      data    { get; }
 
-        #endregion
-
-
-        #region Method
-
+        // 메서드
         Coroutine StartLevel(bool isFirst);
         Coroutine FailLevel(PlayerDieState type);
         Coroutine ClearLevel(GoalType type);
         void      SaveLevel(ICheckPointable checkPoint);
-
-        #endregion
     }
 
-
+    // //////////////////////////////////////////////////////////////////////////////
+    // 2. 클래스(SceneBase 클래스 상속)
+    // //////////////////////////////////////////////////////////////////////////////
     public class SceneDirector : SceneBase, ISceneDirector
     {
-        #region Definition
-
+        // ==============================================================================
+        // 1) 내부 타입
+        //    - 같은 타입의 오브젝트 리스트 정의
+        // ==============================================================================
         public class UI : List<IUIBase>
         {
-            #region Field
-
             public Canvas             canvas { get; }
             public IMainUIController  main   { get; }
             public IStartUIController start  { get; }
             public IFailUIController  fail   { get; }
             public IClearUIController clear  { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public UI(Transform transform) : base(transform.GetComponentsInChildren<IUIBase>(true))
             {
@@ -77,11 +86,6 @@ namespace Stage
                 clear  = transform.GetComponentInChildren<IClearUIController>(true);
             }
 
-            #endregion
-
-
-            #region Method
-
             public void Initialize() { foreach (var ui in this) ui.gameObject.SetActive(false); }
 
             public void SetCanvas(Camera camera)
@@ -90,57 +94,32 @@ namespace Stage
                 canvas.worldCamera   = camera;
                 canvas.planeDistance = 1f;
             }
-
-            #endregion
         }
-
 
         public class Audios : List<IAudioBase>
         {
-            #region Field
-
             public IBackGroundMusicController bgm    { get; }
             public ISystemAudioController     system { get; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Audios(Transform transform) : base(transform.GetComponentsInChildren<IAudioBase>(true))
             {
                 bgm    = transform.GetComponentInChildren<IBackGroundMusicController>(true);
                 system = transform.GetComponentInChildren<ISystemAudioController>(true);
             }
-
-            #endregion
         }
-
 
         public class Cameras : List<global::ICameraController>
         {
-            #region Field
-
             public ICameraController        main    { get; }
             public IGameSetCameraController gameSet { get; }
 
             public global::ICameraController current { get; protected set; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Cameras(GameObject gameObject) : base(gameObject.GetComponentsInChildren< global::ICameraController> (true))
             {
                 main    = gameObject.GetComponentInChildren<ICameraController>(true);
                 gameSet = gameObject.GetComponentInChildren<IGameSetCameraController>(true);
             }
-
-            #endregion
-
-
-            #region Method
 
             public void Initialize()
             {
@@ -159,21 +138,15 @@ namespace Stage
 
                 current = camera;
             }
-
-            #endregion
         }
 
-
+        // ------------------------------------------------------------------------------
+        // 1-1) 내부 타입 -> 스테이지
+        //    - 현재 선택된 스테이지 초기화 및 활성화
+        // ------------------------------------------------------------------------------
         public class Stages : Dictionary<int, IStageController>
         {
-            #region Field
-
             public IStageController current { get; protected set; }
-
-            #endregion
-
-
-            #region Constructor
 
             public Stages(GameObject gameObject) : base()
             {
@@ -185,11 +158,6 @@ namespace Stage
                 }
             }
 
-            #endregion
-
-
-            #region Method
-
             public void Initialize(StageData stageData)
             {
                 current = this[stageData.id];
@@ -200,15 +168,12 @@ namespace Stage
                     else                  stage.gameObject.SetActive(false);
                 }
             }
-
-            #endregion
         }
 
-        #endregion
-
-
-        #region Field
-
+        // ==============================================================================
+        // 2) 필드
+        // ==============================================================================
+        // Component & Reference
         public UI                   ui      { get; protected set; }
         public Audios               audios  { get; protected set; }
         public IScoreManager        score   { get; protected set; }
@@ -218,13 +183,12 @@ namespace Stage
         public Stages               stages  { get; protected set; }
         public IDataManager         data => DataManager.instance;
 
-        #endregion
-
-
-        #region Method
-
-        #region Initialization
-
+        // ==============================================================================
+        // 3) 메서드
+        // ==============================================================================
+        // ------------------------------------------------------------------------------
+        // 3-1) 메서드 -> 초기화
+        // ------------------------------------------------------------------------------
         protected override void SetField()
         {
             base.SetField();
@@ -240,11 +204,11 @@ namespace Stage
             type = Type.Stage;
         }
 
-        #endregion
-
-
-        #region Enter
-
+        // ------------------------------------------------------------------------------
+        // 3-2) 메서드 -> 들어오기(Enter)
+        //    - 오브젝트 초기화
+        //    - 현재 스테이지(레벨) 초기화 및 레벨 시작
+        // ------------------------------------------------------------------------------
         public override Coroutine Enter(Type prev)
         {
             IGameDirector          game        = GameDirector.instance;
@@ -281,11 +245,10 @@ namespace Stage
             }
         }
 
-        #endregion
-
-
-        #region Exit
-
+        // ------------------------------------------------------------------------------
+        // 3-3) 메서드 -> 나가기(Exit)
+        //    - 이벤트(타입)에 따른 씬 변
+        // ------------------------------------------------------------------------------
         public override Coroutine Exit(Type next)
         {
             if (next != Type.None) data.Destroy();
@@ -294,11 +257,9 @@ namespace Stage
             return base.Exit(next);
         }
 
-        #endregion
-
-
-        #region Pause
-
+        // ------------------------------------------------------------------------------
+        // 3-4) 메서드 -> 일시정지(Pause)
+        // ------------------------------------------------------------------------------
         public override void Pause(bool paused, params IAudioBase[] exceptions)
         {
             ICameraController camera = cameras.main;
@@ -323,11 +284,13 @@ namespace Stage
             }
         }
 
-        #endregion
-
-
-        #region Start
-
+        // ------------------------------------------------------------------------------
+        // 3-5) 메서드 -> 레벨
+        // ------------------------------------------------------------------------------
+        // ******************************************************************************
+        // 3-5-1) 메서드 -> 레벨 -> 시작(Start)
+        //    - 저장된 체크포인트 정보에 따라 오브젝트의 시작 위치나 진행도(Score) 정보를 변경
+        // ******************************************************************************
         public virtual Coroutine StartLevel(bool isFirst)
         {
             ILevelController         level       = stages.current.levels.current;
@@ -366,11 +329,11 @@ namespace Stage
             player.input.enabled = true;
         }
 
-        #endregion
-
-
-        #region Fail
-
+        // ******************************************************************************
+        // 3-5-2) 메서드 -> 레벨 -> 실패(Fail)
+        //    - 플레이어 사망 시 호출됨
+        //    - 씬을 멈춘 후 실패 메뉴(UI) 호출
+        // ******************************************************************************
         public virtual Coroutine FailLevel(PlayerDieState type)
         {
             if (type == PlayerDieState.Bungee) Time.timeScale = 1f;
@@ -389,11 +352,11 @@ namespace Stage
             game.SetCursorVisible(CursorVisibleEventType.MenuOpen, true);
         }
 
-        #endregion
-
-
-        #region Clear
-
+        // ******************************************************************************
+        // 3-5-3) 메서드 -> 레벨 -> 성공(Clear)
+        //    - 플레이어가 골에 도달 시 호출됨
+        //    - 씬을 멈춘 후 스코어 정보가 포함된 성공 UI 호출
+        // ******************************************************************************
         public virtual Coroutine ClearLevel(GoalType type)
         {
             score.Write();
@@ -410,19 +373,16 @@ namespace Stage
             game.SetCursorVisible(CursorVisibleEventType.MenuOpen, true);
         }
 
-        #endregion
-
-
-        #region Save
-
+        // ******************************************************************************
+        // 3-5-3) 메서드 -> 레벨 -> 저장(Save)
+        //    - 체크포인트 도달 시 현재 레벨의 진행도 저장
+        //    - 체크포인트는 물리적인 오브젝트가 아닌 이벤트 형식으로 여러 오브젝트에서 재정의하여 호출
+        //    - ex) Planet(Field) 클리어 시 체크포인트 저장 등
+        // ******************************************************************************
         public void SaveLevel(ICheckPointable checkPoint)
         {
             score.Save();
             stages.current.levels.current.Save(checkPoint);
         }
-
-        #endregion
-
-        #endregion
     }
 }
