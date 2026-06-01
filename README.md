@@ -9,10 +9,17 @@
 #### 참고 : <https://www.youtube.com/playlist?list=PLhscUuAvcIkuDTdSSWKkFfHjPwHGn0bD_> (동영상 재생 목록)
 
 
-### 주요 개발 내용
+## 주요 개발 내용
   - `오브젝트의 모듈화`를 통한 확장 기능
   - 지형과 오브젝트에 대한 동적인 `중력 생성 시스템`
   - 여러 환경에 대응하는 `멀티 플랫폼 지원 및 컨트롤러 전환` 기능
 
-### 프로그램 구조
-<img width="2190" height="1120" alt="Diagram02" src="https://github.com/user-attachments/assets/5c00f8a1-a2f5-46d2-a666-43372906b54e" />
+## 프로그램 구조
+<img width="1642" height="840" alt="Diagram02" src="https://github.com/user-attachments/assets/5c00f8a1-a2f5-46d2-a666-43372906b54e" />
+
+## 오브젝트 구조
+#### 1. 캐릭터 클래스
+<img width="1420" height="530" alt="Character 03" src="https://github.com/user-attachments/assets/cb8f3c76-2825-46e2-85a6-9a0b9af0c750" />
+
+#### 2. 속성 인터페이스
+<img width="1329" height="578" alt="Interface 03" src="https://github.com/user-attachments/assets/c6c71723-b899-42c3-a1b1-c6ec42edfec9" />
