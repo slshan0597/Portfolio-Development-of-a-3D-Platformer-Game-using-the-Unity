@@ -33,7 +33,7 @@
 <img width="500" alt="Interface 03" src="https://github.com/user-attachments/assets/c6c71723-b899-42c3-a1b1-c6ec42edfec9" />
 
 ####  ex) 스테이지 씬에서 확장(상속)된 오브젝트 인터페이스
-<img width="600" alt="Interface_Stage 02" src="https://github.com/user-attachments/assets/d280d3e3-a0a2-4ee3-b64d-bdc2a4a011de" />
+<img width="600" alt="Interface_Stage 02" src="https://github.com/user-attachments/assets/245a0c00-e11d-41c2-a977-75e6b8b8e879" />
 
 ### 3. 스테이지 씬 확장(상속)
 #### ex) 스테이지 씬에서의 레벨 클리어 프로세스
