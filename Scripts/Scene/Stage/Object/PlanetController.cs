@@ -27,7 +27,7 @@ namespace Stage
     using BGMType          = BackGroundMusicController.SoundType;
 
     // //////////////////////////////////////////////////////////////////////////////
-    // 1. 인터페이스(global::IPlanetController 클래스 상속)
+    // 1. 인터페이스(global::IPlanetController 인터페이스 상속)
     // //////////////////////////////////////////////////////////////////////////////
     public interface IPlanetController : global::IPlanetController
     {
