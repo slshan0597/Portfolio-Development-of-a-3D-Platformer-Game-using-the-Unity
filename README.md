@@ -32,5 +32,5 @@
 ####  ex) 오브젝트 인터페이스
 <img width="500" alt="Interface 03" src="https://github.com/user-attachments/assets/c6c71723-b899-42c3-a1b1-c6ec42edfec9" />
 
-####  ex) 스테이지 씬 전용 오브젝트 인터페이스
+####  ex) 스테이지 씬에서 확장(상속)된 오브젝트 인터페이스
 <img width="600" alt="Interface_Stage 01" src="https://github.com/user-attachments/assets/70aa3a22-4eb7-40c3-97cb-857c7933d21c" />
