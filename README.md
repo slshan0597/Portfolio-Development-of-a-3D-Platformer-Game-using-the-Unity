@@ -34,3 +34,7 @@
 
 ####  ex) 스테이지 씬에서 확장(상속)된 오브젝트 인터페이스
 <img width="600" alt="Interface_Stage 01" src="https://github.com/user-attachments/assets/70aa3a22-4eb7-40c3-97cb-857c7933d21c" />
+
+### 3. 스테이지 씬 확장(상속)
+#### ex) 스테이지 클리어 프로세스
+<img width="800" height="" alt="Stage 01" src="https://github.com/user-attachments/assets/cd46f7fd-75d3-4544-98cf-5262ea949dd5" />
