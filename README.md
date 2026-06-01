@@ -15,11 +15,18 @@
   - 여러 환경에 대응하는 `멀티 플랫폼 지원 및 컨트롤러 전환` 기능
 
 ## 프로그램 구조
-<img width="1642" height="840" alt="Diagram02" src="https://github.com/user-attachments/assets/5c00f8a1-a2f5-46d2-a666-43372906b54e" />
+<img width="2190" height="1120" alt="Diagram02" src="https://github.com/user-attachments/assets/cf03b874-562b-49b7-9075-6a02887da73c" />
 
 ## 오브젝트 구조
-#### 1. 캐릭터 클래스
-<img width="1420" height="530" alt="Character 03" src="https://github.com/user-attachments/assets/cb8f3c76-2825-46e2-85a6-9a0b9af0c750" />
+### 1. 모듈화
+#### ex) 캐릭터 클래스
+<img width="600" alt="Character 03" src="https://github.com/user-attachments/assets/b90e16c2-1fde-4a5f-82e9-82a93000d7a0" />
+
+#### ex) 아이템 클래스
+<img width="400" alt="Item 01" src="https://github.com/user-attachments/assets/2f0a1c6d-88e1-4694-ac99-7104e55481d2" />
+
+#### ex) 트랜스포터 클래스
+<img width="500" alt="Transporter 01" src="https://github.com/user-attachments/assets/60945b53-bca8-4892-ac2f-e94b04fe2173" />
 
 #### 2. 속성 인터페이스
-<img width="1329" height="578" alt="Interface 03" src="https://github.com/user-attachments/assets/c6c71723-b899-42c3-a1b1-c6ec42edfec9" />
+<img width="600" alt="Interface 03" src="https://github.com/user-attachments/assets/c6c71723-b899-42c3-a1b1-c6ec42edfec9" />
