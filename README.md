@@ -15,7 +15,7 @@
   - 여러 환경에 대응하는 `멀티 플랫폼 지원 및 컨트롤러 전환` 기능
 
 ## 프로그램 구조
-<img width="2190" height="1120" alt="Diagram02" src="https://github.com/user-attachments/assets/cf03b874-562b-49b7-9075-6a02887da73c" />
+<img width="2190" height="1120" alt="Diagram03" src="https://github.com/user-attachments/assets/19d3f4a7-79ea-434c-b764-00a4c06dfff7" />
 
 ## 오브젝트 구조
 ### 1. 모듈화
