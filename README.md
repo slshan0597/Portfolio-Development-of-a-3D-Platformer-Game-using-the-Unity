@@ -95,6 +95,8 @@
 #### 소스 코드: [Scripts/Game/Menu/Setting/Details/Control](Scripts/Game/Menu/Setting/Details/Control), [Scripts/UIBase.cs](Scripts/UIBase.cs)
 #### 동영상: <https://youtu.be/cM-nUX7hS6k>
 
+---
+
 #### 3-1) 입력에 따른 UI 전환 프로세스
 <img width="300" alt="asdfasf" src="https://github.com/user-attachments/assets/6436da23-0efa-4c2c-9c95-cdcbd2ada4b1" />
 
