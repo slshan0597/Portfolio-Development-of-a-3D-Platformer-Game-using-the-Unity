@@ -92,6 +92,9 @@
 - 플랫폼과 입력 장치에 대해, 컨트롤 관리자를 통해 식별한 뒤 입력에 대응하는 맵핑(Key)으로 변환
 - 변환과 동시에 연결된 모든 UI에 대해, UI의 레이블과 단축 키 입력 등을 해당 맵핑으로 전환하여 표시
 
+#### 소스 코드: [Scripts/Game/Menu/Setting/Details/Control](Scripts/Game/Menu/Setting/Details/Control), [Scripts/UIBase.cs](Scripts/UIBase.cs)
+#### 동영상: <https://youtu.be/cM-nUX7hS6k>
+
 #### 3-1) 입력에 따른 UI 전환 프로세스
 <img width="300" alt="asdfasf" src="https://github.com/user-attachments/assets/6436da23-0efa-4c2c-9c95-cdcbd2ada4b1" />
 
@@ -105,3 +108,16 @@
 <img width="250" alt="03b" src="https://github.com/user-attachments/assets/42d3287e-f824-4c78-bf62-fe8f12908f02" />
 
 (좌- Windows 플랫폼 + Keyboard 입력 / 중- Windows 플랫폼 + Gamepad 입력 / 우- Android 플랫폼 + Touch 입력)
+
+---
+
+- 입력 장치가 Gamepad일 경우, Selectable UI 간의 선택과 이동이 가능하도록 각 UI 마다 `Select 기능을` 별도로 구현
+- 플랫폼이 Android일 경우, Touch 입력에 따른 플레이어의 조작을 위한 `Virtual Gamepad(UI)` 기능 추가
+
+#### 3-3) Gamepad 입력 장치에 대한 Select 기능 (결과)
+<img width="300" alt="Select 02" src="https://github.com/user-attachments/assets/646696d6-00d4-4615-824f-69521691e878" />
+<img width="400" alt="Select_Result 01" src="https://github.com/user-attachments/assets/20b42363-15be-4c71-b720-86f398451b5c" />
+
+#### 3-4) Android 플랫폼에 대한 Virtual Joystick (결과)
+<img width="300" alt="VG 02" src="https://github.com/user-attachments/assets/ed6e5a13-a4ba-44b9-af59-de250636a85b" />
+<img width="400" alt="VJ_Result 01" src="https://github.com/user-attachments/assets/6c8379b2-1cbf-4efc-874e-52d745f85788" />
