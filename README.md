@@ -125,10 +125,10 @@
 - 입력 장치가 Gamepad일 경우, Selectable UI 간의 선택과 이동이 가능하도록 각 UI 마다 `Select 기능을` 별도로 구현
 - 플랫폼이 Android일 경우, Touch 입력에 따른 플레이어의 조작을 위한 `Virtual Gamepad(UI)` 기능 추가
 
-#### 3-3) Gamepad 입력 장치에 대한 Select 기능 (결과)
+#### 3-3) Gamepad 입력 장치에 대한 Select 기능
 <img width="300" alt="Select 02" src="https://github.com/user-attachments/assets/646696d6-00d4-4615-824f-69521691e878" />
 <img width="400" alt="Select_Result 01" src="https://github.com/user-attachments/assets/20b42363-15be-4c71-b720-86f398451b5c" />
 
-#### 3-4) Android 플랫폼에 대한 Virtual Joystick (결과)
+#### 3-4) Android 플랫폼에 대한 Virtual Joystick
 <img width="300" alt="VG 02" src="https://github.com/user-attachments/assets/ed6e5a13-a4ba-44b9-af59-de250636a85b" />
 <img width="400" alt="VJ_Result 01" src="https://github.com/user-attachments/assets/6c8379b2-1cbf-4efc-874e-52d745f85788" />
