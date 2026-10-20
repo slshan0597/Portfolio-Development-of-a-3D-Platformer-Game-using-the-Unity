@@ -69,16 +69,24 @@
 #### 2-1) 중력을 구하는 과정에 대한 평면도
 <img width="600" height="300" alt="Core_Inward 01" src="https://github.com/user-attachments/assets/3d1e84bf-d972-4062-9823-33ce417c5ac9" />
 
+#### 2-2) 캐릭터별 중력이 적용된 결과
+<img width="300" alt="Gravity 07" src="https://github.com/user-attachments/assets/60ea3e34-144e-4088-95e9-84bb601113d2" />
+<img width="380" alt="adsfaf" src="https://github.com/user-attachments/assets/b5ba847a-d2e7-42d0-869f-99209cb93f83" />
+
 ---
 
 - 필드의 지형을 단순한 구 형태만 사용하는 것 뿐만 아니라, `다양한 지형(형태)에 대응하는 중력 계산식과 프로퍼티` 를 구현
 - 내부가 비어있는 경우, 역으로 코어에서 오브젝트로 향하는 직선이 지면에 교차할 때의 법선을 구하는 방식으로 구현
 - 원기둥 형태의 경우, 코어를 관통하는 하나의 축에 대하여 오브젝트가 투영된 위치를 임시 코어로 지정하여, 그 임시 코어를 기준으로 동일한 방식으로 구현
 
-#### 2-2) 플래닛(지형) 클래스의 중력 프로퍼티
+#### 2-3) 플래닛(지형) 클래스의 중력 프로퍼티
 <img width="600" alt="Property 02" src="https://github.com/user-attachments/assets/744f1b35-6e1d-4a3f-a3ad-78f016a6b2b3" />
 
-#### 2-3) Gravity Direction 속성이 Outward인 지형의 평면도
+#### 2-4) Core Type 속성이 Line인 지형의 평면도
+<img width="382" height="225" alt="image02" src="https://github.com/user-attachments/assets/3ec340d6-7781-410e-8034-6994537b64f7" />
+
+
+#### 2-5) Gravity Direction 속성이 Outward인 지형의 평면도
 <img height="250" alt="Core_Outward 01" src="https://github.com/user-attachments/assets/413d8fd3-835c-454b-af13-c22b0c621ead" />
 <img height="250" alt="Line_Outward 01" src="https://github.com/user-attachments/assets/1d42230b-2529-442c-bf8a-8ba038da04b9" />
 
