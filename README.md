@@ -92,6 +92,30 @@
 - 판단 책임을 **맞는 쪽**으로 이동: `IDamageable`이 `[Flags]` 마스크로 받을 공격을 선언하고, `TryDamage()`가 수락 여부를 `bool`로 반환
 - 공격하는 쪽은 결과에 따라 반응, 폭발 · 투사체도 같은 방식으로 사용
 
+```mermaid
+flowchart LR
+    subgraph After["개선 후"]
+        direction LR
+        A1[PlayerTriggerController] --> I{{"IDamageable<br/>TryDamage(attacker, type)"}}
+        A2[ExplosionController] --> I
+        A3[ProjectileBase] --> I
+        I -.-> C1[CharacterBase]
+        I -.-> C2[BlockBase]
+        I -.-> C3[ThrowableBase]
+    end
+```
+ 
+```csharp
+// 트리거 오브젝트 이름("Foot", "Normal" …)을 공격 종류로 해석 → 같은 스크립트를 발·몸에 재사용
+type = Enum.TryParse(name, out DamageType _type) ? _type : DamageType.None;
+ 
+if (!target.TryDamage(player.transform, type)) return;   // 마스크에 없는 공격이면 false
+switch (type) {
+    case DamageType.Normal: camera.Shake(CameraShakeType.Medium); break;  // 공격 성공 시 화면 흔들림
+    case DamageType.Foot:   player.Jump(JumpState.Bounce);         break;  // 밟으면 튕겨 오름
+}
+```
+
 ---
 
 ### 성능 향상
