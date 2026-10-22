@@ -56,19 +56,46 @@
 
 ---
 
-- 같은 타입의 오브젝트가 아니어도 공통된 기능들이 존재하며, 동일한 방식의 호출을 위해 일부 `공통된 속성이나 기능들을 인터페이스`로 묶어 오브젝트에 상속
-####  1-4) 오브젝트 인터페이스
+### 인터페이스
+
+- 여러 계층을 가로지르는 6개의 역할 인터페이스가 다형성의 중심, 호출하는 쪽은 대상이 무엇인지 모른 채 인터페이스만 호출
+
+| 항목 | 책임 | 구현 클래스 |
+| --- | --- | --- |
+| `IGravityable` | 필드(Planet) 중력을 받고 회전 보정 | `CharacterBase`, `ThrowableBase`, `FireBallController`, `CoinController`, `HitPointItemController` |
+| `IDamageable` | `[Flags]` 마스크로 받을 공격 종류를 선언하고 피격 판정 | `CharacterBase`, `BlockBase`, `ThrowableBase` |
+| `IInteractable` | 대화 · 텔레포트 | `NonPlayerCharacterController`, `TransporterBase`, `ThrowableBase` |
+| `ITriggerable` | 처치 · 파괴 시 필드 클리어 조건 통지 | Stage 씬의 적 · 블록 · NPC |
+| `IRewardable` | 클리어 보상으로 등장 | Stage 씬의 텔레포트 · 골 |
+| `ICheckPointable` | 재시작 지점 제공 | Stage 씬의 텔레포트 · 필드 |
+
+#### 공통 인터페이스
 <img width="500" alt="Interface 03" src="https://github.com/user-attachments/assets/c6c71723-b899-42c3-a1b1-c6ec42edfec9" />
 
-####  1-5) 스테이지 씬의 오브젝트 인터페이스 (기존 인터페이스 상속)
+#### 스테이지 씬의 오브젝트 인터페이스 (기존 인터페이스 상속)
 <img width="600" alt="Interface_Stage 02" src="https://github.com/user-attachments/assets/245a0c00-e11d-41c2-a977-75e6b8b8e879" />
+
+#### 스테이지 씬의 레벨 클리어 프로세스 (트리거 추가)
+<img width="700" height="" alt="Stage 01" src="https://github.com/user-attachments/assets/cd46f7fd-75d3-4544-98cf-5262ea949dd5" />
 
 ---
 
-- 스테이지 씬에서의 오브젝트 또한 새로 설계하는 대신 기존의 오브젝트를 상속하여 `스테이지 씬의 진행 트리거`를 추가
+### 문제 해결
+ 
+대상별로 나뉜 플레이어 공격 감지기 → <code>IDamageable</code> 하나로 통합
 
-#### 1-6) 스테이지 씬의 레벨 클리어 프로세스
-<img width="700" height="" alt="Stage 01" src="https://github.com/user-attachments/assets/cd46f7fd-75d3-4544-98cf-5262ea949dd5" />
+**개선 전 (문제점)**
+- `PlayerHitableDetector`, `PlayerWallDetector`, `PlayerInteractableDetector`, `PlayerOtherCharacterDetector` + 공통 부모, 총 5개 파일이 "무엇을 맞혔는가"까지 구분
+- 던지기 상자 · 블록처럼 맞을 수 있는 대상이 늘 때마다 감지 로직 수정 필요
+  
+**개선 후 (개선 방법)**
+- 판단 책임을 **맞는 쪽**으로 이동: `IDamageable`이 `[Flags]` 마스크로 받을 공격을 선언하고, `TryDamage()`가 수락 여부를 `bool`로 반환
+- 공격하는 쪽은 결과에 따라 반응, 폭발 · 투사체도 같은 방식으로 사용
+
+---
+
+### 성능 향상
+<img width="1800" height="580" alt="modularity_lookup" src="https://github.com/user-attachments/assets/5d4b633e-31dd-475c-a219-77869efd4815" />
 
 ---
 
