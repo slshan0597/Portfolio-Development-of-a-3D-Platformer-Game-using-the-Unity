@@ -1,40 +1,57 @@
 # 포트폴리오 - Unity 엔진을 활용한 3D 플랫포머 게임 개발
 
-## 개요
 - 독창적인 게임 시스템을 가진 ‘슈퍼 마리오 갤럭시’에 깊은 인상을 받아 Unity 엔진을 통해 재구현하여 개발
 - 다양한 상황과 위치에 따라 변하는 중력 시스템
 
-#### 개발 기간: 2022.12 ~ 2025.6
-#### 개발 인원: 1인 개발
-#### 기술 스택: Unity3D, Visual Studio(C#)
-#### 빌드 플랫폼: Windows, Android
+## 개요
 
-## 주요 개발 내용
-  - `오브젝트의 모듈화`를 통한 확장 기능
-  - 지형과 오브젝트에 대한 동적인 `중력 생성 시스템`
-  - 여러 환경에 대응하는 `멀티 플랫폼 지원 및 컨트롤러 전환` 기능
+| 항목 | 내용 |
+| --- | --- |
+| 장르 | 3D 행성 플랫포머 |
+| 개발 형태 | 1인 개인 프로젝트 (기획·프로그래밍) |
+| 개발 기간 | 2022.12 ~ 2025.06 |
+| 엔진·언어 | Unity, C# |
+| 플랫폼 | Windows, Android |
+| 입력 장치 | 키보드·마우스, 게임패드, 터치(가상 조이스틱) |
+| 규모 | C# 스크립트 186개, 씬 4개(Title·Lobby·Tutorial·Stage) |
 
-#### 동영상 (재생 목록): <https://www.youtube.com/playlist?list=PLhscUuAvcIkuDTdSSWKkFfHjPwHGn0bD_>
+## 주요 개발
+ 
+| 항목 | 핵심 | 대표 성과 |
+| --- | --- | --- |
+| **오브젝트 모듈화** | 역할 인터페이스 + 베이스 클래스 + 씬 전용 서브클래스로 다형성 구현 | 인터페이스 기반 참조 비율 **3% → 72%**, 감지 스크립트 **5개 → 1개** |
+| **중력 시스템** | 코어 콜라이더 표면 법선 기반 중력 | 오브젝트당 프레임 연산 **9회 → 2회**, GC 할당 **0건**, 행성 형태 **5종** 지원 |
+| **멀티 플랫폼 지원 및 컨트롤러 전환** | 플랫폼 판별 + 입력 장치 자동 감지 + 플랫폼별 키 매핑 | 지원 조합 **1개 → 4개**, 장치 전환 **수동 → 자동·양방향** |
+
+- 동영상 (재생 목록): <https://www.youtube.com/playlist?list=PLhscUuAvcIkuDTdSSWKkFfHjPwHGn0bD_>
 
 ## 프로그램 구조
 <img width="2190" height="1120" alt="Diagram03" src="https://github.com/user-attachments/assets/19d3f4a7-79ea-434c-b764-00a4c06dfff7" />
 
 ## 구현
+
 ### 1. 오브젝트 모듈화 (다형성)
-#### 소스 코드: [Scripts/Object](Scripts/Object)
-#### 동영상: <https://youtu.be/DAtqm6yHDps>
+
+> "오브젝트가 **무엇인지**" 묻던 코드를 "오브젝트가 **무엇을 할 수 있는지**" 묻는 코드로 전환
+> 
+> "역할 인터페이스 → 공용 베이스 클래스 → 구체 클래스 → 씬 전용 서브클래스"의 4단 구조로 정리, 호출하는 쪽은 대상의 구체 타입을 모른 채 인터페이스만 호출
+
+- 소스 코드: [Scripts/Object](Scripts/Object)
+- 동영상: <https://youtu.be/DAtqm6yHDps>
 
 ---
 
+### 상속
+
 - 같은 타입의 오브젝트를 추가할 때마다 발생하는 중복되는 기능이나 속성들에 대해, `오브젝트의 기반 클래스`에 먼저 얕게 구현하고 점진적으로 확장
 
-####  1-1) 캐릭터 클래스
+####  캐릭터 클래스
 <img width="550" alt="Character 03" src="https://github.com/user-attachments/assets/b90e16c2-1fde-4a5f-82e9-82a93000d7a0" />
 
-####  1-2) 아이템 클래스
+####  아이템 클래스
 <img width="400" alt="Item 01" src="https://github.com/user-attachments/assets/2f0a1c6d-88e1-4694-ac99-7104e55481d2" />
 
-####  1-3) 트랜스포터 클래스
+####  트랜스포터 클래스
 <img width="400" alt="Transporter 01" src="https://github.com/user-attachments/assets/60945b53-bca8-4892-ac2f-e94b04fe2173" />
 
 ---
