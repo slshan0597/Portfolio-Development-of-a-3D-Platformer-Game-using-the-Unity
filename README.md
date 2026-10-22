@@ -1,9 +1,11 @@
 # 포트폴리오 - Unity 엔진을 활용한 3D 플랫포머 게임 개발
-
-- 독창적인 게임 시스템을 가진 ‘슈퍼 마리오 갤럭시’에 깊은 인상을 받아 Unity 엔진을 통해 재구현하여 개발
-- 다양한 상황과 위치에 따라 변하는 중력 시스템
+> 여러 형태의 행성 위로 달려 스테이지를 클리어해 나아가는 3D 플랫포머 게임
 
 ## 개요
+
+> 독창적인 게임 시스템을 가진 ‘슈퍼 마리오 갤럭시’에 깊은 인상을 받아 Unity 엔진을 통해 재구현하여 개발
+> 
+> 다양한 상황과 위치에 따라 변하는 중력 시스템
 
 | 항목 | 내용 |
 | --- | --- |
@@ -65,9 +67,9 @@
 | `IGravityable` | 필드(Planet) 중력을 받고 회전 보정 | `CharacterBase`, `ThrowableBase`, `FireBallController`, `CoinController`, `HitPointItemController` |
 | `IDamageable` | `[Flags]` 마스크로 받을 공격 종류를 선언하고 피격 판정 | `CharacterBase`, `BlockBase`, `ThrowableBase` |
 | `IInteractable` | 대화 · 텔레포트 | `NonPlayerCharacterController`, `TransporterBase`, `ThrowableBase` |
-| `ITriggerable` | 처치 · 파괴 시 필드 클리어 조건 통지 | Stage 씬의 적 · 블록 · NPC |
-| `IRewardable` | 클리어 보상으로 등장 | Stage 씬의 텔레포트 · 골 |
-| `ICheckPointable` | 재시작 지점 제공 | Stage 씬의 텔레포트 · 필드 |
+| `ITriggerable` | 처치 · 파괴 시 필드 클리어 조건 통지 | Stage 씬의 Enemy · Block · NPC |
+| `IRewardable` | 클리어 보상으로 등장 | Stage 씬의 Transporter · Goal |
+| `ICheckPointable` | 재시작 지점 제공 | Stage 씬의 Transporter(Launcher) · Planet |
 
 #### 공통 인터페이스
 <img width="500" alt="Interface 03" src="https://github.com/user-attachments/assets/c6c71723-b899-42c3-a1b1-c6ec42edfec9" />
@@ -80,46 +82,35 @@
 
 ---
 
-### 문제 해결
+### 개선 내용
+
+<img width="720" alt="modularity_lookup" src="https://github.com/user-attachments/assets/5d4b633e-31dd-475c-a219-77869efd4815" />
+
+| 관점 | 개선 전 (구체 타입·태그 의존) | 개선 후 (인터페이스) |
+| --- | --- | --- |
+| **확장성** | 새 오브젝트가 생길 때마다 호출하는 쪽 코드에 `case` 추가 | `IDamageable` 등만 구현하면 호출하는 쪽은 **수정 없음** |
+| **분기** | `tag == "Player"`, 타입별 `switch`가 종류만큼 증가 | "할 수 있는 일"만 호출 → 분기 자체가 사라짐 (태그 비교 **7곳 → 0곳**) |
+| **결합도** | 공격·피격, 행성 · 대상이 서로의 구체 클래스를 앎 | 서로 인터페이스만 앎 → 한쪽 수정이 다른 쪽에 영향 없음 |
+| **안정성** | 수정 지점이 많아 기존 기능 회귀 위험 | 수정 범위가 새 클래스 하나로 한정 |
  
-대상별로 나뉜 플레이어 공격 감지기 → <code>IDamageable</code> 하나로 통합
-
-**개선 전 (문제점)**
-- `PlayerHitableDetector`, `PlayerWallDetector`, `PlayerInteractableDetector`, `PlayerOtherCharacterDetector` + 공통 부모, 총 5개 파일이 "무엇을 맞혔는가"까지 구분
-- 던지기 상자 · 블록처럼 맞을 수 있는 대상이 늘 때마다 감지 로직 수정 필요
-  
-**개선 후 (개선 방법)**
-- 판단 책임을 **맞는 쪽**으로 이동: `IDamageable`이 `[Flags]` 마스크로 받을 공격을 선언하고, `TryDamage()`가 수락 여부를 `bool`로 반환
-- 공격하는 쪽은 결과에 따라 반응, 폭발 · 투사체도 같은 방식으로 사용
-
 ```mermaid
 flowchart LR
-    subgraph After["개선 후"]
-        direction LR
-        A1[PlayerTriggerController] --> I{{"IDamageable<br/>TryDamage(attacker, type)"}}
-        A2[ExplosionController] --> I
-        A3[ProjectileBase] --> I
+    subgraph Before["개선 전 · 호출하는 쪽이 대상을 구분"]
+        direction TB
+        P1[PlayerHitableDetector] --> Q{"tag / 타입 검사"}
+        Q -- Enemy --> E1[적 처리]
+        Q -- Block --> E2[블록 처리]
+        Q -- "새 종류" --> E3["❗ case 추가 필요"]
+    end
+    subgraph After["개선 후 · 대상이 스스로 판단"]
+        direction TB
+        P2[PlayerTriggerController] --> I{{"IDamageable.TryDamage()"}}
         I -.-> C1[CharacterBase]
         I -.-> C2[BlockBase]
-        I -.-> C3[ThrowableBase]
+        I -.-> C3["새 종류 ✅ 구현만 추가"]
     end
+    Before ~~~ After
 ```
- 
-```csharp
-// 트리거 오브젝트 이름("Foot", "Normal" …)을 공격 종류로 해석 → 같은 스크립트를 발·몸에 재사용
-type = Enum.TryParse(name, out DamageType _type) ? _type : DamageType.None;
- 
-if (!target.TryDamage(player.transform, type)) return;   // 마스크에 없는 공격이면 false
-switch (type) {
-    case DamageType.Normal: camera.Shake(CameraShakeType.Medium); break;  // 공격 성공 시 화면 흔들림
-    case DamageType.Foot:   player.Jump(JumpState.Bounce);        break;  // 밟으면 튕겨 오름
-}
-```
-
----
-
-### 성과
-<img width="900" alt="modularity_lookup" src="https://github.com/user-attachments/assets/5d4b633e-31dd-475c-a219-77869efd4815" />
 
 ---
 
