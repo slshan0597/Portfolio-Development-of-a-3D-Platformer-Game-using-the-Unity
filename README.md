@@ -30,6 +30,13 @@
 ## 프로그램 구조
 <img width="2190" height="1120" alt="Diagram03" src="https://github.com/user-attachments/assets/19d3f4a7-79ea-434c-b764-00a4c06dfff7" />
 
+| 계층 | 폴더 | 역할 |
+| --- | --- | --- |
+| 게임 전역 | `Game/` | 싱글턴 `GameDirector`가 씬 전환 · 메뉴 · 설정 · 공용 UI · 저장 데이터를 소유, 입력 매핑도 여기서 모든 씬이 공유 |
+| 씬 | `Scene/<씬>/` | `SceneBase`를 상속한 `SceneDirector`가 진입 · 퇴장 연출, 배경음, 카메라, 씬 UI 관리 |
+| 씬 전용 오브젝트 | `Scene/<씬>/Object/` | 공용 클래스를 같은 이름으로 상속해 클리어 · 보상 · 체크포인트 같은 씬 규칙만 추가 |
+| 공용 오브젝트 | `Object/` | 캐릭터 · 필드(Planet) · 레벨 오브젝트 · 카메라, 인터페이스로 호출 |
+
 ## 구현
 
 ### 1. 오브젝트 모듈화 (다형성)
