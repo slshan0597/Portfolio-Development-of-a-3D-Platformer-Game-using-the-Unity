@@ -112,7 +112,7 @@ type = Enum.TryParse(name, out DamageType _type) ? _type : DamageType.None;
 if (!target.TryDamage(player.transform, type)) return;   // 마스크에 없는 공격이면 false
 switch (type) {
     case DamageType.Normal: camera.Shake(CameraShakeType.Medium); break;  // 공격 성공 시 화면 흔들림
-    case DamageType.Foot:   player.Jump(JumpState.Bounce);         break;  // 밟으면 튕겨 오름
+    case DamageType.Foot:   player.Jump(JumpState.Bounce);        break;  // 밟으면 튕겨 오름
 }
 ```
 
