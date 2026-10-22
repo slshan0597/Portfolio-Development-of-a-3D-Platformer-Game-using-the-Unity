@@ -118,8 +118,8 @@ switch (type) {
 
 ---
 
-### 성능 향상
-<img width="1800" height="580" alt="modularity_lookup" src="https://github.com/user-attachments/assets/5d4b633e-31dd-475c-a219-77869efd4815" />
+### 성과
+<img width="900" alt="modularity_lookup" src="https://github.com/user-attachments/assets/5d4b633e-31dd-475c-a219-77869efd4815" />
 
 ---
 
