@@ -230,21 +230,48 @@ protected virtual void OnTriggerExit(Collider other)
 ---
 
 ### 3. 멀티 플랫폼 지원 및 컨트롤러 전환
-- `Windows와 Android 플랫폼`에 대하여, 빌드 환경이 달라도 컴파일과 빌드가 가능하도록 플랫폼(Type)에 따른 조건을 추가하는 방식으로 소스 코드를 구현
-- 플랫폼과 별개로, 기본 입력 장치(Windows -> Keyboard, Android -> Touch) 외에 별도의 `컨트롤러(Gamepad) 연결 시 전환` 기능 구현
+
+> 키보드 · 게임패드 · 터치(Mobile 한정)를 실행 중 자동 전환하고, 키 매핑을 행동 × 플랫폼 × 입력 장치 3차원으로 관리
+
+### 지원 범위
+ 
+| 플랫폼 | 키보드·마우스 | 게임패드 | 터치(가상 조이스틱) |
+|---|:---:|:---:|:---:|
+| Windows | ✅ | ✅ | — |
+| Android | — | ✅ | ✅ |
 
 #### 소스 코드: [Scripts/Game/Menu/Setting/Details/Control](Scripts/Game/Menu/Setting/Details/Control), [Scripts/UIBase.cs](Scripts/UIBase.cs)
 #### 동영상: <https://youtu.be/cM-nUX7hS6k>
 
 ---
 
+### 3-1. 감지 흐름
+
 - 플랫폼과 입력 장치에 대해, 컨트롤 관리자를 통해 식별한 뒤 입력에 대응하는 맵핑(Key)으로 변환
 - 변환과 동시에 연결된 모든 UI에 대해, UI의 레이블과 단축 키 입력 등을 해당 맵핑으로 전환하여 표시
 
-#### 3-1) 입력에 따른 UI 전환 프로세스
+```csharp
+// ControlSettingManager — 눌린 키로 장치를 판정 (기존 Input Manager에는 장치 연결 이벤트가 없음)
+switch (Application.platform)
+{
+    case RuntimePlatform.Android:
+        if (Input.touchCount > 0) type = State.Touch;
+        else foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
+            if (Input.GetKeyDown(key) && key.ToString().Contains("Joystick")) { type = State.Joystick; break; }
+        break;
+ 
+    default:
+        foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
+            if (Input.GetKeyDown(key)) { type = key.ToString().Contains("Joystick") ? State.Joystick : State.Keyboard; break; }
+        break;
+}
+if (state != type) SetState(type);
+```
+
+#### 입력에 따른 UI 전환 프로세스
 <img width="300" alt="asdfasf" src="https://github.com/user-attachments/assets/6436da23-0efa-4c2c-9c95-cdcbd2ada4b1" />
 
-#### 3-2) 입력에 따른 UI 전환 결과
+#### 입력에 따른 UI 전환 결과
 <img width="250" alt="04a" src="https://github.com/user-attachments/assets/89bf5237-a0f9-4c34-b721-41e9f2064ddb" />
 <img width="250" alt="05a" src="https://github.com/user-attachments/assets/5b7e449b-d4db-4d26-be0f-fd815cd9ef1a" />
 <img width="250" alt="06a" src="https://github.com/user-attachments/assets/67a24e48-d7e1-4326-a4df-2599a12ced46" />
@@ -257,13 +284,52 @@ protected virtual void OnTriggerExit(Collider other)
 
 ---
 
+### 3-2. 입력 추상화
+
+- `IPlayerInputManager`는 장치와 무관한 **의도(Intent)** 만 노출, 플레이어는 장치를 모름
+- 플레이어 로직은 `jumpKeyPressed`만 확인하고, 그 값이 스페이스바인지, 패드 A 버튼인지, 화면 터치인지는 알 필요가 없음
+ 
+```csharp
+public interface IPlayerInputManager
+{
+    Vector3 moveDirection      { get; }   // 정규화된 이동 입력
+    Vector2 cameraAxis         { get; }   // 카메라의 방향
+    bool    jumpKeyPressed     { get; }
+    bool    crouchKeyPressed   { get; }
+    bool    hipDropKeyPressed  { get; }
+    bool    attackKeyPressed   { get; }
+    bool    interactKeyPressed { get; }
+}
+```
+ 
+```csharp
+// PlayerInputManager.cs — 현재 입력 상태에 따라 소스만 교체
+switch (controlSetting.state)
+{
+    case ControlState.Touch:
+        var buttons = virtualJoystick.root.main.action.buttons;
+        jumpKeyPressed = buttons[MainState.Jump].pressedDown;
+        ...
+        break;
+ 
+    default:   // Keyboard, Joystick — 플랫폼·장치별 매핑된 KeyCode 사용
+        jumpKeyPressed = Input.GetKeyDown(controlSetting.GetKey(MainState.Jump));
+        ...
+        break;
+}
+```
+
+---
+
+### 3-3. 부가 기능
+
 - 입력 장치가 Gamepad일 경우, Selectable UI 간의 선택과 이동이 가능하도록 각 UI 마다 `Select 기능을` 별도로 구현
 - 플랫폼이 Android일 경우, Touch 입력에 따른 플레이어의 조작을 위한 `Virtual Gamepad(UI)` 기능 추가
 
-#### 3-3) Gamepad 입력 장치에 대한 Select 기능
+#### Gamepad 입력 장치에 대한 Select 기능
 <img width="300" alt="Select 02" src="https://github.com/user-attachments/assets/646696d6-00d4-4615-824f-69521691e878" />
 <img width="400" alt="Select_Result 01" src="https://github.com/user-attachments/assets/20b42363-15be-4c71-b720-86f398451b5c" />
 
-#### 3-4) Android 플랫폼에 대한 Virtual Joystick
+#### Android 플랫폼에 대한 Virtual Joystick
 <img width="300" alt="VG 02" src="https://github.com/user-attachments/assets/ed6e5a13-a4ba-44b9-af59-de250636a85b" />
 <img width="400" alt="VJ_Result 01" src="https://github.com/user-attachments/assets/6c8379b2-1cbf-4efc-874e-52d745f85788" />
