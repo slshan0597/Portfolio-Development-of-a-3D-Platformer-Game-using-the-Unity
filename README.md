@@ -184,7 +184,7 @@ sequenceDiagram
 
 ### 2-3. 개선 내용
 
-- 캐릭터가 필드를 탐색 -> 필드가 캐릭터를 탐색하는 구조로 변경
+1) 캐릭터가 필드를 탐색 -> 필드가 캐릭터를 탐색하는 구조로 변경
 
 | 개선 전 | 개선 후 |
 | --- | --- |
@@ -202,6 +202,29 @@ flowchart LR
         A1["OnTriggerStay<br/>(물리 프레임)"] --> A2["TryGetComponent<br/>IGravityable"] --> A3["코어 SphereCast<br/>법선"] --> A4["TryApplyGravity<br/>종단 속도·회전"]
     end
     B ~~~ A
+```
+
+2) 씬의 모든 필드를 활성화 -> 플레이어가 있는 영역의 필드만 활성화
+
+- 활성화된 필드에 있는 모델만 그림자를 렌더링하고 캐릭터들을 활성화, 멀리 있는 행성은 그림자 연산과 AI가 쉬도록 하여 부하를 감소
+- 트랜스포터(Launcher)는 스플라인 궤적을 따라 플레이어를 다른 필드로 이동시키며, 이동 중에는 Rigidbody를 Kinematic으로 전환
+- 이때 Kinematic 전환으로 인해 발생하는 Trigger Exit 이벤트가 필드를 잘못 비활성화하지 않도록, 직전 Kinematic 상태를 기억해 해당 이벤트를 무시함
+
+| 개선 전 | 개선 후 |
+| --- | --- |
+| 트랜스포터가 플레이어를 `isKinematic = true`로 바꾸면 `OnTriggerExit` 발생 → 필드 비활성화(그림자 꺼짐, 캐릭터(Enemy) 정지) | 마지막으로 본 kinematic 상태를 기억해 **물리 상태 전환으로 생긴 Exit는 무시** |
+
+```csharp
+protected virtual void OnTriggerExit(Collider other)
+{
+    if (other.isTrigger || !other.TryGetComponent(out IPlayerController player)) return;
+    if (playerIsKinematic != player.rigidbody.isKinematic)
+    {
+        playerIsKinematic = player.rigidbody.isKinematic;   // 실제 이탈이 아님
+        return;
+    }
+    SetEnable(false, player);
+}
 ```
 
 ---
