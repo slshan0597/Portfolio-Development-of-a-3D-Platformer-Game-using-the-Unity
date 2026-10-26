@@ -197,7 +197,7 @@ flowchart LR
         direction LR
         B1["Update<br/>(렌더 프레임)"] --> B2["OverlapSphere<br/>배열 할당"] --> B3["태그 switch"] --> B4["AddForce<br/>(상한 없음)"]
     end
-    subgraph A["개선 후 · 행성이 밂"]
+    subgraph A["개선 후 · 필드가 관리"]
         direction LR
         A1["OnTriggerStay<br/>(물리 프레임)"] --> A2["TryGetComponent<br/>IGravityable"] --> A3["코어 SphereCast<br/>법선"] --> A4["TryApplyGravity<br/>종단 속도·회전"]
     end
