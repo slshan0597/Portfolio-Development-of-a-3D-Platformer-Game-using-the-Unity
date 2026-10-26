@@ -50,7 +50,7 @@
 
 ---
 
-### 상속
+### 1-1. 상속
 
 - 같은 타입의 오브젝트를 추가할 때마다 발생하는 중복되는 기능이나 속성들에 대해, 오브젝트의 `베이스 클래스`에 먼저 얕게 구현하고 점진적으로 확장
 
@@ -65,7 +65,7 @@
 
 ---
 
-### 인터페이스
+### 1-2. 인터페이스
 
 - 오브젝트가 가진 성질을 작은 인터페이스로 정의하고, 필요한 오브젝트만 골라서 구현
 - 호출하는 쪽은 대상이 무엇인지 모른 채 `인터페이스만 호출`
@@ -92,7 +92,7 @@
 
 ---
 
-### 개선 내용
+### 1-3. 개선 내용
 
 <img width="720" alt="modularity_lookup" src="https://github.com/user-attachments/assets/5d4b633e-31dd-475c-a219-77869efd4815" />
 
@@ -150,30 +150,33 @@ sequenceDiagram
 
 ---
 
-- 기본적으로 중력은 필드의 코어를 향하지만, `코어와 오브젝트 사이의 직선과 교차하는 지면의 법선`을 구하는 과정을 추가하여 그 역을 오브젝트의 Gravity 속성에 부여
-- Gravity 속성으로 오브젝트에 힘을 가함과 동시에 벡터의 방향을 기준으로 오브젝트를 회전시키는 방법으로 구현
+### 2-1. 중력(방향) 계산
 
-#### 2-1) 중력을 구하는 과정에 대한 평면도
+- 기본적으로 중력은 필드의 코어를 향하지만, `코어와 오브젝트를 잇는 직선과 만나는 지면의 법선`을 구하는 과정을 추가하여 그 역방향을 오브젝트의 Gravity 속성에 부여
+- Gravity 속성으로 오브젝트에 힘을 가함과 동시에 벡터의 방향을 기준으로 오브젝트를 회전
+
+#### 중력을 구하는 과정에 대한 평면도
 <img width="600" height="300" alt="Core_Inward 01" src="https://github.com/user-attachments/assets/3d1e84bf-d972-4062-9823-33ce417c5ac9" />
 
-#### 2-2) 캐릭터별 중력이 적용된 결과
+#### 캐릭터별 중력이 적용된 결과
 <img width="300" alt="Gravity 07" src="https://github.com/user-attachments/assets/60ea3e34-144e-4088-95e9-84bb601113d2" />
 <img width="380" alt="adsfaf" src="https://github.com/user-attachments/assets/b5ba847a-d2e7-42d0-869f-99209cb93f83" />
 
 ---
 
-- 필드의 지형을 단순한 구 형태만 사용하는 것 뿐만 아니라, `다양한 지형(형태)에 대응하는 중력 계산식과 프로퍼티` 를 구현
-- 내부가 비어있는 경우, 역으로 코어에서 오브젝트로 향하는 직선이 지면에 교차할 때의 법선을 구하는 방식으로 구현
-- 원기둥 형태의 경우, 코어를 관통하는 하나의 축에 대하여 오브젝트가 투영된 위치를 임시 코어로 지정하여, 그 임시 코어를 기준으로 동일한 방식으로 구현
+### 2-2. 필드(Planet)에 따른 프로퍼티
 
-#### 2-3) 플래닛(지형) 클래스의 중력 프로퍼티
+- 필드의 지형을 단순한 구 형태만 사용하는 것 뿐만 아니라, `다양한 지형(형태)에 대응하는 중력 계산식과 프로퍼티` 를 구현
+- 내부가 비어있는 경우, 역으로 코어에서 오브젝트로 향하는 직선이 지면에 교차할 때의 법선을 구하는 방식으로 변경
+- 원기둥 형태의 경우, 코어를 관통하는 하나의 축에 대하여 오브젝트가 투영된 위치를 임시 코어로 지정하여, 그 임시 코어를 기준으로 동일한 방식으로 적용
+
+#### 플래닛(지형) 클래스의 중력 프로퍼티
 <img width="600" alt="Property 02" src="https://github.com/user-attachments/assets/744f1b35-6e1d-4a3f-a3ad-78f016a6b2b3" />
 
-#### 2-4) Core Type 속성이 Line인 지형의 평면도
+#### Core Type 속성이 Line인 지형의 평면도
 <img width="382" height="225" alt="image02" src="https://github.com/user-attachments/assets/3ec340d6-7781-410e-8034-6994537b64f7" />
 
-
-#### 2-5) Gravity Direction 속성이 Outward인 지형의 평면도
+#### Gravity Direction 속성이 Outward인 지형의 평면도
 <img height="250" alt="Core_Outward 01" src="https://github.com/user-attachments/assets/413d8fd3-835c-454b-af13-c22b0c621ead" />
 <img height="250" alt="Line_Outward 01" src="https://github.com/user-attachments/assets/1d42230b-2529-442c-bf8a-8ba038da04b9" />
 
