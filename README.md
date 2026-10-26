@@ -204,8 +204,9 @@ flowchart LR
     B ~~~ A
 ```
 
-2) 씬의 모든 필드를 활성화 -> 플레이어가 있는 영역의 필드만 활성화
+2) 플레이어의 필드간 이동에 대한 Rigidbody 충돌 문제
 
+- 씬의 모든 필드를 활성화 -> 플레이어가 있는 영역의 필드만 활성화
 - 활성화된 필드에 있는 모델만 그림자를 렌더링하고 캐릭터들을 활성화, 멀리 있는 행성은 그림자 연산과 AI가 쉬도록 하여 부하를 감소
 - 트랜스포터(Launcher)는 스플라인 궤적을 따라 플레이어를 다른 필드로 이동시키며, 이동 중에는 Rigidbody를 Kinematic으로 전환
 - 이때 Kinematic 전환으로 인해 발생하는 Trigger Exit 이벤트가 필드를 잘못 비활성화하지 않도록, 직전 Kinematic 상태를 기억해 해당 이벤트를 무시함
@@ -232,6 +233,8 @@ protected virtual void OnTriggerExit(Collider other)
 ### 3. 멀티 플랫폼 지원 및 컨트롤러 전환
 
 > 키보드 · 게임패드 · 터치(Mobile 한정)를 실행 중 자동 전환하고, 키 매핑을 행동 × 플랫폼 × 입력 장치 3차원으로 관리
+>
+> 모든 UI는 `UIBase`를 상속하며, 해상도 비율(16:9 / 4:3)을 변경하면 `CanvasScaler`의 기준 축을 바꿔 모든 UI가 잘리지 않게 비율을 계산하여 적용
 
 ### 지원 범위
  
@@ -312,7 +315,7 @@ switch (controlSetting.state)
         ...
         break;
  
-    default:   // Keyboard, Joystick — 플랫폼·장치별 매핑된 KeyCode 사용
+    default:   // Keyboard, Joystick — 플랫폼 · 장치별 매핑된 KeyCode 사용
         jumpKeyPressed = Input.GetKeyDown(controlSetting.GetKey(MainState.Jump));
         ...
         break;
@@ -321,15 +324,106 @@ switch (controlSetting.state)
 
 ---
 
-### 3-3. 부가 기능
+### 3-3. 플랫폼 · 장치별 키 매핑과 재설정
 
-- 입력 장치가 Gamepad일 경우, Selectable UI 간의 선택과 이동이 가능하도록 각 UI 마다 `Select 기능을` 별도로 구현
+- 키 매핑은 **행동 → 플랫폼 → 장치 → KeyCode** 의 3단 구조로 저장
+-  인스펙터에서 편집할 수 있도록 직렬화 가능한 제네릭 딕셔너리 `SimpleData<TKey, TValue>`를 직접 만들어 사용
+ 
+```
+Jump
+ ├─ WindowsPlayer ─┬─ Keyboard : Space
+ │                 └─ Joystick : JoystickButton0
+ └─ Android ───────── Joystick : JoystickButton0
+```
+ 
+```csharp
+// 저장 키 형식: "{설정종류}_Character_{행동}_{플랫폼}_{장치}"
+string  key   = $"{this.type}_Character_{mappingsType}_{mappingType}_{type}";
+KeyCode value = Enum.TryParse(PlayerPrefs.GetString(key), out KeyCode result) ? result : element.value;
+```
+ 
+- 설정 메뉴에서 키를 재설정할 때는 **현재 장치에 맞는 키만 허용**
+- 키보드 모드에서는 패드 버튼을, 패드 모드에서는 키보드 키를 무시하며, Android에서 화면을 터치하면 재설정을 취소
+- 카메라 감도와 상하 · 좌우 반전도 함께 저장
+
+---
+
+### 3-4. 부가 기능
+- 입력 장치가 Gamepad일 경우, 마우스 입력 없이도 메뉴 조작이 가능하도록 각 UI 마다 `내비게이션(Select) 기능을` 별도로 구현
 - 플랫폼이 Android일 경우, Touch 입력에 따른 플레이어의 조작을 위한 `Virtual Gamepad(UI)` 기능 추가
 
-#### Gamepad 입력 장치에 대한 Select 기능
+```csharp
+protected virtual void SetState(State type)
+{
+    state = type;
+ 
+    game.SetCursorVisible(CursorVisibleEventType.ControllerChange, type != State.Joystick);
+ 
+    foreach (var ui in connectedUI) ui.Set();   // 버튼 라벨, 가상 조이스틱 표시 여부 등 갱신
+ 
+    switch (state)
+    {
+        case State.Joystick: connectedUI.current?.SelectFirstSelectable();    break;  // 패드 UI 내비게이션
+        default:             EventSystem.current.SetSelectedGameObject(null); break;
+    }
+}
+```
+
+#### Gamepad 입력 장치에 대한 내비게이션(Select) 기능
 <img width="300" alt="Select 02" src="https://github.com/user-attachments/assets/646696d6-00d4-4615-824f-69521691e878" />
 <img width="400" alt="Select_Result 01" src="https://github.com/user-attachments/assets/20b42363-15be-4c71-b720-86f398451b5c" />
 
-#### Android 플랫폼에 대한 Virtual Joystick
+#### Android 플랫폼에 대한 가상 게임패드
 <img width="300" alt="VG 02" src="https://github.com/user-attachments/assets/ed6e5a13-a4ba-44b9-af59-de250636a85b" />
 <img width="400" alt="VJ_Result 01" src="https://github.com/user-attachments/assets/6c8379b2-1cbf-4efc-874e-52d745f85788" />
+
+--- 
+
+### 3-5. 개선 내용
+
+1) 커서 표시 및 충돌
+
+| 개선 전 | 개선 후 |
+| --- | --- |
+| 메뉴와 패드 모드가 각자 `Cursor.visible` 변경 → 패드 모드에서 메뉴를 닫으면 커서가 다시 나타남 | 이유별 표시 여부를 보관하고 **모두 `true`일 때만** 표시 → 호출 순서와 무관 |
+| 일시정지할 때 현재 씬 이름을 확인해 커서를 직접 켜고 끔 → 패드를 쓰는 중에도 메뉴를 열면 커서가 나타났고, 씬이 늘어날 때마다 분기를 추가해야 함 | "메뉴 열림", "장치 변경" 등 이벤트별로 표시 요청만 등록하고, **모든 요청이 표시를 원할 때만** 커서를 보여줌 → 패드 사용 중에는 메뉴를 열어도 커서가 나타나지 않음 |
+
+```csharp
+public virtual void SetCursorVisible(CursorVisibleEventType type, bool visible)
+{
+    cursorVisibles[type] = visible;
+ 
+    bool result = true;
+
+    foreach (bool value in cursorVisibles.Values) result &= value;
+ 
+    Cursor.visible   = result;
+    Cursor.lockState = (controlSetting.state == ControlState.Keyboard && !result) ? CursorLockMode.Locked
+                                                                                   : CursorLockMode.None;
+}
+```
+
+2) 컨트롤 설정(매핑) 중, 컨트롤러 변경 시 충돌
+
+| 개선 전 | 개선 후 |
+| --- | --- |
+| 키 재지정 대기 중 패드 버튼 → 자동 감지가 먼저 반응해 매핑 대상이 엇갈림 | 키 입력 대기 상태(`WaitingForInput`)를 추가 → 해당 상태에서는 장치 판정을 건너뜀 |
+
+```csharp
+protected virtual IEnumerator DetectJoystick()
+{
+    while (!Input.anyKeyDown) yield return null;
+
+    IConfirmUIController confirmUI = menu.game.ui.confirm;
+
+    // 설정 창(UI)에서 키 설정 중에 타 입력 방식이 감지될 경우, UI 등의 혼선 방지를 위해 스킵
+    if (confirmUI.state == ConfirmUIController.State.WaitingForInput) goto Skip;
+
+    State type = state;
+
+    switch (Application.platform)
+    {
+        ...
+    }
+}
+```
