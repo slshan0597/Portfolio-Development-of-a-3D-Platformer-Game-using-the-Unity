@@ -96,11 +96,11 @@
 
 <img width="720" alt="modularity_lookup" src="https://github.com/user-attachments/assets/5d4b633e-31dd-475c-a219-77869efd4815" />
 
-| 관점 | 개선 전 (구체 타입·태그 의존) | 개선 후 (인터페이스) |
+| 관점 | 개선 전(타입 · 태그 의존) | 개선 후(인터페이스) |
 | --- | --- | --- |
 | **확장성** | 새 오브젝트가 생길 때마다 호출하는 쪽 코드에 `case` 추가 | `IDamageable` 등만 구현하면 호출하는 쪽은 **수정 없음** |
 | **분기** | `tag == "Player"`, 타입별 `switch`가 종류만큼 증가 | "할 수 있는 일"만 호출 → 분기 자체가 사라짐 (태그 비교 **7곳 → 0곳**) |
-| **결합도** | 공격·피격, 행성 · 대상이 서로의 구체 클래스를 앎 | 서로 인터페이스만 앎 → 한쪽 수정이 다른 쪽에 영향 없음 |
+| **결합도** | 공격 · 피격, 행성 · 대상이 서로의 구체 클래스를 알아야 함 | 서로 인터페이스만 알면 됨 → 한쪽 수정이 다른 쪽에 영향 없음 |
 | **안정성** | 수정 지점이 많아 기존 기능 회귀 위험 | 수정 범위가 새 클래스 하나로 한정 |
  
 ```mermaid
@@ -125,7 +125,25 @@ flowchart LR
 ---
 
 ### 2. 중력 시스템
-- 필드(Planet)에 대해 각 `오브젝트는 위치에 따라 고유한 중력`을 받아야 하므로, Physics의 Gravity 속성의 글로벌 설정 대신 별도의 Gravity 속성을 구현
+
+> 필드(Planet)에 대해 오브젝트는 위치에 따라 고유한 중력을 받아야 하므로, Physics의 Gravity 속성의 글로벌 설정 대신 `별도의 Gravity 속성`을 구현
+
+```mermaid
+sequenceDiagram
+    participant P as PlanetController (중력 영역)
+    participant G as IGravityable (캐릭터/아이템/투척물)
+    participant C as Planet Core (프록시 콜라이더)
+ 
+    loop OnTriggerStay (FixedUpdate 주기)
+        P->>G: TryApplyGravity(planet)
+        G->>P: GetGravity(this)
+        P->>C: SphereCast (대상 → 코어)
+        C-->>P: 표면 법선 (hit.normal)
+        P-->>G: gravity = -normal × force
+        G->>G: AddForce(gravity) — 최대 낙하 속도 이하일 때만
+        G->>G: 자세 보정 (up ↔ -gravity)
+    end
+```
 
 #### 소스 코드: [Scripts/Object/PlanetController.cs](Scripts/Object/PlanetController.cs), [Scripts/Object/ObjectBase.cs](Scripts/Object/ObjectBase.cs)
 #### 동영상: <https://youtu.be/bSYdc5tvh7Y>
