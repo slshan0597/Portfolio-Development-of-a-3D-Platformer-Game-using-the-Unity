@@ -182,6 +182,28 @@ sequenceDiagram
 
 (좌- Core Type이 Point인 평면도 / 우- Core Type이 Line 인 평면도)
 
+### 2-3. 개선 내용
+
+- 캐릭터가 필드를 탐색 -> 필드가 캐릭터를 탐색하는 구조로 변경
+
+| 개선 전 | 개선 후 |
+| --- | --- |
+| 캐릭터마다 내부의 `Update`에서 `OverlapSphere`로 필드를 탐색 (매 프레임 배열 할당) | 필드 트리거의 `OnTriggerStay`가 영역 안 `IGravityable`에게만 중력 전달 |
+| 태그(`"Player"`/`"Enemy"`) `switch`로 콜라이더를 다르게 조회 → 대상 종류마다 필드 코드 수정 | 대상이 `radius`·`rigidbody` 등을 인터페이스로 노출 → 대상만 추가 |
+ 
+```mermaid
+flowchart LR
+    subgraph B["개선 전 · 캐릭터가 찾음"]
+        direction LR
+        B1["Update<br/>(렌더 프레임)"] --> B2["OverlapSphere<br/>배열 할당"] --> B3["태그 switch"] --> B4["AddForce<br/>(상한 없음)"]
+    end
+    subgraph A["개선 후 · 행성이 밂"]
+        direction LR
+        A1["OnTriggerStay<br/>(물리 프레임)"] --> A2["TryGetComponent<br/>IGravityable"] --> A3["코어 SphereCast<br/>법선"] --> A4["TryApplyGravity<br/>종단 속도·회전"]
+    end
+    B ~~~ A
+```
+
 ---
 
 ### 3. 멀티 플랫폼 지원 및 컨트롤러 전환
